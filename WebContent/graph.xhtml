@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="ISO-8859-9" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:p="http://primefaces.org/ui" xmlns:ui="http://java.sun.com/jsf/facelets">
+<h:head>
+  <title>Tabloid Proteome</title>
+  <link rel="stylesheet" type="text/css" href="#{resource['css/style.css']}" />
+  <h:outputScript library="primefaces" name="jquery/jquery.js" />
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.13/css/jquery.dataTables.min.css"/>
+  
+  <link rel="stylesheet" type="text/css" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>
+ 
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+  <script>
+  
+  $(function(){
+	  $("#header").load("header.xhtml"); 
+	  $("#footer").load("footer.xhtml"); 
+	});
+  </script>
+  <script src="http://cytoscape.github.io/cytoscape.js/api/cytoscape.js-latest/cytoscape.min.js"></script>
+      
+    <script>
+    $(function(){
+    var offsets = document.getElementById('cy').getBoundingClientRect();
+    var height = offsets.height;
+    var width = offsets.width;
+    var nodes = document.getElementById('nodes').value.slice(1, document.getElementById('nodes').value.length-1).split(',');
+
+        var edges = document.getElementById('edges').value.slice(1, document.getElementById('edges').value.length-1).split(',');
+
+        var newObj = [];
+      var count;
+      if(nodes.length == 2){
+        for(count = 0; count &lt; nodes.length; count++){
+        newObj.push({ group: "nodes", data: { id: nodes[count] }, position: { x: width/4 +250*count , y: height/2 } });
+        }
+      }
+  if(nodes.length &gt; 2){
+  var angle = 2 * Math.PI /(nodes.length-1);
+  newObj.push({ group: "nodes", data: { id: nodes[0] }, position: { x: width/2 , y: height/2} });
+  for(count = 1; count &lt; nodes.length; count++){
+    newObj.push({ group: "nodes", data: { id: nodes[count] }, position: { x: width/2 + 180 * Math.cos(angle * (count-1)) , y: height/2 + 180 * Math.sin(angle * (count-1)) } });
+  }
+  }
+  for(count=0; count &lt; nodes.length - 1; count++){
+    newObj.push({ group: "edges", data: { id: edges[count], source: nodes[0], target: nodes[count+1] } });
+  }
+
+  var cy = cytoscape({
+    container: document.getElementById('cy'),
+
+    boxSelectionEnabled: false,
+    autounselectify: true,
+    
+    style: cytoscape.stylesheet()
+      .selector('node')
+        .css({
+          'content': 'data(id)',
+          'text-valign': 'center',
+          'background-color': '#0099CC',
+          'width' : '80px',
+          'height' : '45px'
+
+        })
+      .selector('node:selected')
+          .css({
+            'background-color': '#E4860D'
+          })  
+        
+      .selector('edge')
+        .css({
+          'width': 2,
+          'line-color': 'red',
+          'curve-style': 'bezier'
+        })
+      .selector('.highlighted')
+        .css({
+          'line-color': '#E4860D',
+          'transition-property': 'line-color',
+          'transition-duration': '0.5s'
+        }),
+    
+   
+    
+    layout: {
+      name: 'circle',
+
+      directed: true,
+      padding: 10
+    },
+    userZoomingEnabled: false,
+
+  }); 
+  cy.add(newObj);
+ 
+  cy.on('tap', 'node', function (evt) {
+
+    passNodeToJSFManagedBean ([ {
+          name : 'selectedNode',
+          value : evt.cyTarget.id()
+         }
+       ]); 
+    
+    return false;
+  });
+  cy.on('tap', 'edge', function (evt) {
+    passEdgeToJSFManagedBean ([ {
+          name : 'selectedEdge',
+          value : evt.cyTarget.id()
+          
+         }
+       ]); 
+    return false;
+    
+  });
+ 
+  });
+   
+    </script>
+
+</h:head>
+<h:body>
+  <h:form id="graphForm">
+    <div id="header"></div>
+    <div id="content" class="content">
+    <input type="hidden" id="nodes" value="#{visualisationBean.nodes}" /> 
+    <input type="hidden" id="edges" value="#{visualisationBean.edges}" /> 
+    <p:remoteCommand name="passNodeToJSFManagedBean" id="passNodeToJSFManagedBeancmd" action="#{visualisationBean.getNode}" process="@this"
+       oncomplete="clickButton();" update="graphForm:proteinDetailsTable" />
+     <input type="button" id="btnn" style="display:none"></input>  
+<script>
+$( function() {
+    var dialog =  $( "#proteinDetails" ).dialog({
+      autoOpen: false,  
+          height: 400,
+          width: 600,
+          open: function(event, ui) {
+        	        $(".ui-dialog-titlebar-close", ui.dialog | ui).hide();
+        	    },
+        buttons: {
+ 			
+        	Close: function() {
+        	          dialog.dialog( "close" );
+        	        }
+        	      }
+      });
+      $( "#btnn" ).button().on( "click", function() {
+        dialog.dialog( "open" );
+        });
+    } );
+ 
+  function clickButton() {
+    document.getElementById('btnn').click();
+    return false;
+  }
+</script>
+    <p:remoteCommand name="passEdgeToJSFManagedBean" id="passEdgeToJSFManagedBeancmd" action="#{visualisationBean.getEdge}" process="@this" 
+      update="graphForm:relationsPanel" />
+  
+    <div id="cy" ></div>
+    
+    <div id="proteinDetails" title="Protein Details">
+    
+    <p:panel id="proteinDetailsTable" style="border:none">
+      <table cellpadding="0" cellspacing="0" class="dataTable" 
+        style="font-size:12px;font-family: Arial, sans-serif;">
+        <tr>
+          <td width="30%">Uniprot Accession :</td>
+          <td><a href="http://www.uniprot.org/uniprot/#{visualisationBean.selectedNode}" style="color: #404040;">#{visualisationBean.selectedNode}</a></td>
+        </tr>
+        <tr>
+          <td width="30%">Uniprot Status :</td>
+          <td>#{visualisationBean.selectedProtein.uniprotStatus}</td>
+        </tr>
+        <tr>
+          <td width="30%">Protein Name :</td>
+          <td>#{visualisationBean.selectedProtein.proteinName}</td>
+        </tr>
+        <tr>
+          <td width="30%">Protein Entry Name :</td>
+          <td>#{visualisationBean.selectedProtein.uniprotEntryName}</td>
+        </tr>
+        <tr>
+          <td width="30%">Gene Name :</td>
+          <td>#{visualisationBean.selectedProtein.geneName}</td>
+        </tr>
+        <tr>
+          <td width="30%">Species :</td>
+          <td>#{visualisationBean.selectedProtein.species}</td>
+        </tr>
+        <tr>
+          <td width="30%">Length :</td>
+          <td>#{visualisationBean.selectedProtein.getLenghth()}</td>
+        </tr>
+      </table>
+     
+      </p:panel>
+    
+    </div>
+
+      <p:panel id="relationsPanel" styleClass="relations" visible="#{visualisationBean.visible}">
+        <h3 style="font-size:14px;font-family: Arial, sans-serif">Association between #{visualisationBean.protein1.uniprotAccession} and #{visualisationBean.protein2.uniprotAccession}</h3>
+        <table cellpadding="0" cellspacing="0" class="dataTable" 
+          style="font-size:12px;font-family: Arial, sans-serif;border-top:1px solid #ddd;border-right:1px solid #ddd;border-bottom:1px solid #ddd" >
+          <thead> <tr> <th style="border-left:1px solid #ddd">jacc sim score</th>
+          <th style="border-left:1px solid #ddd">interaction</th>
+          <th style="border-left:1px solid #ddd">paralog</th>
+          <th style="border-left:1px solid #ddd">intact confidence</th>
+          <th style="border-left:1px solid #ddd">interaction detection</th>
+          <th style="border-left:1px solid #ddd">interaction type</th></tr></thead>
+          <tbody>
+            <ui:repeat var="associate" value="#{visualisationBean.association}">
+            <tr>
+              <td style="border-left:1px solid #ddd">#{associate.jaccSimScore}</td>
+              <td style="border-left:1px solid #ddd">#{associate.interact}</td>
+              <td style="border-left:1px solid #ddd">#{associate.paralog}</td>
+              <td style="border-left:1px solid #ddd">#{associate.intactConfidence}</td>
+              <td style="border-left:1px solid #ddd">#{associate.interactionDetection}</td>
+              <td style="border-left:1px solid #ddd">#{associate.interactionType}</td>
+            </tr>
+            </ui:repeat>
+          </tbody>
+        </table>
+        <h3 style="font-size:14px;font-family: Arial, sans-serif">Common projects between #{visualisationBean.protein1.uniprotAccession} and #{visualisationBean.protein2.uniprotAccession}</h3>
+        <div style = "height:200px; overflow:auto">
+        <table cellpadding="0" cellspacing="0" class="dataTable" 
+          style="font-size:12px;font-family: Arial, sans-serif;border-top:1px solid #ddd;border-right:1px solid #ddd;border-bottom:1px solid #ddd" >
+          <thead> <tr> <th style="border-left:1px solid #ddd" width="15px">no</th>
+          <th style="border-left:1px solid #ddd">project accession</th>
+          <th style="border-left:1px solid #ddd">keywords</th>
+          <th style="border-left:1px solid #ddd">tissue</th>
+          <th style="border-left:1px solid #ddd">tags</th></tr></thead>
+          <tbody>
+            <ui:repeat var="project" value="#{visualisationBean.projects}" varStatus="status">
+            <tr>
+              <td style="border-left:1px solid #ddd; border-bottom:1px solid #ddd">#{status.index}</td>
+              <td style="border-left:1px solid #ddd; border-bottom:1px solid #ddd"><a href="https://www.ebi.ac.uk/pride/archive/projects/#{project.projectAccession}">#{project.projectAccession}</a></td>
+              <td style="border-left:1px solid #ddd; border-bottom:1px solid #ddd">#{project.keywords}</td>
+              <td style="border-left:1px solid #ddd; border-bottom:1px solid #ddd">#{project.tissue}</td>
+              <td style="border-left:1px solid #ddd; border-bottom:1px solid #ddd">#{project.tags}</td>
+            </tr>
+            </ui:repeat>
+          </tbody>
+        </table>
+        </div>
+        <h3 style="font-size:14px;font-family: Arial, sans-serif">Pathways between #{visualisationBean.protein1.uniprotAccession} and #{visualisationBean.protein2.uniprotAccession}</h3>
+        <div style = "height:200px; overflow:auto">
+        <table cellpadding="0" cellspacing="0" class="dataTable" 
+          style="font-size:12px;font-family: Arial, sans-serif;border-top:1px solid #ddd;border-right:1px solid #ddd;border-bottom:1px solid #ddd" >
+          <thead> <tr> <th style="border-left:1px solid #ddd" width="15px">no</th>
+          <th style="border-left:1px solid #ddd">reactome accession</th>
+          <th style="border-left:1px solid #ddd">pathway name</th>
+          <th style="border-left:1px solid #ddd">evidence code</th></tr></thead>
+          <tbody>
+            <ui:repeat var="pathWay" value="#{visualisationBean.pathWays}" varStatus="status">
+            <tr>
+              <td style="border-left:1px solid #ddd; border-bottom:1px solid #ddd">#{status.index}</td>
+              <td style="border-left:1px solid #ddd; border-bottom:1px solid #ddd"><a href="http://www.reactome.org/PathwayBrowser/#/#{pathWay.reactomeAccession}">#{pathWay.reactomeAccession}</a></td>
+              <td style="border-left:1px solid #ddd; border-bottom:1px solid #ddd">#{pathWay.pathwayName}</td>
+              <td style="border-left:1px solid #ddd; border-bottom:1px solid #ddd">#{pathWay.evidenceCode}</td>
+            </tr>
+            </ui:repeat>
+          </tbody>
+        </table>
+        </div>
+        <h3 style="font-size:14px;font-family: Arial, sans-serif">Complexes projects between #{visualisationBean.protein1.uniprotAccession} and #{visualisationBean.protein2.uniprotAccession}</h3>
+        <div style = "height:200px; overflow:auto">
+        <table cellpadding="0" cellspacing="0" class="dataTable" 
+          style="font-size:12px;font-family: Arial, sans-serif;border-top:1px solid #ddd;border-right:1px solid #ddd;border-bottom:1px solid #ddd" >
+          <thead> <tr> <th style="border-left:1px solid #ddd" width="15px">no</th>
+          <th style="border-left:1px solid #ddd">corum id</th>
+          <th style="border-left:1px solid #ddd">complex name</th>
+          <th style="border-left:1px solid #ddd">complex comment</th>
+          <th style="border-left:1px solid #ddd">cell line</th>
+          <th style="border-left:1px solid #ddd">disease comment</th>
+          <th style="border-left:1px solid #ddd">subunit comment</th>
+          <th style="border-left:1px solid #ddd">pubmed id</th>
+          <th style="border-left:1px solid #ddd">purification method</th>
+          </tr></thead>
+          <tbody>
+            <ui:repeat var="complex" value="#{visualisationBean.complexs}" varStatus="status">
+            <tr>
+              <td style="border-left:1px solid #ddd; border-bottom:1px solid #ddd">#{status.index}</td>
+              <td style="border-left:1px solid #ddd; border-bottom:1px solid #ddd">#{complex.corumId}</td>
+              <td style="border-left:1px solid #ddd; border-bottom:1px solid #ddd">#{complex.complexName}</td>
+              <td style="border-left:1px solid #ddd; border-bottom:1px solid #ddd">#{complex.complexComment}</td>
+              <td style="border-left:1px solid #ddd; border-bottom:1px solid #ddd">#{complex.cellLine}</td>
+              <td style="border-left:1px solid #ddd; border-bottom:1px solid #ddd">#{complex.diseaseComment}</td>
+              <td style="border-left:1px solid #ddd; border-bottom:1px solid #ddd">#{complex.subUnitComment}</td>
+              <td style="border-left:1px solid #ddd; border-bottom:1px solid #ddd"><a href="https://www.ncbi.nlm.nih.gov/pubmed?cmd=search&amp;term=#{complex.pubmedId}">#{complex.pubmedId}</a></td>
+              <td style="border-left:1px solid #ddd; border-bottom:1px solid #ddd">#{complex.purificationMethod}</td>
+            </tr>
+            </ui:repeat>
+          </tbody>
+        </table>
+        </div>
+        <h3 style="font-size:14px;font-family: Arial, sans-serif">GO between #{visualisationBean.protein1.uniprotAccession} and #{visualisationBean.protein2.uniprotAccession}</h3>
+        <div style = "height:200px; overflow:auto; display: inline-block;">
+        <table cellpadding="0" cellspacing="0" class="dataTable" 
+          style="font-size:11px;font-family: Arial, sans-serif;border-top:1px solid #ddd;border-right:1px solid #ddd;border-bottom:1px solid #ddd" >
+          <thead> <tr> <th style="border-left:1px solid #ddd">no</th>
+          <th style="border-left:1px solid #ddd">MF id</th>
+          <th style="border-left:1px solid #ddd">MF name</th></tr></thead>
+          <tbody>
+            <ui:repeat var="mf" value="#{visualisationBean.mf}" varStatus="status">
+            <tr>
+              <td style="border-left:1px solid #ddd; border-bottom:1px solid #ddd">#{status.index}</td>
+              <td style="border-left:1px solid #ddd; border-bottom:1px solid #ddd"><a href="http://www.ebi.ac.uk/QuickGO/GTerm?id=#{mf.id}">#{mf.id}</a></td>
+              <td style="border-left:1px solid #ddd; border-bottom:1px solid #ddd">#{mf.name}</td>
+            </tr>
+            </ui:repeat>
+          </tbody>
+        </table>
+        </div>
+        <div style = "height:200px; overflow:auto; display: inline-block;">
+        <table cellpadding="0" cellspacing="0" class="dataTable" 
+          style="font-size:11px;font-family: Arial, sans-serif;border-top:1px solid #ddd;border-right:1px solid #ddd;border-bottom:1px solid #ddd" >
+          <thead> <tr> <th style="border-left:1px solid #ddd">no</th>
+          <th style="border-left:1px solid #ddd">BP id</th>
+          <th style="border-left:1px solid #ddd">BP name</th></tr></thead>
+          <tbody>
+            <ui:repeat var="bp" value="#{visualisationBean.bp}" varStatus="status">
+            <tr>
+              <td style="border-left:1px solid #ddd; border-bottom:1px solid #ddd">#{status.index}</td>
+              <td style="border-left:1px solid #ddd; border-bottom:1px solid #ddd"><a href="http://www.ebi.ac.uk/QuickGO/GTerm?id=#{bp.id}">#{bp.id}</a></td>
+              <td style="border-left:1px solid #ddd; border-bottom:1px solid #ddd">#{bp.name}</td>
+            </tr>
+            </ui:repeat>
+          </tbody>
+        </table>
+        </div>
+        <div style = "height:200px; overflow:auto; display: inline-block;">
+        <table cellpadding="0" cellspacing="0" class="dataTable" 
+          style="font-size:11px;font-family: Arial, sans-serif;border-top:1px solid #ddd;border-right:1px solid #ddd;border-bottom:1px solid #ddd" >
+          <thead> <tr> <th style="border-left:1px solid #ddd">no</th>
+          <th style="border-left:1px solid #ddd">CC id</th>
+          <th style="border-left:1px solid #ddd">CC name</th></tr></thead>
+          <tbody>
+            <ui:repeat var="cc" value="#{visualisationBean.cc}" varStatus="status">
+            <tr>
+              <td style="border-left:1px solid #ddd; border-bottom:1px solid #ddd">#{status.index}</td>
+              <td style="border-left:1px solid #ddd; border-bottom:1px solid #ddd"><a href="http://www.ebi.ac.uk/QuickGO/GTerm?id=#{cc.id}">#{cc.id}</a></td>
+              <td style="border-left:1px solid #ddd; border-bottom:1px solid #ddd">#{cc.name}</td>
+            </tr>
+            </ui:repeat>
+          </tbody>
+        </table>
+        </div>
+        
+      </p:panel>
+     
+    </div>
+    <div id="footer"></div>
+
+  </h:form>
+
+</h:body>
+</html>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="ISO-8859-9" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:p="http://primefaces.org/ui"  xmlns:ui="http://java.sun.com/jsf/facelets">
+
+<f:metadata>
+  <f:event listener="#{graphDbManagedBean.load}" type="preRenderView" />
+</f:metadata>
+
+<h:head>
+  <title>Graph Database</title>
+  <link rel="stylesheet" type="text/css" href="#{resource['css/style.css']}" />
+
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+
+  <script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.13/css/jquery.dataTables.min.css"/>
+  <script type="text/javascript" src ="#{resource['js/dataTable.js']}"></script>
+  <script>
+  $(function(){
+	  $("#header").load("header.xhtml"); 
+	  $("#footer").load("footer.xhtml"); 
+	});
+  
+  </script>
+
+</h:head>
+<body>
+  <h:form id="tableForm">
+    <div id="header"></div>
+
+    <div id="content" class="content">
+      <input type="hidden" id="association" value="#{graphDbManagedBean.associations}" /> 
+      <input type="hidden" id="commonProjects" value="#{graphDbManagedBean.commonProjects}" /> 
+      <input type="hidden" id="pathways" value="#{graphDbManagedBean.pathways}" /> 
+      <input type="hidden" id="complexes" value="#{graphDbManagedBean.complexes}" /> 
+      <input type="hidden" id="mfs" value="#{graphDbManagedBean.mfs}" /> 
+      <input type="hidden" id="bps" value="#{graphDbManagedBean.bps}" /> 
+      <input type="hidden" id="ccs" value="#{graphDbManagedBean.ccs}" /> 
+      <div style="height:40px">
+          <h3 style="float:left; position:relative; left:37%">PROTEIN ASSOCIATION DATA TABLE</h3>
+          <p:commandLink style="float: right; position: relative; top:20%" action="#{navigationBean.redirectToGraph}">
+            <p:graphicImage id="graphImg" name="images/graphIcon.png" height="40px" width="50px" />
+            <p:tooltip id="toolTipTrack" for="graphImg" value="graph representation" position="left" style="font-size:12px;" />
+          </p:commandLink>
+        </div>
+        <table id="dataTable" class="display" cellspacing="0" width="100%">
+          <thead>
+            <tr>
+              <th></th>
+              <th>1st protein</th>
+              <th>2nd protein</th>
+              <th>1st protein name</th>
+              <th>2nd protein name</th>
+              <th>Jacc sim score</th>
+              <th>Interaction</th>
+              <th>Paralog</th>
+              <th>Number of distinct complex</th>
+              <th>Number of distinct path</th>
+              <th>Number of common projects</th>
+            </tr>
+          </thead>
+          <tbody>
+            <ui:repeat var="proteinDTO" value="#{graphDbManagedBean.proteinDTOS}">
+              
+            <tr>
+                <td id="btn" class="details-control"><img src="#{resource['images/expand_arrow.png']}" alt="smt" width="15px" height="15px"/></td>
+                <td><a href="http://www.uniprot.org/uniprot/#{proteinDTO.protein1.uniprotAccession}" style="color: #404040;" >#{proteinDTO.protein1.uniprotAccession}</a></td>
+                <td><a href="http://www.uniprot.org/uniprot/#{proteinDTO.protein2.uniprotAccession}" style="color: #404040;">#{proteinDTO.protein2.uniprotAccession}</a></td>
+                <td><a>#{proteinDTO.protein1.proteinName}</a></td>
+                <td><a>#{proteinDTO.protein2.proteinName}</a></td>
+                <td><a>#{proteinDTO.associate.jaccSimScore}</a></td>
+                <td><a>#{proteinDTO.associate.interact}</a></td>
+                <td><a>#{proteinDTO.associate.paralog}</a></td>
+                <td><a>#{proteinDTO.distinctComplexCount}</a></td>
+                <td><a>#{proteinDTO.distinctPathCount}</a></td>
+                <td><a>#{proteinDTO.commonProjectSize}</a></td>
+            </tr>
+            </ui:repeat>
+          </tbody>
+        </table>
+ 
+     
+      
+    </div>
+    <div id="footer"></div>
+  </h:form>
+</body>
+</html>

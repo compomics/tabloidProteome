@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="ISO-8859-9" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:p="http://primefaces.org/ui">
+<h:head>
+  <link rel="stylesheet" type="text/css" href="#{resource['css/style.css']}" />
+  <h:outputScript library="primefaces" name="jquery/jquery.js" />
+  <script> 
+    $(function(){
+    $("#header").load("header.xhtml"); 
+    $("#footer").load("footer.xhtml"); 
+  });
+  </script>
+</h:head>
+<body>
+  <h:form id="dataForm">
+    <div id="header"></div>
+    <div id="content" class="content">
+      <table width="100%">
+        <tr>
+          <td width="40%">
+            <div class="leftboxMenu">
+              <h1 style="color: #94C4E4; font-size: 24px">Data</h1>
+              <div class="box">
+                <table>
+                  <tr>
+                    <td width="25%" align="left" class="tableRow"><a href="data.xhtml?active_subpage=statistics"
+                      style="font-size: 20px; color: black; text-decoration: none">Statistics</a></td>
+                  </tr>
+                  <tr>
+                    <td align="left" class="tableRow"><a href="data.xhtml?active_subpage=dataSource"
+                      style="font-size: 20px; color: black; text-decoration: none">Data Source</a></td>
+                  </tr>
+                  <tr>
+                    <td align="left" class="tableRow"><a href="data.xhtml?active_subpage=reference"
+                      style="font-size: 20px; color: black; text-decoration: none">Reference</a></td>
+                  </tr>
+                  <tr>
+                    <td align="left" class="tableRow"><a href="data.xhtml?active_subpage=download"
+                      style="font-size: 20px; color: black; text-decoration: none">Download</a></td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+
+          </td>
+          <td width="60%"><p:panel id="dataPanel" styleClass="rightboxMenu">
+              <p:panel style="margin-left:5%; margin-right:5%;" visible="#{contentBean.statistics}">
+                <p:outputPanel deferred="true">
+                  <h3 style="color: #94C4E4;">Statistics</h3>
+                  <p style="font-size: 90%;">99 Mass spectrometry based proteomics Project from PRIDE</p>
+                  <p style="font-size: 90%;">1063 Assay/Experiment</p>
+                  <p style="font-size: 90%;">4562 Proteins</p>
+                  <p style="font-size: 90%;">2325 protein pairs</p>
+                  <a> <img border="0" src="#{resource['images/statistics.png']}" width="450px" height="273px" /></a>
+                </p:outputPanel>
+              </p:panel>
+
+              <p:panel style="margin-left:5%; margin-right:5%" visible="#{contentBean.dataSource}">
+                <p:outputPanel deferred="true">
+                  <h3 style="color: #94C4E4;">Data Source</h3>
+                  <a href="https://www.ebi.ac.uk/pride/archive/" style="font-size: 90%;">Pride</a>
+                  <a>, </a>
+                  <a href="http://www.reactome.org/" style="font-size: 90%;">Reactome</a>
+                  <a>, </a>
+                  <a href="http://www.ebi.ac.uk/QuickGO/" style="font-size: 90%;">GO</a>
+                  <a>, </a>
+                  <a href="http://www.uniprot.org" style="font-size: 90%;">Uniprot</a>
+                  <a>, </a>
+                  <a href="" style="font-size: 90%;">CORUM</a>
+                  <a>, </a>
+                  <a href="http://www.ensembl.org/index.html" style="font-size: 90%;">Ensembl</a>
+                  <a>, </a>
+                  <a href="http://www.ebi.ac.uk/intact/" style="font-size: 90%;">IntAct</a>
+                </p:outputPanel>
+              </p:panel>
+
+              <p:panel style="margin-left:5%; margin-right:5%" visible="#{contentBean.reference}">
+                <p:outputPanel deferred="true">
+                  <h3 style="color: #94C4E4;">Reference</h3>
+                  <p style="font-size: 90%;">some references</p>
+                </p:outputPanel>
+              </p:panel>
+
+              <p:panel style="margin-left:5%; margin-right:5%" visible="#{contentBean.download}">
+                <p:outputPanel deferred="true">
+                  <h3 style="color: #94C4E4;">Download</h3>
+                  <p style="font-size: 90%;">add file to download here</p>
+                </p:outputPanel>
+              </p:panel>
+            </p:panel></td>
+        </tr>
+      </table>
+    </div>
+    <div id="footer"></div>
+  </h:form>
+</body>
+</html>

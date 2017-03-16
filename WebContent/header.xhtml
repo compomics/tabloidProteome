@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="ISO-8859-9" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:p="http://primefaces.org/ui">
+<h:head>
+  <title>Tabloid Proteome</title>
+  <link rel="stylesheet" type="text/css" href="#{resource['css/style.css']}" />
+  <h:outputScript library="primefaces" name="jquery/jquery.js" />
+  <script>
+  // function to set the height on fly
+  function autoHeight() {
+    $('#content').css('min-height', 0);
+    $('#content').css('min-height', (
+      $(document).height() 
+      - $('#header').height() 
+    ));
+  }
+
+  // onDocumentReady function bind
+  $(document).ready(function() {
+    autoHeight();
+  });
+
+  // onResize bind of the function
+  $(window).resize(function() {
+    autoHeight();
+  });
+
+  </script>
+</h:head>
+<body>
+  <div id="header" class="header">
+    <h:panelGrid id="header" columns="2" style="width:100%" columnClasses="seventy-percent , thirdy-percent">
+      <h:panelGrid columns="2">
+        <p:graphicImage name="images/logo.png" height="38px" width="50px" />
+        <p:outputLabel value="Tabloid Proteome"
+          style="font-size:30px; color: #333333;
+              font-family: 'Lucida Sans Unicode', 'Lucida Grande', sans-serif;" />
+      </h:panelGrid>
+      <h:panelGrid columns="3" columnClasses="align-search, align-data, align-help">
+        <p:link value="Search" outcome="search" style="color:#62605E" />
+        <p:link value="Data Table" outcome="dataTable" style="color:#62605E" />
+        <p:link value="Help" style="color:#62605E" />
+      </h:panelGrid>
+    </h:panelGrid>
+  </div>
+</body>
+</html>

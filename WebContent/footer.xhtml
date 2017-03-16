@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="ISO-8859-9" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:p="http://primefaces.org/ui">
+<h:head>
+  <link rel="stylesheet" type="text/css" href="#{resource['css/style.css']}" />
+  <h:outputScript library="primefaces" name="jquery/jquery.js" />
+  <script>
+			// function to set the height on fly
+			function autoHeight() {
+				$('#content').css('min-height', 0);
+				$('#content').css(
+						'min-height',
+						($(document).height() - $(
+								'#footer').height()));
+			}
+
+			// onDocumentReady function bind
+			$(document).ready(function() {
+				autoHeight();
+			});
+
+			// onResize bind of the function
+			$(window).resize(function() {
+				autoHeight();
+			});
+	</script>
+</h:head>
+<body>
+  <div id="footer" class="footer">
+    <table width="100%">
+      <th align="center"><h2>
+          <a style="font-size: 16px; color: black; padding-left: 15px; color: #62605E;">SUPPORTED BY</a>
+        </h2></th>
+      <th align="center"><h2>
+          <a href="about.xhtml?active_subpage=content" style="font-size: 18px; color: #62605E;">About</a>
+        </h2></th>
+      <th align="center"><h2>
+          <a href="data.xhtml?active_subpage=statistics" style="font-size: 18px; color: #62605E;">Data</a>
+        </h2></th>
+      <th align="center"><h2>
+          <a href="help.xhtml?active_subpage=documentation" style="font-size: 18px; color: #62605E;">Help</a>
+        </h2></th>
+      <tr>
+        <td width="25%" align="center"><a href="https://compomics.com" style="padding-left: 15px;"> <img border="0"
+            src="#{resource['images/compOmics_logo.png']}" width="52px" height="27px" /></a></td>
+        <td width="25%" align="center"><a href="about.xhtml?active_subpage=content"
+          style="font-size: 16px; color: #62605E; text-decoration: none">Content</a></td>
+        <td width="25%" align="center"><a href="data.xhtml?active_subpage=statistics"
+          style="font-size: 16px; color: #62605E; text-decoration: none">Statistics</a></td>
+        <td width="25%" align="center"><a href="help.xhtml?active_subpage=documentation"
+          style="font-size: 16px; color: #62605E; text-decoration: none">Documentation</a></td>
+      </tr>
+      <tr class="spacer">
+        <td></td>
+      </tr>
+      <tr>
+        <td align="center"><a href="http://www.crl-mappit.be/" style="padding-left: 15px"> <img border="0"
+            src="#{resource['images/cytokineLogo.png']}" width="59px" height="22px" /></a></td>
+        <td align="center"><a href="about.xhtml?active_subpage=version" class="switch_form"
+          style="font-size: 16px; color: #62605E; text-decoration: none">Version</a></td>
+        <td align="center"><a href="data.xhtml?active_subpage=dataSource" style="font-size: 16px; color: #62605E; text-decoration: none">Data
+            Source</a></td>
+        <td align="center"><a href="help.xhtml?active_subpage=contact" style="font-size: 16px; color: #62605E; text-decoration: none">Contact</a></td>
+      </tr>
+      <tr class="spacer">
+        <td></td>
+      </tr>
+      <tr>
+        <td align="center"><a href="http://mbc.vib-ugent.be" style="padding-left: 15px;"> <img border="0"
+            src="#{resource['images/MBCLogo.png']}" width="69px" height="24px" /></a></td>
+        <td align="center"><a href="about.xhtml?active_subpage=licence" class="switch_form"
+          style="font-size: 16px; color: #62605E; text-decoration: none">Licence</a></td>
+        <td align="center"><a href="data.xhtml?active_subpage=reference" style="font-size: 16px; color: #62605E; text-decoration: none">Reference</a></td>
+        <td></td>
+      </tr>
+      <tr class="spacer">
+        <td></td>
+      </tr>
+      <tr>
+        <td align="center"><a href="http://www.vib.be" style="padding-left: 15px;"> <img border="0" src="#{resource['images/VIBLogo.png']}"
+            width="41px" height="27px" /></a></td>
+        <td></td>
+        <td align="center"><a href="data.xhtml?active_subpage=download" style="font-size: 16px; color: #62605E; text-decoration: none">Download</a></td>
+        <td></td>
+      </tr>
+    </table>
+  </div>
+</body>
+</html>
