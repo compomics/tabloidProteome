@@ -2,7 +2,6 @@ package com.compomics.beans;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -19,8 +18,6 @@ import com.compomics.neo4j.model.nodes.Complex;
 import com.compomics.neo4j.model.nodes.Go;
 import com.compomics.neo4j.model.nodes.PathWay;
 import com.compomics.neo4j.model.nodes.Project;
-import com.compomics.neo4j.model.nodes.Protein;
-import com.google.gson.Gson;
 
 /**
  * Created by demet on 12/12/2016.
