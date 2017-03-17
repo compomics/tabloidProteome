@@ -4,17 +4,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
-
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-import org.primefaces.context.RequestContext;
-import org.primefaces.model.mindmap.DefaultMindmapNode;
-import org.primefaces.model.mindmap.MindmapNode;
 
 import com.compomics.neo4j.model.dataTransferObjects.ProteinDTO;
 import com.compomics.neo4j.model.nodes.Complex;
