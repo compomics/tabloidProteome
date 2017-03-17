@@ -143,23 +143,24 @@ public class GraphDbManagedBean implements Serializable{
 		Map<String, String> requestParams = context.getExternalContext().getRequestParameterMap();
 		if(requestParams.containsKey("accession")){
 			if(requestParams.get("accession")!=null && !requestParams.get("accession").equals("")){
-				if(requestParams.get("accession").contains("&")){
-					String[] split = requestParams.get("accession").split("&");
-					accession1 = split[0];
-					accession2 = split[1];
-					setSelectionType("double");
-					getProteinDTOs();
-				}else{
-					accession1 = requestParams.get("accession");
-					accession2 = null;
-					setSelectionType("single");
-					getProteinDTOs();
-				}
+				accession1 = requestParams.get("accession");
+				accession2 = null;
+				setSelectionType("single");
+				getProteinDTOs();
+			}
+		}else if(requestParams.containsKey("accession1") && requestParams.containsKey("accession2")){
+			if(requestParams.get("accession1")!=null && !requestParams.get("accession1").equals("") && requestParams.get("accession2")!=null && !requestParams.get("accession2").equals(""))
+			{
+				accession1 = requestParams.get("accession1");
+				accession2 = requestParams.get("accession2");
+				setSelectionType("double");
+				getProteinDTOs();
 			}
 		}
 	}
 	
     public void getProteinDTOs(){
+    	proteinDTOS.clear();
     	FacesMessage msg = null;
         if(selectionType.equals("single")){
         	if(accession1 == null || accession1.equals("")){
@@ -266,4 +267,8 @@ public class GraphDbManagedBean implements Serializable{
 		bps.clear();
 		ccs.clear();
 	}
+    
+    public void setSelectionType(){
+    	selectionType = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("selectionType");
+    }
 }

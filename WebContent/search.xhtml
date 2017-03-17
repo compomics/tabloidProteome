@@ -1,28 +1,34 @@
 <?xml version="1.0" encoding="ISO-8859-9" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:f="http://xmlns.jcp.org/jsf/core"
-  xmlns:p="http://primefaces.org/ui">
+  xmlns:p="http://primefaces.org/ui" xmlns:ui="http://java.sun.com/jsf/facelets">
 
 <h:head>
   <title>Tabloid Proteome</title>
   <link rel="stylesheet" type="text/css" href="#{resource['css/style.css']}" />
-  <h:outputScript library="primefaces" name="jquery/jquery.js" />
-  <script>
-  $(function(){
-	  $("#header").load("header.xhtml"); 
-	  $("#footer").load("footer.xhtml"); 
-	});
-  </script>
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
   <script type="text/javascript">
 
 	function singleDoubleCheck() {
     	if (document.getElementById('singleCheck').checked) {
     		document.getElementById('ifDouble').style.display = 'none';
         	document.getElementById('ifSingle').style.display = 'block';
+        	passSingleDoubleToJSFManagedBean ([ {
+                name : 'selectionType',
+                value : 'single'
+                
+               }
+             ]); 
     	}
     	if(document.getElementById('doubleCheck').checked) {
     		document.getElementById('ifSingle').style.display = 'none';
-    		document.getElementById('ifDouble').style.display = 'block';	
+    		document.getElementById('ifDouble').style.display = 'block';
+    		passSingleDoubleToJSFManagedBean ([ {
+                name : 'selectionType',
+                value : 'double'
+                
+               }
+             ]); 
 		}
 	}
 	
@@ -43,22 +49,28 @@
 	}
 	
 	function goToDataTableDouble() {
-		window.location = 'dataTable.xhtml?accession=' + document.getElementById('doubleAccessionA').value 
-		+ '&amp;' + document.getElementById('doubleAccessionB').value;
+		window.location = 'dataTable.xhtml?accession1=' + document.getElementById('doubleAccessionA').value 
+		+ '&amp;accession2=' + document.getElementById('doubleAccessionB').value;
 		return false;
 	}
 </script>
 </h:head>
 <body>
   <h:form id="searchForm">
-    <p:growl id="msg" showDetail="true" autoUpdate="true" />
-    <div id="header"></div>
+
+    <div id="header">
+      <ui:insert name="header" >
+        <ui:include src="/header.xhtml" />
+      </ui:insert>
+    </div>
     <div id="content" class="content">
+    <p:remoteCommand name="passSingleDoubleToJSFManagedBean" id="passSingleDoubleToJSFManagedBeancmd" action="#{graphDbManagedBean.setSelectionType}"/>
       <div id="sidebar">
         <div style="margin-left: 20%; margin-top: 25%;">
-          <input type="radio" name="singleDouble" onclick="singleDoubleCheck()" id="singleCheck" checked="checked" /> <label>Single Protein
-            Search</label> <br> </br> <input type="radio" name="singleDouble" onclick="singleDoubleCheck()" id="doubleCheck" /> <label>Double Protein
-            Search</label>
+          <input type="radio" name="singleDouble" onclick="singleDoubleCheck()" id="singleCheck" checked="checked" /> 
+          <label>Single Protein Search</label> <br> </br> 
+          <input type="radio" name="singleDouble" onclick="singleDoubleCheck()" id="doubleCheck" /> 
+          <label>Double Protein Search</label>
         </div>
 
       </div>
@@ -90,7 +102,11 @@
         </div>
       </div>
     </div>
-    <div id="footer"></div>
+    <div id="footer">
+      <ui:insert name="footer" >
+        <ui:include src="/footer.xhtml" />
+      </ui:insert>
+    </div>
   </h:form>
 </body>
 </html>
