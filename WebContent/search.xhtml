@@ -44,12 +44,12 @@
 	}
 	
 	function goToDataTableSingle() {
-		window.location = 'dataTable.xhtml?accession=' + document.getElementById('singleAccession').value;
+		window.location = '/tabloidproteome/dataTable.xhtml?accession=' + document.getElementById('singleAccession').value;
 		return false;
 	}
 	
 	function goToDataTableDouble() {
-		window.location = 'dataTable.xhtml?accession1=' + document.getElementById('doubleAccessionA').value 
+		window.location = '/tabloidproteome/dataTable.xhtml?accession1=' + document.getElementById('doubleAccessionA').value 
 		+ '&amp;accession2=' + document.getElementById('doubleAccessionB').value;
 		return false;
 	}
