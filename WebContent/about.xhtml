@@ -3,6 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:f="http://xmlns.jcp.org/jsf/core"
   xmlns:p="http://primefaces.org/ui" xmlns:ui="http://java.sun.com/jsf/facelets">
 <h:head>
+  <title>Tabloid Proteome</title>
   <link rel="stylesheet" type="text/css" href="#{resource['css/style.css']}" />
   <h:outputScript library="primefaces" name="jquery/jquery.js" />
 </h:head>
@@ -42,7 +43,7 @@
               <p:panel style="margin-left:5%; margin-right:5%;" visible="#{contentBean.content}">
                 <p:outputPanel deferred="true">
                   <h3 style="color: #94C4E4;">Content</h3>
-                  <p style="font-size: 90%;">ProtANet is protein association network generated using publically available mass spectrometry based
+                  <p style="font-size: 90%;">Tabloid Proteome is protein association network generated using publically available mass spectrometry based
                     experiments in PRIDE. All experiments in PRIDE are re-processed using re-spin pipeline to determine protein present in each
                     experiment with their peptide counts in each experiment. Peptide counts for each proteins are used to calculate the highly
                     co-occurring proteins in various mass spectrometry based experiments. ProtANet is the collection of these co-occurring protein
@@ -56,7 +57,7 @@
               <p:panel style="margin-left:5%; margin-right:5%" visible="#{contentBean.version}">
                 <p:outputPanel deferred="true">
                   <h3 style="color: #94C4E4;">Version</h3>
-                  <p style="font-size: 90%;">ProtANet version 1.1</p>
+                  <p style="font-size: 90%;">Tabloid Proteome version 1.0</p>
                 </p:outputPanel>
               </p:panel>
 

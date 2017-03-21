@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Bare - Start Bootstrap Template</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="resources/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="resources/css/bootstrap.css" rel="stylesheet">
+    <link href="resources/css/sticky-footer.css" rel="stylesheet">
+    <style>
+    body {
+        padding-top: 70px;
+        /* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of navigation changes. */
+    }
+    </style>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+    <div id="wrapper">
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" >
+        <div class="container" id="header">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a href="#" class="navbar-left"><img src="resources/images/logo.png" style="width:70px; height: 54px;"></a>
+                <a class="navbar-brand" href="#">TABLOID PROTEOME</a>
+            </div>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav pull-right">
+                    <li>
+                        <a href="#">Search</a>
+                    </li>
+                    <li>
+                        <a href="#">Data Table</a>
+                    </li>
+                    <li>
+                        <a href="#">Help</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+
+    <!-- Page Content -->
+    <div class="container" id="content">
+        <h1 style="height: 40px;"></h1>
+        <div class="row">
+          <div class="col-md-3 col-md-offset-2">
+            <div class="panel panel-default">
+              <div class="panel-body">
+                <div class="radio" style="margin-bottom: 25px;">
+                  <label><input type="radio" name="optradio" value="singleCheck" onclick="singleDoubleCheck()" checked="checked">Single Protein Search</label>
+                </div>
+                <div class="radio">
+                  <label><input type="radio" name="optradio" value="doubleCheck" onclick="singleDoubleCheck()">Double Protein Search</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-5 offset-md-3">
+            <div class="panel panel-default" id="singleSearch" style="display: block;">
+              <div class="panel-heading text-center">SEARCH</div>
+               <div class="panel-body">
+                  <form>
+                                         
+                    <div class="row">   
+                      <div class="col-md-5">
+                        <label style="font-weight: normal;">Protein Accession : </label>
+                      </div>                          
+                      <div class="col-md-7">
+                        <input type="text" class="form-control" aria-describedby="basic-addon1" size="25%" id="acc">
+                      </div>         
+                    </div><br/>
+                    <div align="center"><button type = "button" class = "btn btn-primary " style="width: 104px;">Search</button></div>
+                   </form>  
+                </div>
+             </div>
+             <div class="panel panel-default" id="doubleSearch" style="display: none;">
+                <div class="panel-heading text-center">SEARCH</div>
+                <div class="panel-body">
+                  <form>                      
+                    <div class="row">  
+                      <div class="col-md-5">
+                        <label style="font-weight: normal;">1st Protein Accession : </label>
+                      </div>                          
+                      <div class="col-md-7">
+                        <input type="text" class="form-control" aria-describedby="basic-addon1" size="25%" id="acc1">
+                      </div>
+                    </div><br>
+                    <div class="row">  
+                      <div class="col-md-5">
+                        <label style="font-weight: normal;">2nd Protein Accession : </label>
+                      </div>                          
+                      <div class="col-md-7">
+                        <input type="text" class="form-control" aria-describedby="basic-addon1" size="25%" id="acc1">
+                      </div>
+                    </div><br>
+                    <div align="center"><button type = "button" class = "btn btn-primary " style="width: 104px;">Search</button></div>
+                   </form>  
+                </div>
+             </div>
+          </div>    
+        </div> 
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+        <script type="text/javascript">
+        
+        $('input').on('change', function() {
+        	var radioVal =   $('input[name=optradio]:checked').val(); 
+        	if(radioVal == 'singleCheck'){
+        		$('#doubleSearch').css("display", "none")
+        		$('#singleSearch').css("display", "block")
+        	}
+        	if(radioVal == 'doubleCheck'){
+        		$('#singleSearch').css("display", "none")
+        		$('#doubleSearch').css("display", "block")
+        	}
+        	return false;
+        });
+       
+        </script>
+
+       <!-- /.row -->
+
+    </div>
+    <!-- /.container -->
+
+    <div id="footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-sm-3">
+            <p class="text-muted credit">SUPPORTED BY</p>
+            <p class="text-muted credit"><a href="https://compomics.com" style="padding-left: 15px;"> <img border="0"
+            src="resources/images/compOmics_logo.png" width="52px" height="27px" /></a></p>
+            <p class="text-muted credit"><a href="http://www.crl-mappit.be/" style="padding-left: 15px"> <img border="0"
+            src="resources/images/cytokineLogo.png" width="59px" height="22px" /></a></p>
+            <p class="text-muted credit"><a href="http://mbc.vib-ugent.be" style="padding-left: 15px;"> <img border="0"
+            src="resources/images/MBCLogo.png" width="69px" height="24px" /></a></p>
+            <p class="text-muted credit"><a href="http://www.vib.be" style="padding-left: 15px;"> <img border="0" 
+            src="resources/images/VIBLogo.png" width="41px" height="27px" /></a></p>
+          </div>
+          <div class="col-sm-3">
+            <p class="credit" style="margin-bottom: 15px;"><a class="text-muted">About</a></p>
+            <p class="credit" style="margin-bottom: 15px;"><a class="text-sub">Content</a></p>
+            <p class="credit" style="margin-bottom: 15px;"><a class="text-sub">Version</a></p>
+            <p class="credit"><a class="text-sub">Licence</a></p>
+          </div>
+          <div class="col-sm-3">
+            <p class="credit" style="margin-bottom: 15px;"><a class="text-muted">Data</a></p>
+            <p class="credit" style="margin-bottom: 15px;"><a class="text-sub">Statistics</a></p>
+            <p class="credit" style="margin-bottom: 15px;"><a class="text-sub">Data Source</a></p>
+            <p class="credit" style="margin-bottom: 15px;"><a class="text-sub">Reference</a></p>
+            <p class="credit"><a class="text-sub">Download</a></p>
+          </div>
+          <div class="col-sm-3">
+            <p class="credit" style="margin-bottom: 15px;"><a class="text-muted">Help</a></p>
+            <p class="credit" style="margin-bottom: 15px;"><a class="text-sub">Documentation</a></p>
+            <p class="credit"><a class="text-sub">Contact</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- jQuery Version 1.11.1 -->
+    <script src="js/jquery.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
+ </div>
+</body>
+
+</html>

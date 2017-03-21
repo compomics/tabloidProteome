@@ -55,7 +55,7 @@ function format ( idx ) {
 	'<h3 style="padding-left:10px;">Pathways</h3>' +
 	'<div style = "height:200px; overflow:auto">' +
 	'<table cellpadding="5" cellspacing="0" border="1px solid rgba(0, 0, 0, 0)" >'+
-		'<thead> <tr> <th>No</th><th>reactome accession</th><th>pathway name</th><th>evidence cod</th></tr></thead>'+
+		'<thead> <tr> <th>No</th><th>reactome accession</th><th>pathway name</th><th>evidence code</th></tr></thead>'+
 		'<tbody>';
 		for(i=0; i < pathways.length/3; i++){
 			tables += '<tr><td>'+(i+1)+'</td><td><a href="http://www.reactome.org/PathwayBrowser/#/'
