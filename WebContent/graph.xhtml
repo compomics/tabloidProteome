@@ -64,6 +64,7 @@
           newObj.push({ group: "edges", data: { id: edges[count], source: nodes[0], target: nodes[count+1] , label: jaccSimScores[count]} });
         }
 
+        
         var cy = cytoscape({
           container: document.getElementById('cy'),
           boxSelectionEnabled: false,
@@ -84,6 +85,7 @@
               .selector('edge')
               .css({
                   'width': 2,
+                  'curve-style': 'bezier',
                   'line-color': 'red',
                   'label': 'data(label)',
                   'color' : 'black',
