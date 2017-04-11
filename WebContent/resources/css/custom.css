@@ -1,0 +1,92 @@
+@media (min-width: 1200px) {
+  .container {
+    width: 90%;
+  }
+}
+
+.table-custom {
+	font-size: 12px;
+}
+.panel-header {
+	font-size: 14px;
+	font-weight: bolder;
+}
+ .panel-heading span
+    {
+        margin-top: -20px;
+        font-size: 15px;
+    }
+
+    .row
+    {
+        margin-top: 40px;
+        padding: 0 10px;
+    }
+
+    .clickable
+    {
+        cursor: pointer;
+    }
+.wrap {
+    width: 100%;
+}
+
+.wrap table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.wrap table tr td {
+    padding: 5px;
+    border: 1px solid #ededed;
+    width: 100px;
+    word-wrap: break-word;
+}
+
+.wrap table.head tr th {
+    background: #ededed;
+    height: 30px;
+}
+
+.inner_table {
+    max-height: 100px;
+    overflow-y: auto;
+} 
+ #cy {
+	height: 500px;
+	width: 100%;
+	overflow: hidden;
+	top: 200px;
+
+}
+.relations {
+	top:75%;
+	width: 100%;
+	overflow: hidden;
+	font-size:12px;
+	border:none;
+}
+
+
+@media (min-width: 768px) {
+
+    .brand-pills > li > a {
+        border-top-right-radius: 0px;
+    	border-bottom-right-radius: 0px;
+    }
+    
+    li.brand-nav.active a:after{
+    	content: " ";
+    	display: block;
+    	width: 0;
+    	height: 0;
+    	border-top: 20px solid transparent;
+    	border-bottom: 20px solid transparent;
+    	border-left: 9px solid #428bca;
+    	position: absolute;
+    	top: 50%;
+    	margin-top: -20px;
+    	left: 100%;
+    	z-index: 2;
+    }
+}

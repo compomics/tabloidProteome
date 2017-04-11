@@ -1,9 +1,6 @@
 package com.compomics.neo4j.model.relationshipTypes;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
-
-import org.neo4j.driver.internal.value.FloatValue;
 
 /**
  * Created by demet on 12/19/2016.
@@ -18,6 +15,10 @@ public class Associate implements Serializable{
     private Double jaccSimScore;
 
     private String interact;
+    
+    private String intact;
+    
+    private String bioGrid;
 
     private String commonAssayCount;
 
@@ -25,9 +26,9 @@ public class Associate implements Serializable{
     
     private String intactConfidence;
     
-    private String interactionDetection;
+    private String intactDetection;
     
-    private String interactionType;
+    private String intactInteractionType;
 
     public Associate() {
     }
@@ -76,25 +77,39 @@ public class Associate implements Serializable{
 		return intactConfidence;
 	}
 
-	public String getInteractionDetection() {
-		return interactionDetection;
+	public String getIntactDetection() {
+		return intactDetection;
 	}
 
-	public String getInteractionType() {
-		return interactionType;
+	public String getIntactInteractionType() {
+		return intactInteractionType;
 	}
 
 	public void setIntactConfidence(String intactConfidence) {
 		this.intactConfidence = intactConfidence;
 	}
 
-	public void setInteractionDetection(String interactionDetection) {
-		this.interactionDetection = interactionDetection;
+	public void setIntactDetection(String interactionDetection) {
+		this.intactDetection = interactionDetection;
 	}
 
-	public void setInteractionType(String interactionType) {
-		this.interactionType = interactionType;
+	public void setIntactInteractionType(String interactionType) {
+		this.intactInteractionType = interactionType;
 	}
-    
-    
+
+	public String getIntact() {
+		return intact;
+	}
+
+	public String getBioGrid() {
+		return bioGrid;
+	}
+
+	public void setIntact(String intact) {
+		this.intact = intact;
+	}
+
+	public void setBioGrid(String bioGrid) {
+		this.bioGrid = bioGrid;
+	} 
 }

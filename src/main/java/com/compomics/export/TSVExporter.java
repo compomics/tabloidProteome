@@ -1,183 +1,169 @@
 package com.compomics.export;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.faces.application.FacesMessage;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+
+import org.apache.tomcat.util.http.fileupload.util.Streams;
+
 import com.compomics.neo4j.model.dataTransferObjects.ProteinDTO;
-import com.compomics.neo4j.model.nodes.PathWay;
-import com.compomics.neo4j.model.nodes.Project;
+import com.compomics.neo4j.model.nodes.Go;
 
 public class TSVExporter implements Serializable{
 
 	private static final long serialVersionUID = -7839067679207942313L;
 
 	private List<ProteinDTO> proteinDTOS;
-	
-	private String [][] matrix ;
+	private StringBuilder tsvExport ;
 	
 	private final String SEPARATOR = "\t";
 	private final String END_OF_LINE = "\n";
-	private final int NUMBER_OF_COLUMNS = 34;
-	private int NUMBER_OF_ROWS = 0;
+	private final String ACCESSION_SEPARATOR = ";";
 	
 	// headers
-	private final String PROTEIN_1= "Protein A";
-	private final String PROTEIN_2= "Protein B";
-	private final String PROTEIN_1_NAME = "Protein A name";
-	private final String PROTEIN_2_NAME = "Protein B name";
-	private final String JACC_SIM_SCORE = "Jacc sim score";
-	private final String INTERACT = "Interaction";
-	private final String PARALOG = "Paralog";
-	private final String DIST_COMPLEX = "Number of distinct complexes";
-	private final String DIST_PATHWAY = "Number of distinct pathways";
-	private final String COMM_PROJECT_SIZE = "Number of common project size";
-	private final String INTACT_CONF = "Intact confidence";
-	private final String INTACT_DETECTION = "Interaction detection";
-	private final String INTACT_TYPE = "Interaction type";
-	private final String PROJECT_ACC = "Project accession";
-	private final String KEYWORDS = "Keywords";
-	private final String TISSUE = "Tissue";
-	private final String TAGS = "Tags";
-	private final String REACTOME_ACC = "Reactome accession";
-	private final String PATHWAY_NAME = "Pathway name";
-	private final String EVIDENCE_CODE = "Evidence code";
-	private final String CORUM_ID = "Corum id";
-	private final String COMPLEX_NAME = "Complex name";
-	private final String COMPLEX_COMMENT = "Complex comment";
-	private final String CELL_LINE = "Cell line";
-	private final String DISEASE_COMMENT = "Disease comment";
-	private final String SUBUNIT_COMMENT = "Subunit comment";
-	private final String PUBMED_ID = "Pubmed id";
-	private final String PURIFICATION_METHOD = "Purification method";
-	private final String MF_ID = "MF id";
-	private final String MF_NAME = "MF name";
-	private final String BP_ID = "BP id";
-	private final String BP_NAME = "BP name";
-	private final String CC_ID = "CC id";
-	private final String CC_NAME = "CC name";
+	private final String PROTEIN_1= "Protein 1";
+	private final String PROTEIN_2= "Protein 2";
+	private final String PROTEIN_1_NAME = "Protein 1 name";
+	private final String PROTEIN_2_NAME = "Protein 2 name";
+	private final String PROTEIN_1_GENE = "Protein 1 gene name";
+	private final String PROTEIN_2_GENE = "Protein 2 gene name";
+	private final String JACC_SIM_SCORE = "Jacc similarity score";
+	private final String INTACT = "IntAct";
+	private final String BIOGRID = "BioGRID";
+	private final String PARALOG = "Ensemble paralog";
+	private final String NUM_COMPLEX = "Number of common complexes";
+	private final String NUM_PATHWAY = "Number of common pathways";
+	private final String NUM_PROJECT = "Number of common projects";
+	private final String NUM_MF = "Number of MFs";
+	private final String NUM_BP = "Number of BPs";
+	private final String NUM_CC = "Number of CCs";
+	private final String PROJECTS = "Projects";
+	private final String PATHWAYS = "Pathways";
+	private final String COMPLEXES = "Complexes";
+	private final String MF = "GO MF";
+	private final String BP = "GO BP";
+	private final String CC= "GO CC";
+
 	
 	
-	public TSVExporter(List<ProteinDTO> proteinDTOS) {
+	public void tsvExport(List<ProteinDTO> proteinDTOS) {
 		this.proteinDTOS = proteinDTOS;
+		tsvExport = new StringBuilder();
+		createTSVString();
+		export();
 	}
 	
-	private void createMatrix(){
-		if(!proteinDTOS.isEmpty()){
-			findMatrixSize();
-			matrix = new String[NUMBER_OF_COLUMNS][NUMBER_OF_ROWS];
-			addMatrixData();
-		}
-	}
-	
-	private void findMatrixSize(){
-		NUMBER_OF_ROWS = proteinDTOS.size();
-		proteinDTOS.forEach(proteinDTO ->{
-			if(proteinDTO.getProjects().size() > NUMBER_OF_ROWS){
-				NUMBER_OF_ROWS = proteinDTO.getProjects().size();
-			}
-			if(proteinDTO.getPathWays().size() > NUMBER_OF_ROWS){
-				NUMBER_OF_ROWS = proteinDTO.getPathWays().size();
-			}
-			if(proteinDTO.getComplexes().size() > NUMBER_OF_ROWS){
-				NUMBER_OF_ROWS = proteinDTO.getComplexes().size();
-			}
-			if(proteinDTO.getMf().size() > NUMBER_OF_ROWS){
-				NUMBER_OF_ROWS = proteinDTO.getMf().size();
-			}
-			if(proteinDTO.getBp().size() > NUMBER_OF_ROWS){
-				NUMBER_OF_ROWS = proteinDTO.getBp().size();
-			}
-			if(proteinDTO.getCc().size() > NUMBER_OF_ROWS){
-				NUMBER_OF_ROWS = proteinDTO.getCc().size();
-			}
-		});
-		// for header
-		NUMBER_OF_ROWS++;
-	}
-	
-	private void addMatrixHeaders(){
-		// headers
-		// main protein association table
-		matrix[0][0] = PROTEIN_1;
-		matrix[0][1] = PROTEIN_2;
-		matrix[0][2] = PROTEIN_1_NAME;
-		matrix[0][3] = PROTEIN_2_NAME;
-		matrix[0][4] = JACC_SIM_SCORE;
-		matrix[0][5] = INTERACT;
-		matrix[0][6] = PARALOG;
-		matrix[0][7] = DIST_COMPLEX;
-		matrix[0][8] = DIST_PATHWAY;
-		matrix[0][9] = COMM_PROJECT_SIZE;
-		// association
-		matrix[0][10] = INTACT_CONF;
-		matrix[0][11] = INTACT_DETECTION;
-		matrix[0][12] = INTACT_TYPE;
-		// common projects
-		matrix[0][13] = PROJECT_ACC;
-		matrix[0][14] = KEYWORDS;
-		matrix[0][15] = TISSUE;
-		matrix[0][16] = TAGS;
-		// pathways
-		matrix[0][17] = REACTOME_ACC;
-		matrix[0][18] = PATHWAY_NAME;
-		matrix[0][19] = EVIDENCE_CODE;
-		// complexes
-		matrix[0][20] = CORUM_ID;
-		matrix[0][21] = COMPLEX_NAME;
-		matrix[0][22] = COMPLEX_COMMENT;
-		matrix[0][23] = CELL_LINE;
-		matrix[0][24] = DISEASE_COMMENT;
-		matrix[0][25] = SUBUNIT_COMMENT;
-		matrix[0][26] = PUBMED_ID;
-		matrix[0][27] = PURIFICATION_METHOD;
-		// mf
-		matrix[0][28] = MF_ID;
-		matrix[0][29] = MF_NAME;
-		// bp
-		matrix[0][30] = BP_ID;
-		matrix[0][31] = BP_NAME;
-		// cc
-		matrix[0][32] = CC_ID;
-		matrix[0][33] = CC_NAME;
-	}
-	
-	public void addMatrixData(){
-		addMatrixHeaders();
+	private void createTSVString(){
+		tsvExport.append(PROTEIN_1).append(SEPARATOR).append(PROTEIN_2).append(SEPARATOR).append(PROTEIN_1_NAME).append(SEPARATOR).append(PROTEIN_2_NAME)
+			.append(SEPARATOR).append(PROTEIN_1_GENE).append(SEPARATOR).append(PROTEIN_2_GENE).append(SEPARATOR).append(NUM_PROJECT).append(SEPARATOR)
+			.append(PROJECTS).append(SEPARATOR).append(JACC_SIM_SCORE).append(SEPARATOR).append(INTACT).append(SEPARATOR).append(BIOGRID).append(SEPARATOR)
+			.append(NUM_PATHWAY).append(SEPARATOR).append(PATHWAYS).append(SEPARATOR).append(NUM_COMPLEX).append(SEPARATOR).append(COMPLEXES).append(SEPARATOR)
+			.append(PARALOG).append(SEPARATOR).append(NUM_BP).append(SEPARATOR).append(BP).append(SEPARATOR).append(NUM_MF).append(SEPARATOR).append(MF)
+			.append(SEPARATOR).append(NUM_CC).append(SEPARATOR).append(CC).append(END_OF_LINE);
 		
-	    proteinDTOS.forEach(proteinDTO ->{
-	    	for(int i = 1; i<NUMBER_OF_ROWS; i++){
-		    	matrix[i][0] = proteinDTO.getProtein1().getUniprotAccession();
-		    	matrix[i][1] = proteinDTO.getProtein2().getUniprotAccession();
-		    	matrix[i][2] = proteinDTO.getProtein1().getProteinName();
-		    	matrix[i][3] = proteinDTO.getProtein2().getProteinName();
-		    	matrix[i][4] = proteinDTO.getAssociate().getJaccSimScore().toString();
-		    	matrix[i][5] = proteinDTO.getAssociate().getInteract();
-		    	matrix[i][6] = proteinDTO.getAssociate().getParalog();
-		    	matrix[i][7] = String.valueOf(proteinDTO.getDistinctComplexCount());
-		    	matrix[i][8] = String.valueOf(proteinDTO.getDistinctPathCount());
-		    	matrix[i][9] = String.valueOf(proteinDTO.getCommonProjectSize());
-		    	matrix[i][10] = proteinDTO.getAssociate().getIntactConfidence();
-		    	matrix[i][11] = proteinDTO.getAssociate().getInteractionDetection();
-		    	matrix[i][12] = proteinDTO.getAssociate().getInteractionType();
-		    	int cp = i;
-		    	for(Project project : proteinDTO.getProjects()){
-		    		matrix[cp][13] = project.getProjectAccession();
-		    		matrix[cp][14] = project.getKeywords();
-		    		matrix[cp][15] = project.getTissue();
-		    		matrix[cp][16] = project.getTags();
-		    		cp++;
-		    	}
-		    	int pw = i;
-		    	for(PathWay pathWay : proteinDTO.getPathWays()){
-		    		matrix[pw][17] = pathWay.getReactomeAccession();
-		    		matrix[pw][18] = pathWay.getPathwayName();
-		    		matrix[pw][19] = pathWay.getEvidenceCode();
-		    		pw++;
-		    	}
-		    	int cm = i;
-		    	
-		    }
+		proteinDTOS.forEach(proteinDTO -> {
+			
+			// find projects accessions
+			StringBuilder projects = new StringBuilder();
+			proteinDTO.getProjects().forEach(project ->{
+				projects.append(project.getProjectAccession()).append(ACCESSION_SEPARATOR);
+			});
+			if(projects.length() > 0){
+				projects.setLength(projects.length() - 1);
+			}
+			
+			// find pathways reactome accessions
+			StringBuilder pathways = new StringBuilder();
+			proteinDTO.getPathWays().forEach(pathway ->{
+				pathways.append(pathway.getReactomeAccession()).append(ACCESSION_SEPARATOR);
+			});
+			if(pathways.length() > 0){
+				pathways.setLength(pathways.length() - 1);
+			}
+			
+			// find complexes corum id
+			StringBuilder complexes = new StringBuilder();
+			proteinDTO.getComplexes().forEach(complex -> {
+				complexes.append(complex.getCorumId()).append(ACCESSION_SEPARATOR);
+			});
+			if (complexes.length() > 0) {
+				complexes.setLength(complexes.length() - 1);
+			}
+			
+			// find GO BP id and number of BPs
+			int bpSize = 0;
+			StringBuilder bps = new StringBuilder();
+			for(Go bp : proteinDTO.getBp()){
+				bps.append(bp.getId()).append(ACCESSION_SEPARATOR);
+				bpSize++;
+			}
+			if (bps.length() > 0) {
+				bps.setLength(bps.length() - 1);
+			}
+
+			// find GO MF id and number of MFs
+			int mfSize = 0;
+			StringBuilder mfs = new StringBuilder();
+			for (Go mf : proteinDTO.getMf()) {
+				mfs.append(mf.getId()).append(ACCESSION_SEPARATOR);
+				mfSize++;
+			}
+			if (mfs.length() > 0) {
+				mfs.setLength(mfs.length() - 1);
+			}
+
+			// find GO CC id and number of CCs
+			int ccSize = 0;
+			StringBuilder ccs = new StringBuilder();
+			for (Go cc : proteinDTO.getCc()) {
+				ccs.append(cc.getId()).append(ACCESSION_SEPARATOR);
+				ccSize++;
+			}
+			if (ccs.length() > 0) {
+				ccs.setLength(ccs.length() - 1);
+			}
+
+			tsvExport.append(proteinDTO.getProtein1().getUniprotAccession()).append(SEPARATOR).append(proteinDTO.getProtein2().getUniprotAccession()).append(SEPARATOR)
+			.append(proteinDTO.getProtein1().getProteinName()).append(SEPARATOR).append(proteinDTO.getProtein2().getProteinName()).append(SEPARATOR)
+			.append(proteinDTO.getProtein1().getGeneName()).append(SEPARATOR).append(proteinDTO.getProtein2().getGeneName()).append(SEPARATOR)
+			.append(proteinDTO.getCommonProjectSize()).append(SEPARATOR).append(projects.toString()).append(SEPARATOR)
+			.append(proteinDTO.getJaccSimScore()).append(SEPARATOR).append(proteinDTO.getIntact()).append(SEPARATOR).append(proteinDTO.getBioGrid()).append(SEPARATOR)
+			.append(proteinDTO.getDistinctPathCount()).append(SEPARATOR).append(pathways.toString()).append(SEPARATOR)
+			.append(proteinDTO.getDistinctComplexCount()).append(SEPARATOR).append(complexes.toString()).append(SEPARATOR).append(proteinDTO.getParalog()).append(SEPARATOR)
+			.append(bpSize).append(SEPARATOR).append(bps.toString()).append(SEPARATOR)
+			.append(mfSize).append(SEPARATOR).append(mfs.toString()).append(SEPARATOR)
+			.append(ccSize).append(SEPARATOR).append(ccs.toString()).append(END_OF_LINE);
 		});
-		
 	}
+	
+	private void export() {
+        FacesContext fc = FacesContext.getCurrentInstance();
+        ExternalContext ec = fc.getExternalContext();
+
+        byte[] exportContent = tsvExport.toString().getBytes();
+        // here something bad happens that the user should know about
+        // but this message does not go out to the user
+        fc.addMessage(null, new FacesMessage("record 2 was flawed"));
+
+        ec.responseReset();
+        ec.setResponseContentType("text/plain");
+        ec.setResponseContentLength(exportContent.length);
+        String attachmentName = "attachment; filename=\"proteinAssociation.txt\"";
+        ec.setResponseHeader("Content-Disposition", attachmentName);
+        try {
+            OutputStream output = ec.getResponseOutputStream();
+            Streams.copy(new ByteArrayInputStream(exportContent), output, false);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+        fc.responseComplete();
+    }
+
 }

@@ -1,15 +1,14 @@
 package com.compomics.neo4j.model.dataTransferObjects;
 
+import java.io.Serializable;
+import java.util.List;
+
 import com.compomics.neo4j.model.nodes.Complex;
 import com.compomics.neo4j.model.nodes.Go;
 import com.compomics.neo4j.model.nodes.PathWay;
 import com.compomics.neo4j.model.nodes.Project;
 import com.compomics.neo4j.model.nodes.Protein;
 import com.compomics.neo4j.model.relationshipTypes.Associate;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by demet on 12/19/2016.
@@ -22,7 +21,7 @@ public class ProteinDTO implements Serializable{
 
     private Protein protein2;
 
-    private Associate associate;
+    private List<Associate> associate;
 
     private List<Project> projects;
     
@@ -41,6 +40,16 @@ public class ProteinDTO implements Serializable{
     private int distinctPathCount;
     
     private int commonProjectSize;
+    
+    private String paralog;
+
+    private Double jaccSimScore;
+
+    private String interact;
+    
+    private String intact;
+    
+    private String bioGrid;
 
     public ProteinDTO() {
     }
@@ -53,7 +62,7 @@ public class ProteinDTO implements Serializable{
 		return protein2;
 	}
 
-	public Associate getAssociate() {
+	public List<Associate> getAssociate() {
 		return associate;
 	}
 
@@ -101,7 +110,7 @@ public class ProteinDTO implements Serializable{
 		this.protein2 = protein2;
 	}
 
-	public void setAssociate(Associate associate) {
+	public void setAssociate(List<Associate> associate) {
 		this.associate = associate;
 	}
 
@@ -141,7 +150,44 @@ public class ProteinDTO implements Serializable{
 		this.commonProjectSize = commonProjectSize;
 	}
 
-    
+	public String getParalog() {
+		return paralog;
+	}
 
-    
+	public Double getJaccSimScore() {
+		return jaccSimScore;
+	}
+
+	public String getInteract() {
+		return interact;
+	}
+
+	public String getIntact() {
+		return intact;
+	}
+
+	public String getBioGrid() {
+		return bioGrid;
+	}
+
+	public void setParalog(String paralog) {
+		this.paralog = paralog;
+	}
+
+	public void setJaccSimScore(Double jaccSimScore) {
+		this.jaccSimScore = jaccSimScore;
+	}
+
+	public void setInteract(String interact) {
+		this.interact = interact;
+	}
+
+	public void setIntact(String intact) {
+		this.intact = intact;
+	}
+
+	public void setBioGrid(String bioGrid) {
+		this.bioGrid = bioGrid;
+	}
+
 }

@@ -23,7 +23,8 @@ public class VisualisationBean implements Serializable{
 	private static final long serialVersionUID = -1246774333059415835L;
 
 	private List<String> nodes = new ArrayList<>();
-	private List<Integer> edges = new ArrayList<>();;
+	private List<Integer> edges = new ArrayList<>();
+	private List<String> jaccSimScores = new ArrayList<>();
 	private String selectedNode;
 	private int selectedEdge;
 	private Protein selectedProtein;
@@ -54,6 +55,10 @@ public class VisualisationBean implements Serializable{
 
 	public int getSelectedEdge() {
 		return selectedEdge;
+	}
+
+	public List<String> getJaccSimScores() {
+		return jaccSimScores;
 	}
 
 	public Protein getSelectedProtein() {
@@ -103,12 +108,13 @@ public class VisualisationBean implements Serializable{
 	public GraphDbManagedBean getGraphDbManagedBean() {
 		return graphDbManagedBean;
 	}
-
+	
 	public void load(GraphDbManagedBean bean) {
 		visible = false;
 		graphDbManagedBean = bean;
 		nodes = new ArrayList<>();
 		edges = new ArrayList<>();
+		jaccSimScores = new ArrayList<>();
 		
 		if(!graphDbManagedBean.getProteinDTOS().isEmpty()){
 			nodes.add(graphDbManagedBean.getProteinDTOS().get(0).getProtein1().getUniprotAccession());
@@ -116,6 +122,7 @@ public class VisualisationBean implements Serializable{
 			for(ProteinDTO proteinDTO : graphDbManagedBean.getProteinDTOS()) {
 				nodes.add(proteinDTO.getProtein2().getUniprotAccession());
 				edges.add(counter);
+				jaccSimScores.add(proteinDTO.getJaccSimScore().toString());
 				counter++;
 			}
 		}	
@@ -127,25 +134,24 @@ public class VisualisationBean implements Serializable{
 			selectedProtein = graphDbManagedBean.getProteinDTOS().get(0).getProtein1();
 		}else{
 			for(ProteinDTO proteinDTO : graphDbManagedBean.getProteinDTOS()) {
-				if(proteinDTO.getProtein2().getUniprotAccession().equals(selectedNode.trim())){
+				if(proteinDTO.getProtein2().getUniprotAccession().equals(selectedNode)){
 					selectedProtein = proteinDTO.getProtein2();
 				}
 			}
 		}
-
 	}
 	
 	public void getNode(){
-		selectedNode = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("selectedNode");  
-		onNodeSelect();
+		selectedNode =  FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("selectedNode").trim(); 
+		if(selectedNode != null) {onNodeSelect();}
 	}
-	
+
 	public void onEdgeSelect(){
 
 		clearRelations();
 		if (graphDbManagedBean.getProteinDTOS().get(selectedEdge) != null) {
 			projects.addAll(graphDbManagedBean.getProteinDTOS().get(selectedEdge).getProjects());
-			association.add(graphDbManagedBean.getProteinDTOS().get(selectedEdge).getAssociate());
+			association.addAll(graphDbManagedBean.getProteinDTOS().get(selectedEdge).getAssociate());
 			pathWays.addAll(graphDbManagedBean.getProteinDTOS().get(selectedEdge).getPathWays());
 			complexs.addAll(graphDbManagedBean.getProteinDTOS().get(selectedEdge).getComplexes());
 			mf.addAll(graphDbManagedBean.getProteinDTOS().get(selectedEdge).getMf());

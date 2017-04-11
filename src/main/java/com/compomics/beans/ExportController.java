@@ -3,12 +3,16 @@ package com.compomics.beans;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
+
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.RequestScoped;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import org.apache.tomcat.util.http.fileupload.util.Streams;
+
+import com.compomics.neo4j.model.dataTransferObjects.ProteinDTO;
 
 @ManagedBean
 @RequestScoped
@@ -37,4 +41,5 @@ public class ExportController {
 
         fc.responseComplete();
     }
+
 }
