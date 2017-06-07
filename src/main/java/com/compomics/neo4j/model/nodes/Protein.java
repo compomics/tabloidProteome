@@ -1,6 +1,7 @@
 package com.compomics.neo4j.model.nodes;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Created by demet on 12/19/2016.
@@ -9,7 +10,9 @@ public class Protein implements Serializable {
 
     private static final long serialVersionUID = -1879461966536472891L;
 
-    private String geneName;
+    private List<Object> geneNames;
+    
+    private List<Object> geneIds;
 
     private String species;
 
@@ -26,12 +29,12 @@ public class Protein implements Serializable {
     public Protein() {
     }
 
-    public String getGeneName() {
-        return geneName;
+    public List<Object> getGeneNames() {
+        return geneNames;
     }
 
-    public void setGeneName(String geneName) {
-        this.geneName = geneName;
+    public void setGeneNames(List<Object> geneName) {
+        this.geneNames = geneName;
     }
 
     public String getSpecies() {
@@ -81,5 +84,13 @@ public class Protein implements Serializable {
     public void setUniprotStatus(String uniprotStatus) {
         this.uniprotStatus = uniprotStatus;
     }
+
+	public List<Object> getGeneIds() {
+		return geneIds;
+	}
+
+	public void setGeneIds(List<Object> geneIds) {
+		this.geneIds = geneIds;
+	}
 
 }

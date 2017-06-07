@@ -33,14 +33,21 @@ public class JSONService implements Serializable{
 	@Path("/{accession}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@JacksonFeatures(serializationEnable =  { SerializationFeature.INDENT_OUTPUT })
-	public Response getProteinDTOsInJSON(@PathParam("accession") String accession){
+	public Response getProteinDTOsInJSON(@PathParam("accession") String accession, @PathParam("jaccard") String jaccard){
 		Service dbService = new Service();
-		List<ProteinDTO> proteinDTOs = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY, accession, "");
-		if(proteinDTOs.isEmpty()){
-			return Response.status(Response.Status.NOT_FOUND).entity("Resource not found for accession: " +  accession).build();
-		}else{
-			return Response.ok(proteinDTOs).build();
+		try{
+			List<ProteinDTO> proteinDTOs = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY, accession, "", Double.valueOf(jaccard));
+			if(proteinDTOs.isEmpty()){
+				return Response.status(Response.Status.NOT_FOUND).entity("Resource not found for accession: " +  accession).build();
+			}else{
+				return Response.ok(proteinDTOs).build();
+			}
+		}catch(NumberFormatException e){
+			e.printStackTrace();
+			return Response.status(Response.Status.BAD_REQUEST).entity("Jaccard Similarity Score should be between 0 and 1.").build();
 		}
+		
+		
 		
 	}
 	
@@ -49,14 +56,20 @@ public class JSONService implements Serializable{
 	@Path("/{accession1}&{accession2}/")
 	@Produces(MediaType.APPLICATION_JSON)
 	@JacksonFeatures(serializationEnable =  { SerializationFeature.INDENT_OUTPUT })
-	public Response getProteinDTOsInJSON(@PathParam("accession1") String accession1, @PathParam("accession2") String accession2){
+	public Response getProteinDTOsInJSON(@PathParam("accession1") String accession1, @PathParam("accession2") String accession2, @PathParam("jaccard") String jaccard){
 		Service dbService = new Service();
-		List<ProteinDTO> proteinDTOs = dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, accession1, accession2);
-		if(proteinDTOs.isEmpty()){
-			return Response.status(Response.Status.NOT_FOUND).entity("Resource not found for accessions: " +  accession1 + " and " + accession2).build();
-		}else{
-			return Response.ok(proteinDTOs).build();
+		try{
+			List<ProteinDTO> proteinDTOs = dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, accession1, accession2, Double.valueOf(jaccard));
+			if(proteinDTOs.isEmpty()){
+				return Response.status(Response.Status.NOT_FOUND).entity("Resource not found for accessions: " +  accession1 + " and " + accession2).build();
+			}else{
+				return Response.ok(proteinDTOs).build();
+			}
+		}catch(NumberFormatException e){
+			e.printStackTrace();
+			return Response.status(Response.Status.BAD_REQUEST).entity("Jaccard Similarity Score should be between 0 and 1.").build();
 		}
+		
 	}
 
 }

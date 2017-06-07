@@ -12,20 +12,20 @@
 <title>Tabloid Proteome</title>
 
 <!-- Bootstrap Core CSS -->
-<link href="resources/css/bootstrap.min.css" rel="stylesheet" />
+<link href="/tabloidproteome/resources/css/bootstrap.min.css" rel="stylesheet" />
 
 <!-- Custom CSS -->
-<link href="resources/css/bootstrap.css" rel="stylesheet" />
+<link href="/tabloidproteome/resources/css/bootstrap.css" rel="stylesheet" />
 
 <script src="http://code.jquery.com/jquery-2.1.4.min.js" type="text/javascript"></script>
 
 
-<link href="resources/css/custom.css" rel="stylesheet" />
-<link href="resources/css/sticky-footer.css" rel="stylesheet" />
-<link href="resources/css/bootstrap-table-expandable.css" rel="stylesheet" />
+<link href="/tabloidproteome/resources/css/custom.css" rel="stylesheet" />
+<link href="/tabloidproteome/resources/css/sticky-footer.css" rel="stylesheet" />
+<link href="/tabloidproteome/resources/css/bootstrap-table-expandable.css" rel="stylesheet" />
 
 <!-- Bootstrap Core JavaScript -->
-<script src="resources/js/bootstrap.min.js"></script>
+<script src="/tabloidproteome/resources/js/bootstrap.min.js"></script>
 
 <style>
 body {
@@ -85,7 +85,7 @@ $(document).ready(function()
           <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
             <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span>
           </button>
-          <a href="/tabloidproteome/search.xhtml" class="navbar-left"><img src="resources/images/logo.png" style="width: 70px; height: 54px;" /></a> <a class="navbar-brand"
+          <a href="/tabloidproteome/search.xhtml" class="navbar-left"><img src="/tabloidproteome/resources/images/logo.png" style="width: 70px; height: 54px;" /></a> <a class="navbar-brand"
             href="/tabloidproteome/search.xhtml">Tabloid Proteome</a>
         </div>
         <!-- Collect the nav links, forms, and other content for toggling -->
@@ -120,31 +120,41 @@ $(document).ready(function()
                 <h3>Frequently Asked Questions</h3>
                 <div class="panel panel-default">
                   <div class="panel-heading">
-                    <h3 class="panel-title">What is Tabloid Proteome?</h3>
-                    <span class="pull-right clickable panel-collapsed"><i class="glyphicon glyphicon-chevron-down"></i></span>
+                  	<span class="clickable panel-collapsed">
+                    	<h3 class="panel-title">
+                    		What is Tabloid Proteome? <i class="pull-right glyphicon glyphicon-chevron-down"/>
+                    	</h3>
+                    </span>
                   </div>
                   <div class="panel-body panel-collapse collapse ">
-                    <p>Tabloid Proteome is protein association network generated using publically available mass spectrometry based experiments in PRIDE. 
+                    <p>Tabloid Proteome is a database of protein association network generated using publically available mass spectrometry based experiments in PRIDE. 
                       These associations includes; protein-protein interaction, complex formation, or different role in single pathway.</p>
                   </div>
                 </div>
                 <div class="panel panel-default">
                   <div class="panel-heading">
-                    <h3 class="panel-title">How all these associations are calculated?</h3>
-                    <span class="pull-right clickable panel-collapsed"><i class="glyphicon glyphicon-chevron-down"></i></span>
+                  	<span class="clickable panel-collapsed">
+                    	<h3 class="panel-title">
+                    		How are all these associations calculated? <i class="pull-right glyphicon glyphicon-chevron-down"/>
+                    	</h3>
+                    </span>
                   </div>
                   <div class="panel-body panel-collapse collapse ">
-                    <p>The association between two proteins are calculated using our method (Gupta et al. under revision) which uses Jaccard Similarity 
+                    <p>The association between two proteins are calculated using our method (Gupta et al. 2017) which uses Jaccard Similarity 
                     score to calculate the value for association. Our method is based on the assumption that consistent protein co-occurrence across a 
                     large collection of different, unrelated MS experiments is not merely due to chance, but that this instead reveals an underlying 
                     biological association between these co-occurring proteins. We have also included the biological relation between the protein pairs 
-                    using five existing knowledgebases; IntAct and BioGRID for interaction, CORUM for complex, Ensembl for paralogs, and Reactome for pathways.</p>
+                    using existing knowledgebases; IntAct and BioGRID for interaction, CORUM for complex, Ensembl for paralogs, Reactome for pathways, 
+                    DisGeNet for diseases.</p>
                   </div>
                 </div>
                 <div class="panel panel-default">
                   <div class="panel-heading">
-                    <h3 class="panel-title">Is it free to use?</h3>
-                    <span class="pull-right clickable panel-collapsed"><i class="glyphicon glyphicon-chevron-down"></i></span>
+                  	<span class="clickable panel-collapsed">
+                    	<h3 class="panel-title">
+                    		Is it free to use? <i class="pull-right glyphicon glyphicon-chevron-down"/>
+                    	</h3>
+                    </span>
                   </div>
                   <div class="panel-body panel-collapse collapse ">
                     <p>Yes, Tabloid Proteome data are available for free.</p>
@@ -152,8 +162,11 @@ $(document).ready(function()
                 </div>
                 <div class="panel panel-default">
                   <div class="panel-heading">
-                    <h3 class="panel-title">How can I download data and in which formats?</h3>
-                    <span class="pull-right clickable panel-collapsed"><i class="glyphicon glyphicon-chevron-down"></i></span>
+                  	<span class="clickable panel-collapsed">
+                    	<h3 class="panel-title">
+                    		How can I download data and in which formats? <i class="pull-right glyphicon glyphicon-chevron-down"/>
+                    	</h3>
+                    </span>
                   </div>
                   <div class="panel-body panel-collapse collapse ">
                     <p>You can download your search result in tab delimited format, from Data Table view. You can also download the image of the Graph 
@@ -162,12 +175,16 @@ $(document).ready(function()
                 </div>
                 <div class="panel panel-default">
                   <div class="panel-heading">
-                    <h3 class="panel-title">Does it provide all interacting partners of protein from IntAct and BioGRID?</h3>
-                    <span class="pull-right clickable panel-collapsed"><i class="glyphicon glyphicon-chevron-down"></i></span>
+                  	<span class="clickable panel-collapsed">
+                    	<h3 class="panel-title">
+                    		Does it provide all interacting partners of protein from IntAct and BioGRID? <i class="pull-right glyphicon glyphicon-chevron-down"/>
+                    	</h3>
+                    </span>
                   </div>
                   <div class="panel-body panel-collapse collapse ">
-                    <p>No, Tabloid Proteome version 1.1 only contains 2325 protein pair, found to be associated according to  our method. Other information 
-                    from the different knowledgebases are added to provide user with existing biological information. </p>
+                    <p>Tabloid proteome include protein-protein interaction only for the protein pairs determined 
+                    using our association study using public proteomics MS data (Gupta et al. 2017). 
+                    It does not include protein-protein interaction which are not found in our study. </p>
                   </div>
                 </div>
               </div>
@@ -176,6 +193,7 @@ $(document).ready(function()
               <p>For any further questions, feedback or suggestions, you can send mail to one of the following person:</p>
               <p>Surya Gupta <a href="mailto:surya.gupta@vib-ugent.be" style="text-decoration: underline;">surya.gupta@vib-ugent.be</a></p>
               <p>Demet Turan <a href="mailto:demet.turan@vib-ugent.be" style="text-decoration: underline;">demet.turan@vib-ugent.be</a></p>
+              <p>Lennart Martens <a href="mailto:lennart.martens@vib-ugent.be" style="text-decoration: underline;">lennart.martens@vib-ugent.be</a></p>
             </div>
           </div>
         </div>
@@ -199,34 +217,36 @@ $(document).ready(function()
               });
             });
           </script>
-   <div id="footer">
+  <div id="footer">
       <div class="container">
         <div class="row">
-          <div class="col-sm-6">
+          <div class="col-sm-9">
             <p class="text-muted credit">SUPPORTED BY</p>
-            <p class="text-muted credit"><a href="https://compomics.com" > <img border="0"
-            src="resources/images/compOmics_logo.png" width="93px" height="48px" /></a>&#160;&#160;&#160;&#160;&#160;&#160;
-            <a href="http://www.crl-mappit.be/" style="padding-left: 15px"> <img border="0"
-            src="resources/images/cytokineLogo.png" width="106px" height="40px" /></a></p>
-            <p class="text-muted credit"><a href="http://mbc.vib-ugent.be"> <img border="0"
-            src="resources/images/MBCLogo.png" width="147px" height="53px"/></a>
-            <a href="http://www.vib.be" style="padding-left: 15px;"> <img border="0" 
-            src="resources/images/VIBLogo.png" width="88px" height="53px"/></a></p>
-            <p class="text-muted credit"><a href="http://www.ugent.be/en"> <img border="0" 
-            src="resources/images/ugent-logo.png" width="90px" height="70px" /></a></p>
+            <p class="text-muted credit"><a target="_blank" href="https://compomics.com" > <img border="0"
+            src="/tabloidproteome/resources/images/compOmics_logo.png" width="90px" height="46px" /></a>&#160;
+            <a target="_blank" href="http://www.crl-mappit.be/" style="padding-left: 15px"> <img border="0"
+            src="/tabloidproteome/resources/images/cytokineLogo.png" width="100px" height="38px" /></a>&#160;&#160;
+            <a target="_blank" href="http://mbc.vib-ugent.be"> <img border="0"
+            src="/tabloidproteome/resources/images/MBCLogo.png" width="140px" height="50px"/></a>&#160;
+            <a target="_blank" href="http://www.vib.be" style="padding-left: 15px;"> <img border="0" 
+            src="/tabloidproteome/resources/images/VIBLogo.png" width="84px" height="50px"/></a>&#160;
+            <a target="_blank" href="http://www.ugent.be/en"> <img border="0" 
+            src="/tabloidproteome/resources/images/ugent-logo.png" width="86px" height="67px" /></a>
+            <a target="_blank" href="https://www.elixir-belgium.org/"> <img border="0"
+								src="/tabloidproteome/resources/images/elixir.png" width="79px" height="57px" /></a></p>
           </div>
-          <div class="col-sm-2">
+          <div class="col-sm-1">
             <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/information.xhtml" class="text-muted">Information</a></p>
             <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/information.xhtml#about" class="text-sub">About</a></p>
             <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/information.xhtml#version" class="text-sub">Version</a></p>
             <p class="credit"><a href="/tabloidproteome/information.xhtml#licence" class="text-sub">Licence</a></p>
           </div>
-          <div class="col-sm-2">
+          <div class="col-sm-1">
             <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml" class="text-muted">Data</a></p>
             <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml#statistics" class="text-sub">Statistics</a></p>
-            <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml#dataSource" class="text-sub">Data Source</a></p>
+            <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml#resources" class="text-sub">Credits &#38; Resources</a></p>
           </div>
-          <div class="col-sm-2">
+          <div class="col-sm-1">
             <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml" class="text-muted">Help</a></p>
             <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml#documentation" class="text-sub">Documentation</a></p>
             <p class="credit"><a href="/tabloidproteome/help.xhtml#contact" class="text-sub">Contact</a></p>

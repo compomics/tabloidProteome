@@ -1,22 +1,505 @@
-<?xml version="1.0" encoding="ISO-8859-9" ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:f="http://xmlns.jcp.org/jsf/core"
-  xmlns:p="http://primefaces.org/ui">
-<h:head>
-  <title>Graph Database</title>
-  <link rel="stylesheet" type="text/css" href="#{resource['css/style.css']}" />
-  <h:outputScript library="primefaces" name="jquery/jquery.js" />
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:h="http://xmlns.jcp.org/jsf/html">
+<f:metadata>
+  <f:event listener="#{graphDbManagedBean.load}" type="preRenderView" />
+</f:metadata>
 
-</h:head>
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="" />
+<meta name="author" content="" />
+
+<title>Tabloid Proteome</title>
+
+<!-- Bootstrap Core CSS -->
+<link href="/tabloidproteome/resources/css/bootstrap.min.css" rel="stylesheet" />
+
+<!-- Custom CSS -->
+<link href="/tabloidproteome/resources/css/bootstrap.css" rel="stylesheet" />
+
+<script src="http://code.jquery.com/jquery-2.1.4.min.js" type="text/javascript"></script>
 
 
-        <h:body>
-            <h:form prependId="false">
-                <h:messages id="messages" />
-                <h:commandButton id="download" value="Download"
-                                 actionListener="#{exportController.export()}" />
-            </h:form>
-        </h:body>
+<link href="/tabloidproteome/resources/css/custom.css" rel="stylesheet" />
+<link href="/tabloidproteome/resources/css/sticky-footer.css" rel="stylesheet" />
+<link href="/tabloidproteome/resources/css/bootstrap-table-expandable.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.7/css/bootstrap-dialog.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
 
+<!-- Bootstrap Core JavaScript -->
+<script src="/tabloidproteome/resources/js/bootstrap.min.js"></script>
+<script src="/tabloidproteome/resources/js/bootstrap-table-expandable.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.7/js/bootstrap-dialog.min.js" type="text/javascript"></script>
+<style>
+body {
+	padding-top: 70px;
+	/* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of navigation changes. */
+}
+</style>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-96922635-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+</head>
+
+<body>
+  <div id="wrapper">
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container" id="header">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span>
+          </button>
+          <a href="/tabloidproteome/search.xhtml" class="navbar-left"><img src="/tabloidproteome/resources/images/logo.png" style="width: 70px; height: 54px;" /></a> 
+          <a class="navbar-brand" href="/tabloidproteome/search.xhtml">Tabloid Proteome</a>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav pull-right">
+            <li><a href="/tabloidproteome/search.xhtml">Search</a></li>
+            <li><a href="/tabloidproteome/dataTable.xhtml">Data Table</a></li>
+            <li><a href="/tabloidproteome/help.xhtml">Help</a></li>
+          </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+      </div>
+      <!-- /.container -->
+    </nav>
+
+
+    <!-- Page Content -->
+    <div class="container" id="content">
+      <input type="hidden" id="control" value="#{graphDbManagedBean.control}" />
+      <h1></h1>
+      <a href="/tabloidproteome/graph.xhtml" style="float: right;">
+      <button type="button"  class="btn btn-default">
+          <img src="/tabloidproteome/resources/images/graphIcon.png" style="height: 15px; width: 15px" />
+          Graph View
+      </button>
+      </a>
+      <h:form prependId="false">
+        <h:commandLink id="download" actionListener="#{graphDbManagedBean.tsvExport()}"
+          style="float: right;">
+          <button type="submit" class="btn btn-default" style="margin-right:5px">
+          <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+          Download
+          </button>
+        </h:commandLink>
+      </h:form>
+      <h3 style="text-align: center;">Protein Association Data Table</h3>
+      <table class="table table-hover table-expandable table-sticky-header table-custom">
+        <thead>
+          <tr>
+            <th>1st protein</th>
+            <th>2nd protein</th>
+            <th>1st protein name</th>
+            <th>1st protein gene name</th>
+            <th>2nd protein name</th>
+            <th>2nd protein gene name</th>
+            <th>Jacc similarity score</th>
+            <th>Interaction</th>
+            <th>Ensembl paralog</th>
+            <th># common complex</th>
+            <th># common pathway</th>
+            <th># common projects</th>
+            <th># common diseases</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <ui:repeat var="proteinDTO" value="#{graphDbManagedBean.proteinDTOS}">
+
+            <tr data-target = "'#' + #{proteinDTO.protein2.uniprotAccession}">
+              <td><a target="_blank" href="http://www.uniprot.org/uniprot/#{proteinDTO.protein1.uniprotAccession}">#{proteinDTO.protein1.uniprotAccession}</a></td>
+              <td><a target="_blank" href="http://www.uniprot.org/uniprot/#{proteinDTO.protein2.uniprotAccession}">#{proteinDTO.protein2.uniprotAccession}</a></td>
+              <td>#{proteinDTO.protein1.proteinName}</td>
+              <td>#{proteinDTO.protein1.geneName}</td>
+              <td>#{proteinDTO.protein2.proteinName}</td>
+              <td>#{proteinDTO.protein2.geneName}</td>
+              <td>#{proteinDTO.associate[0].jaccSimScore}</td>
+              <td>#{proteinDTO.associate[0].interact}</td>
+              <td>#{proteinDTO.associate[0].paralog}</td>
+              <td>#{proteinDTO.distinctComplexCount}</td>
+              <td>#{proteinDTO.distinctPathCount}</td>
+              <td>#{proteinDTO.commonProjectSize}</td>
+              <td>#{proteinDTO.diseaseCount}</td>
+              <td><span class="pull-right clickable"><i class="glyphicon glyphicon-chevron-down"></i></span></td>
+            </tr>
+
+            <tr id="#{proteinDTO.protein2.uniprotAccession}">
+              <td colspan="14">
+                <div class="panel panel-default">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">Interactions</h3>
+                    <span class="pull-right clickable panel-collapsed"><i class="glyphicon glyphicon-chevron-down"></i></span>
+                  </div>
+                  <div class="panel-body panel-collapse collapse ">
+                    <div class="row" style="margin-top: 3px;">
+                      <div class="col-sm-2">
+                        <label>IntAct : </label> #{proteinDTO.associate[0].intact}
+                      </div>
+                      <div class="col-sm-2">
+                        <label>BioGRID : </label> #{proteinDTO.associate[0].bioGrid}
+                      </div>
+                    </div>
+                    <div class="wrap">
+                      <table class="head">
+                        <tr>
+                          <th style="width: 12%;">Intact Confidence</th>
+                          <th style="width: 19%;">Intact Detection</th>
+                          <th style="width: 19%;">Intact Interaction Type</th>
+                        </tr>
+                      </table>
+                      <div class="inner_table">
+                        <table>
+                          <ui:repeat var="associate" value="#{proteinDTO.associate}">
+                          <tr>
+                            <td style="width: 12%;">#{associate.intactConfidence}</td>
+                            <td style="width: 19%;">#{associate.intactDetection}</td>
+                            <td style="width: 19%;">#{associate.intactInteractionType}</td>
+                          </tr>
+                        </ui:repeat>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="panel panel-default ">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">Common Projects</h3>
+                    <span class="pull-right clickable panel-collapsed"><i class="glyphicon glyphicon-chevron-down"></i></span>
+                  </div>
+                  <div class="panel-body panel-collapse collapse" >
+                    <div class="wrap">
+                      <table class="head ">
+                        <tr>
+                          <th style="width: 5%;">No</th>
+                          <th style="width: 20%;">Project Accession</th>
+                          <th style="width: 20%;">Keywords</th>
+                          <th style="width: 35%;">Tissue</th>
+                          <th style="width: 20%;">Tags</th>
+                        </tr>
+                      </table>
+                      <div class="inner_table">
+                        <table>
+                          <ui:repeat var="project" value="#{proteinDTO.projects}" varStatus="status">
+                          <tr>
+                            <td style="width: 5%;">#{status.index+1}</td>
+                            <td style="width: 20%;"><a target="_blank" href="https://www.ebi.ac.uk/pride/archive/projects/#{project.projectAccession}">#{project.projectAccession}</a></td>
+                            <td style="width: 20%;">#{project.keywords}</td>
+                            <td style="width: 35%;">#{project.tissue}</td>
+                            <td style="width: 20%;">#{project.tags}</td>
+                          </tr>
+                        </ui:repeat>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="panel panel-default ">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">Pathways</h3>
+                    <span class="pull-right clickable panel-collapsed"><i class="glyphicon glyphicon-chevron-down"></i></span>
+                  </div>
+                  <div class="panel-body panel-collapse collapse" >
+                    <div class="wrap">
+                      <table class="head ">
+                        <tr>
+                          <th style="width: 5%;">No</th>
+                          <th style="width: 25%;">Reactome Accession</th>
+                          <th style="width: 50%;">Pathway Name</th>
+                          <th style="width: 20%;">Evidence Code</th>
+                        </tr>
+                      </table>
+                      <div class="inner_table">
+                        <table>
+                          <ui:repeat var="pathWay" value="#{proteinDTO.pathWays}" varStatus="status">
+                          <tr>
+                            <td style="width: 5%;">#{status.index+1}</td>
+                            <td style="width: 25%;"><a target="_blank" href="http://www.reactome.org/PathwayBrowser/#/#{pathWay.reactomeAccession}">#{pathWay.reactomeAccession}</a></td>
+                            <td style="width: 50%;">#{pathWay.pathwayName}</td>
+                            <td style="width: 20%;">#{pathWay.evidenceCode}</td>
+                          </tr>
+                        </ui:repeat>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="panel panel-default ">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">Complexes</h3>
+                    <span class="pull-right clickable panel-collapsed"><i class="glyphicon glyphicon-chevron-down"></i></span>
+                  </div>
+                  <div class="panel-body panel-collapse collapse" >
+                    <div class="wrap">
+                      <table class="head ">
+                        <tr>
+                          <th style="width: 3%;">No</th>
+                          <th style="width: 6%;">Corum Id</th>
+                          <th style="width: 14%;">Complex Name</th>
+                          <th style="width: 20%;">Complex Comment</th>
+                          <th style="width: 7%;">Cell Line</th>
+                          <th style="width: 14%;">Disease Comment</th>
+                          <th style="width: 11%;">Subunit Comment</th>
+                          <th style="width: 7%;">Pubmed Id</th>
+                          <th style="width: 18%;">Purification Method</th>
+                        </tr>
+                      </table>
+                      <div class="inner_table">
+                        <table>
+                          <ui:repeat var="complex" value="#{proteinDTO.complexes}" varStatus="status">
+                            <tr>
+                              <td style="width: 3%;">#{status.index+1}</td>
+                              <td style="width: 6%;"><a target="_blank" href="http://mips.helmholtz-muenchen.de/corum/">#{complex.corumId}</a></td>
+                              <td style="width: 14%;">#{complex.complexName}</td>
+                              <td style="width: 20%;">#{complex.complexComment}</td>
+                              <td style="width: 7%;">#{complex.cellLine}</td>
+                              <td style="width: 14%;">#{complex.diseaseComment}</td>
+                              <td style="width: 11%;">#{complex.subUnitComment}</td>
+                              <td style="width: 7%;"><a target="_blank"
+                                href="https://www.ncbi.nlm.nih.gov/pubmed?cmd=search&amp;term=#{complex.pubmedId}">#{complex.pubmedId}</a></td>
+                              <td style="width: 18%;">#{complex.purificationMethod}</td>
+                            </tr>
+                          </ui:repeat>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="panel panel-default ">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">GO</h3>
+                    <span class="pull-right clickable panel-collapsed"><i class="glyphicon glyphicon-chevron-down"></i></span>
+                  </div>
+                  <div class="panel-body panel-collapse collapse" >
+                    <div class="wrap">
+                      <h3>Molecular Function</h3>
+                      <table class="head ">
+                        <tr>
+                          <th style="width: 5%;">No</th>
+                          <th style="width: 45%;">MF Id</th>
+                          <th style="width: 50%;">MF Name</th>
+                        </tr>
+                      </table>
+                      <div class="inner_table">
+                        <table>
+                          <ui:repeat var="mf" value="#{proteinDTO.mf}" varStatus="status">
+                          <tr>
+                            <td style="width: 5%;">#{status.index+1}</td>
+                            <td style="width: 45%;"><a target="_blank" href="http://www.ebi.ac.uk/QuickGO/GTerm?id=#{mf.id}">#{mf.id}</a></td>
+                            <td style="width: 50%;">#{mf.name}</td>
+                          </tr>
+                        </ui:repeat>
+                        </table>
+                        </div>
+                      </div>
+                      <div class="wrap">
+                      <h3>Biological Process</h3>
+                        <table class="head ">
+                          <tr>
+                            <th style="width: 5%;">No</th>
+                            <th style="width: 45%;">BP Id</th>
+                            <th style="width: 50%;">BP Name</th>
+                          </tr>
+                        </table>
+                        <div class="inner_table">
+                          <table>
+                            <ui:repeat var="bp" value="#{proteinDTO.bp}" varStatus="status">
+                              <tr>
+                                <td style="width: 5%;">#{status.index+1}</td>
+                                <td style="width: 45%;"><a target="_blank" href="http://www.ebi.ac.uk/QuickGO/GTerm?id=#{bp.id}">#{bp.id}</a></td>
+                                <td style="width: 50%;">#{bp.name}</td>
+                              </tr>
+                            </ui:repeat>
+                          </table>
+                        </div>
+                      </div> 
+                      <div class="wrap">
+                      <h3>Cellular Component</h3>
+                        <table class="head ">
+                          <tr>
+                            <th style="width: 5%;">No</th>
+                            <th style="width: 45%;">CC Id</th>
+                            <th style="width: 50%;">CC Name</th>
+                          </tr>
+                        </table>
+                        <div class="inner_table">
+                          <table>
+                            <ui:repeat var="cc" value="#{proteinDTO.cc}" varStatus="status">
+                              <tr>
+                                <td style="width: 5%;">#{status.index+1}</td>
+                                <td style="width: 45%;"><a target="_blank" href="http://www.ebi.ac.uk/QuickGO/GTerm?id=#{cc.id}">#{cc.id}</a></td>
+                                <td style="width: 50%;">#{cc.name}</td>
+                              </tr>
+                            </ui:repeat>
+                          </table>
+                        </div>
+                      </div>                  
+                  </div>
+                </div>
+                <div class="panel panel-default ">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">Diseases</h3>
+                    <span class="pull-right clickable panel-collapsed"><i class="glyphicon glyphicon-chevron-down"></i></span>
+                  </div>
+                  <div class="panel-body panel-collapse collapse" >
+                    <div class="wrap">
+                      <table class="head ">
+                        <tr>
+                          <th style="width: 5%;">No</th>
+                          <th style="width: 45%;">Disgenet Id</th>
+                          <th style="width: 50%;">Disease Name</th>
+                        </tr>
+                      </table>
+                      <div class="inner_table">
+                        <table>
+                          <ui:repeat var="disease" value="#{proteinDTO.diseases}" varStatus="status">
+                          <tr>
+                            <td style="width: 5%;">#{status.index+1}</td>
+                            <td style="width: 45%;"><a target="_blank" href="http://www.disgenet.org/web/DisGeNET/menu/search?0">#{disease.disgenetId}</a></td>
+                            <td style="width: 50%;">#{disease.diseaseName}</td>
+                          </tr>
+                        </ui:repeat>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+
+          </ui:repeat>
+        </tbody>
+      </table>
+      <script type="text/javascript">
+    
+	  	jQuery(function($) {
+			$('.panel-heading span.clickable').on("click", function(e) {
+				if ($(this).hasClass('panel-collapsed')) {
+					// expand the panel
+					$(this).parents('.panel').find('.panel-body').slideDown();
+					$(this).removeClass('panel-collapsed');
+					$(this).find('i').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+				} else {
+					// collapse the panel
+					$(this).parents('.panel').find('.panel-body').slideUp();
+					$(this).addClass('panel-collapsed');
+					$(this).find('i').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+				}
+			});
+		});
+	  	
+	  	jQuery(function($) {
+	  		
+	  		if($('#control').val() == "*"){
+	  			var dialogInstance = new BootstrapDialog();
+                dialogInstance.setTitle('INFORMATION');
+                dialogInstance.setMessage('one or both proteins are not present in the database.');
+                dialogInstance.setType(BootstrapDialog.TYPE_INFO);
+                dialogInstance.open();
+                $('#control').val("do not show dialog again!");
+	  		}else if($('#control').val().indexOf("[") != -1){
+	  			var control = $('#control').val().replace("[", "").replace("]", "");
+	  			if(control == ""){
+	  				var dialogInstance = new BootstrapDialog();
+	                dialogInstance.setTitle('INFORMATION');
+	                dialogInstance.setMessage('There is no link between two proteins.');
+	                dialogInstance.setType(BootstrapDialog.TYPE_INFO);
+	                dialogInstance.open();
+	                $('#control').val("do not show dialog again!");
+	  			}else if(control.split(',').length &gt; 2){
+	  				var proteins = control.split(',');
+	  				var msg = 'There is no direct link between two proteins. \r You can follow the protein path given below. \r';
+	                for(i=0; i &lt; proteins.length; i++){
+	                	msg += proteins[i] + " --> "
+	                }
+	                BootstrapDialog.show({
+	                	title: 'INFORMATION',
+	                    message: msg.slice(0, -4),
+	                    type: BootstrapDialog.TYPE_INFO,
+	                    buttons: [{
+	                        label: 'Go to table view',
+	                        action: function(){
+	                			 var location = '/tabloidproteome/dataTable.xhtml?path=';
+	                			 for(i=0; i &lt; proteins.length; i++){
+	                				 location +=  proteins[i].trim()+ '*';
+	         	                 }		 
+	                			 window.location = location.slice(0, -1);
+	                         }
+	                    }, {
+	                        label: 'close',
+	                        action: function(dialogItself){
+	                             dialogItself.close();
+	                         }
+	                    }]
+	                });
+	                
+	                $('#control').val("do not show dialog again!");
+	  			}
+	  		}
+	  		
+	  	 	if ($('#mainTable > tbody > tr').length == 0){
+	  			$("#mainTable").find('tbody').append("<tr><td>No relation found for the given protein(s)</td></tr>")
+	  	 	}
+	  	});
+	  	
+	   
+	</script>
+
+    </div>
+    <!-- /.container -->
+
+    <div id="footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-sm-9">
+            <p class="text-muted credit">SUPPORTED BY</p>
+            <p class="text-muted credit"><a target="_blank" href="https://compomics.com" > <img border="0"
+            src="/tabloidproteome/resources/images/compOmics_logo.png" width="90px" height="46px" /></a>&#160;
+            <a target="_blank" href="http://www.crl-mappit.be/" style="padding-left: 15px"> <img border="0"
+            src="/tabloidproteome/resources/images/cytokineLogo.png" width="100px" height="38px" /></a>&#160;&#160;
+            <a target="_blank" href="http://mbc.vib-ugent.be"> <img border="0"
+            src="/tabloidproteome/resources/images/MBCLogo.png" width="140px" height="50px"/></a>&#160;
+            <a target="_blank" href="http://www.vib.be" style="padding-left: 15px;"> <img border="0" 
+            src="/tabloidproteome/resources/images/VIBLogo.png" width="84px" height="50px"/></a>&#160;
+            <a target="_blank" href="http://www.ugent.be/en"> <img border="0" 
+            src="/tabloidproteome/resources/images/ugent-logo.png" width="86px" height="67px" /></a>
+            <a target="_blank" href="https://www.elixir-belgium.org/"> <img border="0"
+								src="/tabloidproteome/resources/images/elixir.png" width="79px" height="57px" /></a></p>
+          </div>
+          <div class="col-sm-1">
+            <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/information.xhtml" class="text-muted">Information</a></p>
+            <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/information.xhtml#about" class="text-sub">About</a></p>
+            <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/information.xhtml#version" class="text-sub">Version</a></p>
+            <p class="credit"><a href="/tabloidproteome/information.xhtml#licence" class="text-sub">Licence</a></p>
+          </div>
+          <div class="col-sm-1">
+            <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml" class="text-muted">Data</a></p>
+            <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml#statistics" class="text-sub">Statistics</a></p>
+            <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml#resources" class="text-sub">Credits &#38; Resources</a></p>
+          </div>
+          <div class="col-sm-1">
+            <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml" class="text-muted">Help</a></p>
+            <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml#documentation" class="text-sub">Documentation</a></p>
+            <p class="credit"><a href="/tabloidproteome/help.xhtml#contact" class="text-sub">Contact</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
 
 </html>

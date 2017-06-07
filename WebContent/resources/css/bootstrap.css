@@ -1335,12 +1335,12 @@ mark,
 }
 .text-muted {
   color: #62605E;
-  font-size: 18px;
+  font-size: 15px;
   font-weight:bold;
 }
 .text-sub {
   color: #62605E;
-  font-size: 16px;	
+  font-size: 13px;	
 }
 .text-primary {
   color: #337ab7;

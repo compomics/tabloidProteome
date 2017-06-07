@@ -2,6 +2,7 @@ package com.compomics.beans;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -28,15 +29,16 @@ public class GraphDbManagedBean implements Serializable{
     private Service dbService;
     private String accession1;
     private String accession2;
+    private List<String> accessions = new ArrayList<>();
+    private double jaccScore;
     private String selectionType;
     private String control;
+
     
     // queries
     private static final String SINGLE_PROTEIN_QUERY = "singleProteinSearch";
     private static final String DOUBLE_PROTEIN_QUERY = "doubleProteinSearch";
 
-    @ManagedProperty(value="#{navigationBean}")
-    private NavigationBean navigationBean;
     
     @ManagedProperty(value="#{visualisationBean}")
     private VisualisationBean visualisationBean;
@@ -61,20 +63,28 @@ public class GraphDbManagedBean implements Serializable{
 		this.accession2 = accession2;
 	}
 
+	public List<String> getAccessions() {
+		return accessions;
+	}
+
+	public void setAccessions(List<String> accessions) {
+		this.accessions = accessions;
+	}
+
+	public double getJaccScore() {
+		return jaccScore;
+	}
+
+	public void setJaccScore(double jaccScore) {
+		this.jaccScore = jaccScore;
+	}
+
 	public String getSelectionType() {
 		return selectionType;
 	}
 
 	public void setSelectionType(String selectionType) {
 		this.selectionType = selectionType;
-	}
-
-	public NavigationBean getNavigationBean() {
-		return navigationBean;
-	}
-
-	public void setNavigationBean(NavigationBean navigationBean) {
-		this.navigationBean = navigationBean;
 	}
 
 	public Service getDbService() {
@@ -99,9 +109,12 @@ public class GraphDbManagedBean implements Serializable{
     }
 
 	public void load(){
-		
+		control = "";
 		FacesContext context = FacesContext.getCurrentInstance();
 		Map<String, String> requestParams = context.getExternalContext().getRequestParameterMap();
+		if(requestParams.containsKey("jaccard")){
+			jaccScore = Double.valueOf(requestParams.get("jaccard"));
+		}
 		if(requestParams.containsKey("accession")){
 			if(requestParams.get("accession")!=null && !requestParams.get("accession").equals("")){
 				accession1 = requestParams.get("accession").toUpperCase();
@@ -119,11 +132,27 @@ public class GraphDbManagedBean implements Serializable{
 				setSelectionType("double");
 				getProteinDTOs();
 			}
+		}else if(requestParams.containsKey("path")){
+			if(requestParams.get("path")!=null && !requestParams.get("path").equals("")){
+				proteinDTOS.clear();
+				String[] path = requestParams.get("path").split("\\*");
+				for(int i=0; i<path.length-1; i++){
+					proteinDTOS.addAll(dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, path[i], path[i+1], jaccScore));
+				}
+				visualisationBean.load(this);
+			}
+		}else if(requestParams.containsKey("accessions")){
+			if(requestParams.get("accessions")!=null && !requestParams.get("accessions").equals("")){
+				accessions = Arrays.asList(requestParams.get("accessions").toUpperCase().split(" "));
+				control= "single";
+				setSelectionType("multiple");
+				getProteinDTOs();
+			}
 		}
 	}
 	
 	private void controlRelation(){
-		control = dbService.controlRelation(accession1, accession2);
+		control = dbService.controlRelation(accession1, accession2, jaccScore);
 	}
 	
 	public void getProteinDTOs() {
@@ -134,17 +163,24 @@ public class GraphDbManagedBean implements Serializable{
 		} else if (selectionType.equals("double")) {
 			getDoubleProteinDTOs();
 			visualisationBean.load(this);
+		}else if (selectionType.equals("multiple")) {
+			getMultipleProteinDTOs();
+			visualisationBean.load(this);
 		}
 	}
     
     public void getSingleProteinDTOs(){
 
-        proteinDTOS = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY, accession1, accession2);
+        proteinDTOS = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY, accession1, accession2, jaccScore);
     }
     
     public void getDoubleProteinDTOs(){
 
-        proteinDTOS = dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, accession1, accession2);
+        proteinDTOS = dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, accession1, accession2, jaccScore);
+    }
+    
+    public void getMultipleProteinDTOs(){
+    	proteinDTOS = dbService.getProteinDTOListForMultipleProteins(SINGLE_PROTEIN_QUERY, accessions, jaccScore);
     }
    
     public void setSelectionType(){
@@ -155,4 +191,5 @@ public class GraphDbManagedBean implements Serializable{
     	TSVExporter tsvExporter = new TSVExporter();
     	tsvExporter.tsvExport(proteinDTOS);
     }
+    
 }

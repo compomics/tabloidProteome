@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.compomics.neo4j.model.nodes.Complex;
+import com.compomics.neo4j.model.nodes.Disease;
 import com.compomics.neo4j.model.nodes.Go;
 import com.compomics.neo4j.model.nodes.PathWay;
 import com.compomics.neo4j.model.nodes.Project;
@@ -34,22 +35,16 @@ public class ProteinDTO implements Serializable{
     private List<Go> bp;
     
     private List<Go> cc;
-
+    
+    private List<Disease> diseases;
+    
     private int distinctComplexCount;
 
     private int distinctPathCount;
     
     private int commonProjectSize;
-    
-    private String paralog;
-
-    private Double jaccSimScore;
-
-    private String interact;
-    
-    private String intact;
-    
-    private String bioGrid;
+   
+    private int diseaseCount;
 
     public ProteinDTO() {
     }
@@ -150,44 +145,21 @@ public class ProteinDTO implements Serializable{
 		this.commonProjectSize = commonProjectSize;
 	}
 
-	public String getParalog() {
-		return paralog;
+	public List<Disease> getDiseases() {
+		return diseases;
 	}
 
-	public Double getJaccSimScore() {
-		return jaccSimScore;
+	public int getDiseaseCount() {
+		return diseaseCount;
 	}
 
-	public String getInteract() {
-		return interact;
+	public void setDiseases(List<Disease> diseases) {
+		this.diseases = diseases;
 	}
 
-	public String getIntact() {
-		return intact;
+	public void setDiseaseCount(int diseaseCount) {
+		this.diseaseCount = diseaseCount;
 	}
 
-	public String getBioGrid() {
-		return bioGrid;
-	}
-
-	public void setParalog(String paralog) {
-		this.paralog = paralog;
-	}
-
-	public void setJaccSimScore(Double jaccSimScore) {
-		this.jaccSimScore = jaccSimScore;
-	}
-
-	public void setInteract(String interact) {
-		this.interact = interact;
-	}
-
-	public void setIntact(String intact) {
-		this.intact = intact;
-	}
-
-	public void setBioGrid(String bioGrid) {
-		this.bioGrid = bioGrid;
-	}
 
 }

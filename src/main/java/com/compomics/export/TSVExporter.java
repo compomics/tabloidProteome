@@ -13,6 +13,7 @@ import javax.faces.context.FacesContext;
 import org.apache.tomcat.util.http.fileupload.util.Streams;
 
 import com.compomics.neo4j.model.dataTransferObjects.ProteinDTO;
+import com.compomics.neo4j.model.nodes.Disease;
 import com.compomics.neo4j.model.nodes.Go;
 
 public class TSVExporter implements Serializable{
@@ -43,14 +44,15 @@ public class TSVExporter implements Serializable{
 	private final String NUM_MF = "Number of MFs";
 	private final String NUM_BP = "Number of BPs";
 	private final String NUM_CC = "Number of CCs";
+	private final String NUM_DISEASE = "Number of common diseases";
 	private final String PROJECTS = "Projects";
 	private final String PATHWAYS = "Pathways";
 	private final String COMPLEXES = "Complexes";
 	private final String MF = "GO MF";
 	private final String BP = "GO BP";
 	private final String CC= "GO CC";
+	private final String DISEASES = "Diseases";
 
-	
 	
 	public void tsvExport(List<ProteinDTO> proteinDTOS) {
 		this.proteinDTOS = proteinDTOS;
@@ -65,7 +67,8 @@ public class TSVExporter implements Serializable{
 			.append(PROJECTS).append(SEPARATOR).append(JACC_SIM_SCORE).append(SEPARATOR).append(INTACT).append(SEPARATOR).append(BIOGRID).append(SEPARATOR)
 			.append(NUM_PATHWAY).append(SEPARATOR).append(PATHWAYS).append(SEPARATOR).append(NUM_COMPLEX).append(SEPARATOR).append(COMPLEXES).append(SEPARATOR)
 			.append(PARALOG).append(SEPARATOR).append(NUM_BP).append(SEPARATOR).append(BP).append(SEPARATOR).append(NUM_MF).append(SEPARATOR).append(MF)
-			.append(SEPARATOR).append(NUM_CC).append(SEPARATOR).append(CC).append(END_OF_LINE);
+			.append(SEPARATOR).append(NUM_CC).append(SEPARATOR).append(CC)
+			.append(SEPARATOR).append(NUM_DISEASE).append(SEPARATOR).append(DISEASES).append(END_OF_LINE);
 		
 		proteinDTOS.forEach(proteinDTO -> {
 			
@@ -129,16 +132,28 @@ public class TSVExporter implements Serializable{
 				ccs.setLength(ccs.length() - 1);
 			}
 
+			// find diseases disGeNet Id
+			StringBuilder diseases = new StringBuilder();
+			for (Disease disease : proteinDTO.getDiseases()) {
+				diseases.append(disease.getDisgenetId()).append(ACCESSION_SEPARATOR);
+			}
+			if (diseases.length() > 0) {
+				diseases.setLength(diseases.length() - 1);
+			}
+			
 			tsvExport.append(proteinDTO.getProtein1().getUniprotAccession()).append(SEPARATOR).append(proteinDTO.getProtein2().getUniprotAccession()).append(SEPARATOR)
 			.append(proteinDTO.getProtein1().getProteinName()).append(SEPARATOR).append(proteinDTO.getProtein2().getProteinName()).append(SEPARATOR)
-			.append(proteinDTO.getProtein1().getGeneName()).append(SEPARATOR).append(proteinDTO.getProtein2().getGeneName()).append(SEPARATOR)
+			.append(proteinDTO.getProtein1().getGeneNames()).append(SEPARATOR).append(proteinDTO.getProtein2().getGeneNames()).append(SEPARATOR)
 			.append(proteinDTO.getCommonProjectSize()).append(SEPARATOR).append(projects.toString()).append(SEPARATOR)
-			.append(proteinDTO.getJaccSimScore()).append(SEPARATOR).append(proteinDTO.getIntact()).append(SEPARATOR).append(proteinDTO.getBioGrid()).append(SEPARATOR)
+			.append(proteinDTO.getAssociate().get(0).getJaccSimScore()).append(SEPARATOR).append(proteinDTO.getAssociate().get(0).getIntact())
+			.append(SEPARATOR).append(proteinDTO.getAssociate().get(0).getBioGrid()).append(SEPARATOR)
 			.append(proteinDTO.getDistinctPathCount()).append(SEPARATOR).append(pathways.toString()).append(SEPARATOR)
-			.append(proteinDTO.getDistinctComplexCount()).append(SEPARATOR).append(complexes.toString()).append(SEPARATOR).append(proteinDTO.getParalog()).append(SEPARATOR)
+			.append(proteinDTO.getDistinctComplexCount()).append(SEPARATOR).append(complexes.toString()).append(SEPARATOR)
+			.append(proteinDTO.getAssociate().get(0).getParalog()).append(SEPARATOR)
 			.append(bpSize).append(SEPARATOR).append(bps.toString()).append(SEPARATOR)
 			.append(mfSize).append(SEPARATOR).append(mfs.toString()).append(SEPARATOR)
-			.append(ccSize).append(SEPARATOR).append(ccs.toString()).append(END_OF_LINE);
+			.append(ccSize).append(SEPARATOR).append(ccs.toString()).append(SEPARATOR)
+			.append(proteinDTO.getDiseaseCount()).append(SEPARATOR).append(diseases.toString()).append(END_OF_LINE);
 		});
 	}
 	

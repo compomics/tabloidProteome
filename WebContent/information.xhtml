@@ -12,20 +12,20 @@
 <title>Tabloid Proteome</title>
 
 <!-- Bootstrap Core CSS -->
-<link href="resources/css/bootstrap.min.css" rel="stylesheet" />
+<link href="/tabloidproteome/resources/css/bootstrap.min.css" rel="stylesheet" />
 
 <!-- Custom CSS -->
-<link href="resources/css/bootstrap.css" rel="stylesheet" />
+<link href="/tabloidproteome/resources/css/bootstrap.css" rel="stylesheet" />
 
 <script src="http://code.jquery.com/jquery-2.1.4.min.js" type="text/javascript"></script>
 
 
-<link href="resources/css/custom.css" rel="stylesheet" />
-<link href="resources/css/sticky-footer.css" rel="stylesheet" />
-<link href="resources/css/bootstrap-table-expandable.css" rel="stylesheet" />
+<link href="/tabloidproteome/resources/css/custom.css" rel="stylesheet" />
+<link href="/tabloidproteome/resources/css/sticky-footer.css" rel="stylesheet" />
+<link href="/tabloidproteome/resources/css/bootstrap-table-expandable.css" rel="stylesheet" />
 
 <!-- Bootstrap Core JavaScript -->
-<script src="resources/js/bootstrap.min.js"></script>
+<script src="/tabloidproteome/resources/js/bootstrap.min.js"></script>
 
 <style>
 body {
@@ -85,7 +85,7 @@ $(document).ready(function()
           <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
             <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span>
           </button>
-          <a href="/tabloidproteome/search.xhtml" class="navbar-left"><img src="resources/images/logo.png" style="width: 70px; height: 54px;" /></a> <a class="navbar-brand"
+          <a href="/tabloidproteome/search.xhtml" class="navbar-left"><img src="/tabloidproteome/resources/images/logo.png" style="width: 70px; height: 54px;" /></a> <a class="navbar-brand"
             href="/tabloidproteome/search.xhtml">Tabloid Proteome</a>
         </div>
         <!-- Collect the nav links, forms, and other content for toggling -->
@@ -114,21 +114,38 @@ $(document).ready(function()
         <div class="col-sm-9">
           <div class="tab-content" id="tabs">
             <div class="tab-pane active" id="about">
-              <p>Tabloid Proteome is protein association network generated using publically available mass spectrometry based experiments in
+            	<div class="row">
+            		<div class="col-sm-8">
+            		<h3>Content</h3>
+            			<p>Tabloid Proteome is a database of protein association network generated using publically available mass spectrometry based experiments in
                 PRIDE. These associations includes; protein-protein interaction, complex formation, or different role in single pathway. 
                 All experiments in PRIDE are re-processed using re-spin pipeline to determine protein present in each experiment with their
                 peptide counts in each experiment. Peptide counts for each proteins are used to calculate the highly co-occurring proteins in various
                 mass spectrometry based experiments. Tabloid Proteome is the collection of these co-occurring protein pairs, together with their existing
-                biological relation in existing five knowledgebases. The biological relations included in Tabloid Proteome are pathways from Reactome,
-                protein-protein interaction from IntAct and BioGRID, protein complex from CORUM, and paralog information from Ensembl. Tabloid Proteome also include
-                mapping of proteins with GO biological process, molecular function and cellular component to suggest possible biological relation for
-                the proteins with no biological relation in existing five knowledgebases.</p>
+                biological relation in existing knowledgebases. The biological relations included in Tabloid Proteome are pathways from Reactome,
+                protein-protein interaction from IntAct and BioGRID, protein complex from CORUM, paralog information from Ensembl, and diseases from DisGeNet. 
+                Tabloid Proteome also include mapping of proteins with GO biological process, molecular function and cellular component to suggest possible 
+                biological relation for the proteins with no biological relation in existing knowledgebases.</p>
+            		</div>
+            		<div class="col-sm-4">
+            			<img border="0" src="/tabloidproteome/resources/images/associationFlow.gif" width="250px" height="450px" />
+            		</div>
+            	</div>
+              <div>
+            	<h3>Reference</h3>
+            	<p style="font-weight: bold; font-size: large">Unbiased Protein Association Study on the Public Human Proteome Reveals Biological Connections between Co-Occurring Protein Pairs	</p>
+            	<p>Surya Gupta, Kenneth Verheggen, Jan Tavernier, and Lennart Martens</p>
+            	<p>Journal of Proteome Research Article ASAP</p>
+            	<p>DOI: 10.1021/acs.jproteome.6b01066</p>
+            	<p>PMID: <a target="_blank" href="https://www.ncbi.nlm.nih.gov/pubmed/?term=28480704">28480704</a></p>
             </div>
+            </div>
+            
             <div class="tab-pane" id="version">
-              <p>Tabloid Proteome version 1.0</p>
+              <p>Tabloid Proteome version 1.1 01 June 2017</p>
             </div>
             <div class="tab-pane" id="licence">
-              <p><img border="0" src="resources/images/licence.png" width="88px" height="31px"/> This work is licenced under the Creative Commons Attribution-ShareAlike 4.0 License.</p>
+              <p><img border="0" src="/tabloidproteome/resources/images/licence.png" width="88px" height="31px"/> This work is licenced under the Creative Commons Attribution-ShareAlike 4.0 License.</p>
             </div>
           </div>
         </div>
@@ -139,31 +156,33 @@ $(document).ready(function()
     <div id="footer">
       <div class="container">
         <div class="row">
-          <div class="col-sm-6">
+          <div class="col-sm-9">
             <p class="text-muted credit">SUPPORTED BY</p>
-            <p class="text-muted credit"><a href="https://compomics.com" > <img border="0"
-            src="resources/images/compOmics_logo.png" width="93px" height="48px" /></a>&#160;&#160;&#160;&#160;&#160;&#160;
-            <a href="http://www.crl-mappit.be/" style="padding-left: 15px"> <img border="0"
-            src="resources/images/cytokineLogo.png" width="106px" height="40px" /></a></p>
-            <p class="text-muted credit"><a href="http://mbc.vib-ugent.be"> <img border="0"
-            src="resources/images/MBCLogo.png" width="147px" height="53px"/></a>
-            <a href="http://www.vib.be" style="padding-left: 15px;"> <img border="0" 
-            src="resources/images/VIBLogo.png" width="88px" height="53px"/></a></p>
-            <p class="text-muted credit"><a href="http://www.ugent.be/en"> <img border="0" 
-            src="resources/images/ugent-logo.png" width="90px" height="70px" /></a></p>
+            <p class="text-muted credit"><a target="_blank" href="https://compomics.com" > <img border="0"
+            src="/tabloidproteome/resources/images/compOmics_logo.png" width="90px" height="46px" /></a>&#160;
+            <a target="_blank" href="http://www.crl-mappit.be/" style="padding-left: 15px"> <img border="0"
+            src="/tabloidproteome/resources/images/cytokineLogo.png" width="100px" height="38px" /></a>&#160;&#160;
+            <a target="_blank" href="http://mbc.vib-ugent.be"> <img border="0"
+            src="/tabloidproteome/resources/images/MBCLogo.png" width="140px" height="50px"/></a>&#160;
+            <a target="_blank" href="http://www.vib.be" style="padding-left: 15px;"> <img border="0" 
+            src="/tabloidproteome/resources/images/VIBLogo.png" width="84px" height="50px"/></a>&#160;
+            <a target="_blank" href="http://www.ugent.be/en"> <img border="0" 
+            src="/tabloidproteome/resources/images/ugent-logo.png" width="86px" height="67px" /></a>
+            <a target="_blank" href="https://www.elixir-belgium.org/"> <img border="0"
+								src="/tabloidproteome/resources/images/elixir.png" width="79px" height="57px" /></a></p>
           </div>
-          <div class="col-sm-2">
+          <div class="col-sm-1">
             <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/information.xhtml" class="text-muted">Information</a></p>
             <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/information.xhtml#about" class="text-sub">About</a></p>
             <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/information.xhtml#version" class="text-sub">Version</a></p>
             <p class="credit"><a href="/tabloidproteome/information.xhtml#licence" class="text-sub">Licence</a></p>
           </div>
-          <div class="col-sm-2">
+          <div class="col-sm-1">
             <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml" class="text-muted">Data</a></p>
             <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml#statistics" class="text-sub">Statistics</a></p>
-            <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml#dataSource" class="text-sub">Data Source</a></p>
+            <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml#resources" class="text-sub">Credits &#38; Resources</a></p>
           </div>
-          <div class="col-sm-2">
+          <div class="col-sm-1">
             <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml" class="text-muted">Help</a></p>
             <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml#documentation" class="text-sub">Documentation</a></p>
             <p class="credit"><a href="/tabloidproteome/help.xhtml#contact" class="text-sub">Contact</a></p>

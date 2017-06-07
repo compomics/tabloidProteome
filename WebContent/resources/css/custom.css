@@ -53,12 +53,26 @@
     overflow-y: auto;
 } 
  #cy {
-	height: 500px;
+	height: 200px;
 	width: 100%;
 	overflow: hidden;
-	top: 200px;
 
 }
+
+@media (min-height:  450px) { #cy { height: 250px; width: 100%; overflow: hidden;} }
+@media (min-height:  500px) { #cy { height: 300px; width: 100%; overflow: hidden;} }
+@media (min-height:  550px) { #cy { height: 350px; width: 100%; overflow: hidden;} }
+@media (min-height:  600px) { #cy { height: 400px; width: 100%; overflow: hidden;} }
+@media (min-height:  650px) { #cy { height: 500px; width: 100%; overflow: hidden;} }
+@media (min-height:  700px) { #cy { height: 500px; width: 100%; overflow: hidden;} }
+@media (min-height:  750px) { #cy { height: 500px; width: 100%; overflow: hidden;} }
+@media (min-height:  800px) { #cy { height: 550px; width: 100%; overflow: hidden;} }
+@media (min-height:  850px) { #cy { height: 550px; width: 100%; overflow: hidden;} }
+@media (min-height:  900px) { #cy { height: 600px; width: 100%; overflow: hidden;} }
+@media (min-height:  950px) { #cy { height: 650px; width: 100%; overflow: hidden;} }
+@media (min-height: 1000px) { #cy { height: 700px; width: 100%; overflow: hidden;} }
+@media (min-height: 1050px) { #cy { height: 750px; width: 100%; overflow: hidden;} }
+@media (min-height: 1100px) { #cy { height: 800px; width: 100%; overflow: hidden;} }
 .relations {
 	top:75%;
 	width: 100%;
@@ -89,4 +103,11 @@
     	left: 100%;
     	z-index: 2;
     }
+}
+td.details-control {
+    background: url('../resources/images/red.png') no-repeat center center;
+    cursor: pointer;
+}
+tr.shown td.details-control {
+    background: url('../resources/images/blue.png') no-repeat center center;
 }
