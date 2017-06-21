@@ -17,18 +17,17 @@ import org.neo4j.driver.v1.Session;
 public class Connection implements Serializable{
 
 	private static final long serialVersionUID = 1029809887588268675L;
-	private Session session;
     private Properties prop = new Properties();
     private InputStream input = null;
+    private Driver driver;
 
 
     
-    public Session openConnection() {
+    public void openConnection() {
         try {
             input = getClass().getClassLoader().getResourceAsStream("config.properties");
             prop.load(input);
-            Driver driver = GraphDatabase.driver(prop.getProperty("url"), AuthTokens.basic(prop.getProperty("user"), prop.getProperty("password")));
-            session = driver.session();
+            driver = GraphDatabase.driver(prop.getProperty("url"), AuthTokens.basic(prop.getProperty("user"), prop.getProperty("password"))); 
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -40,11 +39,10 @@ public class Connection implements Serializable{
                 }
             }
         }
-        return session;
     }
     
-    public void closeConnection(){
-    	session.close();
+    public Session startSession(){
+    	return driver.session();
     }
 
 }

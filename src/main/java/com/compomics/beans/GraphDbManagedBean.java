@@ -109,6 +109,7 @@ public class GraphDbManagedBean implements Serializable{
     }
 
 	public void load(){
+		dbService.startSession();
 		control = "";
 		FacesContext context = FacesContext.getCurrentInstance();
 		Map<String, String> requestParams = context.getExternalContext().getRequestParameterMap();
@@ -149,13 +150,14 @@ public class GraphDbManagedBean implements Serializable{
 				getProteinDTOs();
 			}
 		}
+		dbService.closeSession();
 	}
 	
 	private void controlRelation(){
 		control = dbService.controlRelation(accession1, accession2, jaccScore);
 	}
 	
-	public void getProteinDTOs() {
+	private void getProteinDTOs() {
 		proteinDTOS.clear();
 		if (selectionType.equals("single")) {
 			getSingleProteinDTOs();

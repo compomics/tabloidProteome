@@ -8,7 +8,7 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1" />
   <meta name="description" content="" />
   <meta name="author" content="" />
 
@@ -36,7 +36,8 @@
 	 /* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of navigation changes. */
     }   
   </style>
-  <script src="http://cytoscape.github.io/cytoscape.js/api/cytoscape.js-latest/cytoscape.min.js"></script>
+  <script src="/tabloidproteome/resources/js/cytoscape.js"></script>
+  
       <script>
       $(function(){
     	var edges =  document.getElementById('testJson').value.slice(1, document.getElementById('testJson').value.length-1).split('*');
@@ -44,14 +45,13 @@
         var height = offsets.height;
         var width = offsets.width;
         var nodes = document.getElementById('nodes').value.slice(1, document.getElementById('nodes').value.length-1).split(',');
-		var newObj2 = [];
-          var newObj = [];
-          var count;
-          if(nodes.length == 2){
+        var newObj = [];
+        var count;
+        if(nodes.length == 2){
             for(count = 0; count &lt; nodes.length; count++){
               newObj.push({ group: "nodes", data: { id: nodes[count].trim() }, position: { x: width/3 +( width/3)*count , y: height/2 } });
             }
-          }
+        }
         if(nodes.length &gt; 2){
           if(nodes.length &lt; 5){
         	  var angle = 2 * Math.PI /(nodes.length);
@@ -70,8 +70,6 @@
         for(count=0; count &lt; edges.length; count++){
             newObj.push(JSON.parse(edges[count]));
         }
-
-       
         var cy = cytoscape({
           container: document.getElementById('cy'),
           boxSelectionEnabled: false,
@@ -92,7 +90,7 @@
                 })  
               .selector('edge')
               .css({
-                  'width': 2,
+                  'width':'data(width)',
                   'curve-style': 'bezier',
                   'line-color': 'data(faveColor)',
                   'color' : 'black',
@@ -111,12 +109,8 @@
               padding: 10
           },
           userZoomingEnabled: false,
-          
-          
-          
         }); 
         cy.add(newObj);	
- 
         cy.on('tap', 'node', function (evt) {
 
             passNodeToJSFManagedBean ([ {
@@ -640,43 +634,51 @@
     </div>
     <!-- /.container -->
 
-   <div id="footer">
-      <div class="container">
-        <div class="row">
-          <div class="col-sm-9">
-            <p class="text-muted credit">SUPPORTED BY</p>
-            <p class="text-muted credit"><a target="_blank" href="https://compomics.com" > <img border="0"
-            src="/tabloidproteome/resources/images/compOmics_logo.png" width="90px" height="46px" /></a>&#160;
-            <a target="_blank" href="http://www.crl-mappit.be/" style="padding-left: 15px"> <img border="0"
-            src="/tabloidproteome/resources/images/cytokineLogo.png" width="100px" height="38px" /></a>&#160;&#160;
-            <a target="_blank" href="http://mbc.vib-ugent.be"> <img border="0"
-            src="/tabloidproteome/resources/images/MBCLogo.png" width="140px" height="50px"/></a>&#160;
-            <a target="_blank" href="http://www.vib.be" style="padding-left: 15px;"> <img border="0" 
-            src="/tabloidproteome/resources/images/VIBLogo.png" width="84px" height="50px"/></a>&#160;
-            <a target="_blank" href="http://www.ugent.be/en"> <img border="0" 
-            src="/tabloidproteome/resources/images/ugent-logo.png" width="86px" height="67px" /></a>
-            <a target="_blank" href="https://www.elixir-belgium.org/"> <img border="0"
-								src="/tabloidproteome/resources/images/elixir.png" width="79px" height="57px" /></a></p>
-          </div>
-          <div class="col-sm-1">
-            <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/information.xhtml" class="text-muted">Information</a></p>
-            <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/information.xhtml#about" class="text-sub">About</a></p>
-            <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/information.xhtml#version" class="text-sub">Version</a></p>
-            <p class="credit"><a href="/tabloidproteome/information.xhtml#licence" class="text-sub">Licence</a></p>
-          </div>
-          <div class="col-sm-1">
-            <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml" class="text-muted">Data</a></p>
-            <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml#statistics" class="text-sub">Statistics</a></p>
-            <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml#resources" class="text-sub">Credits &#38; Resources</a></p>
-          </div>
-          <div class="col-sm-1">
-            <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml" class="text-muted">Help</a></p>
-            <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml#documentation" class="text-sub">Documentation</a></p>
-            <p class="credit"><a href="/tabloidproteome/help.xhtml#contact" class="text-sub">Contact</a></p>
+        <div id="footer">
+          <div class="container">
+            <div class="row">
+              <div class="col-sm-9">
+                <p class="text-muted credit">SUPPORTED BY</p>
+                <p class="text-muted credit">
+                  <a target="_blank" href="https://compomics.com" > 
+                    <img border="0" src="/tabloidproteome/resources/images/compOmics_logo.png" width="90px" height="46px" />
+                   </a>&#160;
+                  <a target="_blank" href="http://www.crl-mappit.be/" style="padding-left: 15px"> 
+                    <img border="0" src="/tabloidproteome/resources/images/cytokineLogo.png" width="100px" height="38px" />
+                  </a>&#160;&#160;
+                  <a target="_blank" href="http://www.vib.be" style="padding-left: 15px;"> 
+                    <img border="0" src="/tabloidproteome/resources/images/VIBLogo.png" width="84px" height="50px"/>
+                  </a>&#160;
+                  <a target="_blank" href="http://www.ugent.be/en"> 
+                    <img border="0" src="/tabloidproteome/resources/images/ugent-logo.png" width="86px" height="67px" />
+                  </a>
+                  <a target="_blank" href="https://www.elixir-belgium.org/"> 
+                    <img border="0" src="/tabloidproteome/resources/images/elixir.png" width="79px" height="57px" />
+                  </a>
+                  <a target="_blank" href="https://erc.europa.eu/"> 
+                    <img border="0" src="/tabloidproteome/resources/images/erc.png" width="79px" height="79px" />
+                  </a>
+               </p>
+            </div>
+            <div class="col-sm-1">
+              <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/information.xhtml" class="text-muted">Information</a></p>
+              <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/information.xhtml#about" class="text-sub">About</a></p>
+              <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/information.xhtml#version" class="text-sub">Version</a></p>
+              <p class="credit"><a href="/tabloidproteome/information.xhtml#licence" class="text-sub">Licence</a></p>
+            </div>
+            <div class="col-sm-1">
+              <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml" class="text-muted">Data</a></p>
+              <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml#statistics" class="text-sub">Statistics</a></p>
+              <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml#resources" class="text-sub">Credits &#38; Resources</a></p>
+            </div>
+            <div class="col-sm-1">
+              <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml" class="text-muted">Help</a></p>
+              <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml#documentation" class="text-sub">Documentation</a></p>
+              <p class="credit"><a href="/tabloidproteome/help.xhtml#contact" class="text-sub">Contact</a></p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
 
  </div>

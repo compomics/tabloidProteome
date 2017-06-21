@@ -138,7 +138,7 @@ public class VisualisationBean implements Serializable{
 		visible = false;
 		graphDbManagedBean = bean;
 		nodes = new ArrayList<>();
-
+		graphType = "proteinView";
 		proteinDTOS = graphDbManagedBean.getProteinDTOS();
 		controlGeneNames();
 		switchGraph();
@@ -179,34 +179,34 @@ public class VisualisationBean implements Serializable{
 				if(proteinDTO.getAssociate().get(0).getJaccSimScore() >= 0.4){
 					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getUniprotAccession()).append("\",\"target\":\"")
 					.append(proteinDTO.getProtein2().getUniprotAccession()).append("\",\"label\":\"").append(proteinDTO.getAssociate().get(0).getJaccSimScore().toString())
-					.append("\",\"faveColor\":\"black\",\"faveStyle\":\"solid\"}}*");
+					.append("\",\"width\":\"").append(proteinDTO.getAssociate().get(0).getJaccSimScore()*10).append("\",\"faveColor\":\"black\",\"faveStyle\":\"solid\"}}*");
 				}else{
 					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getUniprotAccession()).append("\",\"target\":\"")
 					.append(proteinDTO.getProtein2().getUniprotAccession()).append("\",\"label\":\"").append(proteinDTO.getAssociate().get(0).getJaccSimScore().toString())
-					.append("\",\"faveColor\":\"gray\",\"faveStyle\":\"solid\"}}*");
+					.append("\",\"width\":\"").append(proteinDTO.getAssociate().get(0).getJaccSimScore()*10).append("\",\"faveColor\":\"gray\",\"faveStyle\":\"solid\"}}*");
 				}
 				
 				if(proteinDTO.getAssociate().get(0).getInteract().equals("yes")){
 					counter++;
 					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getUniprotAccession()).append("\",\"target\":\"")
-					.append(proteinDTO.getProtein2().getUniprotAccession()).append("\",\"label\":\"Interact\",\"faveColor\":\"purple\",\"faveStyle\":\"dotted\"}}*");
+					.append(proteinDTO.getProtein2().getUniprotAccession()).append("\",\"width\":\"2\",\"label\":\"Interact\",\"faveColor\":\"purple\",\"faveStyle\":\"dotted\"}}*");
 				}
 				if(proteinDTO.getAssociate().get(0).getParalog().equals("yes")){
 					counter++;
 					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getUniprotAccession()).append("\",\"target\":\"")
-					.append(proteinDTO.getProtein2().getUniprotAccession()).append("\",\"label\":\"Paralog\",\"faveColor\":\"blue\",\"faveStyle\":\"dotted\"}}*");
+					.append(proteinDTO.getProtein2().getUniprotAccession()).append("\",\"width\":\"2\",\"label\":\"Paralog\",\"faveColor\":\"blue\",\"faveStyle\":\"dotted\"}}*");
 				}
 				if(proteinDTO.getPathWays().size()>0){
 					counter++;
 					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getUniprotAccession()).append("\",\"target\":\"")
 					.append(proteinDTO.getProtein2().getUniprotAccession()).append("\",\"label\":\"").append(proteinDTO.getPathWays().size())
-					.append(" Pathways\",\"faveColor\":\"green\",\"faveStyle\":\"dotted\"}}*");
+					.append(" Pathways\",\"width\":\"2\",\"faveColor\":\"green\",\"faveStyle\":\"dotted\"}}*");
 				}
 				if(proteinDTO.getDiseaseCount()>0){
 					counter++;
 					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getUniprotAccession()).append("\",\"target\":\"")
 					.append(proteinDTO.getProtein2().getUniprotAccession()).append("\",\"label\":\"").append(proteinDTO.getDiseaseCount())
-					.append(" Pathways\",\"faveColor\":\"orange\",\"faveStyle\":\"dotted\"}}*");
+					.append(" Pathways\",\"width\":\"2\",\"faveColor\":\"orange\",\"faveStyle\":\"dotted\"}}*");
 				}
 				counter++;
 			}
@@ -241,34 +241,34 @@ public class VisualisationBean implements Serializable{
 				if(proteinDTO.getAssociate().get(0).getJaccSimScore() >= 0.4){
 					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getGeneNames().get(0)).append("\",\"target\":\"")
 					.append(proteinDTO.getProtein2().getGeneNames().get(0)).append("\",\"label\":\"").append(proteinDTO.getAssociate().get(0).getJaccSimScore().toString())
-					.append("\",\"faveColor\":\"black\",\"faveStyle\":\"solid\"}}*");
+					.append("\",\"width\":\"").append(proteinDTO.getAssociate().get(0).getJaccSimScore()*10).append("\",\"faveColor\":\"black\",\"faveStyle\":\"solid\"}}*");
 				}else{
 					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getGeneNames().get(0)).append("\",\"target\":\"")
 					.append(proteinDTO.getProtein2().getGeneNames().get(0)).append("\",\"label\":\"").append(proteinDTO.getAssociate().get(0).getJaccSimScore().toString())
-					.append("\",\"faveColor\":\"gray\",\"faveStyle\":\"solid\"}}*");
+					.append("\",\"width\":\"").append(proteinDTO.getAssociate().get(0).getJaccSimScore()*10).append("\",\"faveColor\":\"gray\",\"faveStyle\":\"solid\"}}*");
 				}
 				
 				if(proteinDTO.getAssociate().get(0).getInteract().equals("yes")){
 					counter++;
 					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getGeneNames().get(0)).append("\",\"target\":\"")
-					.append(proteinDTO.getProtein2().getGeneNames().get(0)).append("\",\"label\":\"Interact\",\"faveColor\":\"purple\",\"faveStyle\":\"dotted\"}}*");
+					.append(proteinDTO.getProtein2().getGeneNames().get(0)).append("\",\"width\":\"2\",\"label\":\"Interact\",\"faveColor\":\"purple\",\"faveStyle\":\"dotted\"}}*");
 				}
 				if(proteinDTO.getAssociate().get(0).getParalog().equals("yes")){
 					counter++;
 					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getGeneNames().get(0)).append("\",\"target\":\"")
-					.append(proteinDTO.getProtein2().getGeneNames().get(0)).append("\",\"label\":\"Paralog\",\"faveColor\":\"blue\",\"faveStyle\":\"dotted\"}}*");
+					.append(proteinDTO.getProtein2().getGeneNames().get(0)).append("\",\"width\":\"2\",\"label\":\"Paralog\",\"faveColor\":\"blue\",\"faveStyle\":\"dotted\"}}*");
 				}
 				if(proteinDTO.getPathWays().size()>0){
 					counter++;
 					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getGeneNames().get(0)).append("\",\"target\":\"")
 					.append(proteinDTO.getProtein2().getGeneNames().get(0)).append("\",\"label\":\"").append(proteinDTO.getPathWays().size())
-					.append(" Pathways\",\"faveColor\":\"green\",\"faveStyle\":\"dotted\"}}*");
+					.append(" Pathways\",\"width\":\"2\",\"faveColor\":\"green\",\"faveStyle\":\"dotted\"}}*");
 				}
 				if(proteinDTO.getDiseaseCount()>0){
 					counter++;
 					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getGeneNames().get(0)).append("\",\"target\":\"")
 					.append(proteinDTO.getProtein2().getGeneNames().get(0)).append("\",\"label\":\"").append(proteinDTO.getDiseaseCount())
-					.append(" Pathways\",\"faveColor\":\"orange\",\"faveStyle\":\"dotted\"}}*");
+					.append(" Pathways\",\"width\":\"2\",\"faveColor\":\"orange\",\"faveStyle\":\"dotted\"}}*");
 				}
 				counter++;
 			}
@@ -291,6 +291,10 @@ public class VisualisationBean implements Serializable{
 			if (proteinDTO.getProtein1().getUniprotAccession().equals(selectedNode.trim())) {
 				selectedProtein = proteinDTO.getProtein1();
 			} else if (proteinDTO.getProtein2().getUniprotAccession().equals(selectedNode)) {
+				selectedProtein = proteinDTO.getProtein2();
+			} else if (proteinDTO.getProtein1().getGeneNames().size()>0 && proteinDTO.getProtein1().getGeneNames().get(0).equals(selectedNode)){
+				selectedProtein = proteinDTO.getProtein1();
+			} else if (proteinDTO.getProtein2().getGeneNames().size()>0 && proteinDTO.getProtein2().getGeneNames().get(0).equals(selectedNode)){
 				selectedProtein = proteinDTO.getProtein2();
 			}
 		}

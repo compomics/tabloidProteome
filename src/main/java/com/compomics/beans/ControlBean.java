@@ -84,6 +84,7 @@ public class ControlBean implements Serializable{
     }
 	
 	public void findProteins(){
+		dbService.startSession();
 		gene1 =  FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("gene").trim().split(",")[0].toUpperCase(); 
 		if(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("gene").trim().split(",").length == 2){
 			gene2 = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("gene").trim().split(",")[1].toUpperCase(); 
@@ -96,23 +97,28 @@ public class ControlBean implements Serializable{
     			java.util.Collections.swap(proteinDTOs, 0, i);
     		}
     	}
+    	dbService.closeSession();
     }
 	
 	public void findPathwayDTOs(){
+		dbService.startSession();
 		String pathway = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("pathway").trim().toUpperCase(); 
 		if(pathway.startsWith("R-HSA")){
 			pathwayDTOs = dbService.findPathwayDTOs(pathway);
 		}else{
 			pathwayDTOs = dbService.findPathwayDTOs(".*"+pathway+".*");
 		}
+		dbService.closeSession();
 	}
 	
 	public void findDiseaseDTOs(){
+		dbService.startSession();
 		String disease = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("disease").trim().toUpperCase(); 
 		if(disease.startsWith("C") && disease.length()==8){
 			diseaseDTOs = dbService.findDiseaseDTOs(disease);
 		}else{
 			diseaseDTOs = dbService.findDiseaseDTOs(".*"+disease+".*");
 		}
+		dbService.closeSession();
 	}
 }

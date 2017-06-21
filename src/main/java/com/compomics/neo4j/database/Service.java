@@ -59,7 +59,15 @@ public class Service implements Serializable{
 
 	public Service() {
 		connection = new Connection();
-		session = connection.openConnection();
+		connection.openConnection();
+	}
+	
+	public void startSession(){
+		session = connection.startSession();
+	}
+	
+	public void closeSession(){
+		session.close();
 	}
 	/**
 	 * check if there is any relation between two proteins
