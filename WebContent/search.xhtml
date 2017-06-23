@@ -197,12 +197,13 @@ body {
     }
     
     function clickButton3() {
-        document.getElementById('btnpathway').click();
+    	$('#progressModal').modal('hide');
+    	window.location = '/tabloidproteome/detailedSearch.xhtml?pathway';
         return false;
     }
     function clickButton4() {
-    		$('#progressModal').modal('hide')
-        document.getElementById('btndisease').click();
+    	$('#progressModal').modal('hide');
+    	window.location = '/tabloidproteome/detailedSearch.xhtml?disease';
         return false;
     }
 
@@ -548,7 +549,7 @@ body {
 										</div>
 										<br />
 										<div align="center">
-											<button type="button" class="btn btn-primary" id="btnPathwaySearch"
+											<button type="button" class="btn btn-primary" id="btnPathwaySearch"  data-toggle="modal" data-target="#progressModal"
 												style="width: 104px;" onclick="searchPathway()">Search</button>
 										</div>
 									</form>
@@ -583,7 +584,7 @@ body {
 										</div>
 										<br />
 										<div align="center">
-											<button type="button" class="btn btn-primary"  data-toggle="modal"  id="btnDiseaseSearch"
+											<button type="button" class="btn btn-primary"  data-toggle="modal" data-target="#progressModal" id="btnDiseaseSearch"
 												style="width: 104px;" onclick="searchDisease()">Search</button>
 										</div>
 									</form>
