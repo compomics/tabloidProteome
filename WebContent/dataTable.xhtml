@@ -98,6 +98,8 @@ body {
           </button>
         </h:commandLink>
       </h:form>
+      <p style="font-weight: bold;">Total number of protein pairs found: #{graphDbManagedBean.proteinDTOS.size()}</p>
+      <p style="color:grey; font-style: italic;">Please click on the protein pair of interest</p>
       <h3 style="text-align: center;">Protein Association Data Table</h3>
       <table class="table table-hover table-expandable table-sticky-header table-custom" id="mainTable">
         <thead>

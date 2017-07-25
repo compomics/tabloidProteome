@@ -56,7 +56,11 @@
 			<artifactId>jersey-servlet</artifactId>
 			<version>1.19.3</version>
 		</dependency>
-
+		<dependency>
+    		<groupId>com.sun.jersey.contribs</groupId>
+    		<artifactId>jersey-multipart</artifactId>
+    		<version>1.8</version>
+		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.jaxrs</groupId>
 			<artifactId>jackson-jaxrs-json-provider</artifactId>
@@ -71,6 +75,11 @@
 			<groupId>org.webjars</groupId>
 			<artifactId>visjs</artifactId>
 			<version>3.10.0</version>
+		</dependency>
+		<dependency>
+  			<groupId>io.swagger</groupId>
+  			<artifactId>swagger-jersey-jaxrs</artifactId>
+  			<version>1.5.0</version>
 		</dependency>
 	</dependencies>
 	<repositories>

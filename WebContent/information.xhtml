@@ -39,7 +39,8 @@ $(document).ready(function()
 		 {  
 		 if(location.hash) 
 		  {
-		     $('a[href=' + location.hash + ']').tab('show');         
+		     $('a[href=' + location.hash + ']').tab('show');  
+		     scrollTo(0,0);
 		  }
 
 		$('a[data-toggle="tab"]').on('shown.bs.tab', function(e) 
@@ -51,15 +52,16 @@ $(document).ready(function()
 		$(document.body).on("click", "a[data-toggle]", function(event) 
 		  {
 		    location.hash = this.getAttribute("href");
+		    scrollTo(0,0);   
 		  });
 
 		$(window).on('popstate', function() 
 		{
 		  var anchor = location.hash;
 		  $('a[href=' + anchor + ']').tab('show');
+		  scrollTo(0,0);   
 
 		});   
-
 });
 
 </script>
@@ -73,6 +75,7 @@ $(document).ready(function()
   ga('send', 'pageview');
 
 </script>
+
 </head>
 
 <body>
@@ -114,18 +117,28 @@ $(document).ready(function()
         <div class="col-sm-9">
           <div class="tab-content" id="tabs">
             <div class="tab-pane active" id="about">
-            	<div class="row">
-            		<div class="col-sm-8">
-            		<h3>Content</h3>
-            			<p>Tabloid Proteome is a database of protein association network generated using publically available mass spectrometry based experiments in
-                PRIDE. These associations includes; protein-protein interaction, complex formation, or different role in single pathway. 
-                All experiments in PRIDE are re-processed using re-spin pipeline to determine protein present in each experiment with their
-                peptide counts in each experiment. Peptide counts for each proteins are used to calculate the highly co-occurring proteins in various
-                mass spectrometry based experiments. Tabloid Proteome is the collection of these co-occurring protein pairs, together with their existing
-                biological relation in existing knowledgebases. The biological relations included in Tabloid Proteome are pathways from Reactome,
-                protein-protein interaction from IntAct and BioGRID, protein complex from CORUM, paralog information from Ensembl, and diseases from DisGeNet. 
-                Tabloid Proteome also include mapping of proteins with GO biological process, molecular function and cellular component to suggest possible 
-                biological relation for the proteins with no biological relation in existing knowledgebases.</p>
+            	<div class="row" style="margin: 0">
+            		<div class="col-sm-8" style="margin: 0">
+            		<h3 style="margin-top: 0">Content</h3>
+            			<p>Because most proteins do not work alone, but rather associate with other proteins to perform their functions, 
+                  it is important to know about these associations. It does not help that these associations can take different forms, 
+                  such as physical contact in protein-protein interactions, participation in complex formation, or as links in the same signalling 
+                  or metabolic pathway. To elucidate as many such protein associations as possible, without being restricted to binary interactions, 
+                  we therefore proposed a novel approach to detect protein association based on the re-processing of large-scale, public mass spectrometry 
+                  based proteomics data. This approach is based on inferring protein association based on the co-occurrence of proteins across many different 
+                  proteomics experiments.</p>
+                  <p>Concretely, we reprocess data from the <a target="_blank" href="https://www.ebi.ac.uk/pride/archive/">PRIDE repository</a> 
+                  using our in-house ReSpin pipeline (which is in turn built from our <a target="_blank" href="https://github.com/compomics/pride-asa-pipeline" >pride-asap</a> 
+                  , <a target="_blank" href="https://github.com/compomics/searchgui">SearchGUI</a> and <a target="_blank" href="https://github.com/compomics/peptide-shaker/" >PeptideShaker</a> tools) 
+                  to identify all proteins in each experiment. We then use the peptide counts 
+                  for each protein in each experiment to determine highly co-occurring proteins across various mass spectrometry based experiments. 
+                  See the reference below for details on the underlying method.</p>
+                  <p>The online Tabloid Proteome is the collection of these co-occurring protein pairs, together with their existing biological relation in 
+                  existing knowledgebases. In addition to the protein associations we derived, pathway links from Reactome, protein-protein interactions 
+                  from IntAct and BioGRID, protein complexes from CORUM, and paralog information from Ensembl are also superimposed. Functional annotation 
+                  is provided by disease information from DisGeNET, and Gene Ontology annotations.</p>
+
+                  <p>You can search that online Tabloid Proteome in a variety of intuitive ways; just have a look at <a target="_blank" href="/tabloidproteome/search.xhtml">home page</a>!</p>
             		</div>
             		<div class="col-sm-4">
             			<img border="0" src="/tabloidproteome/resources/images/associationFlow.gif" width="250px" height="450px" />
@@ -133,9 +146,9 @@ $(document).ready(function()
             	</div>
               <div>
             	<h3>Reference</h3>
-            	<p style="font-weight: bold; font-size: large">Unbiased Protein Association Study on the Public Human Proteome Reveals Biological Connections between Co-Occurring Protein Pairs	</p>
+            	<p style="font-weight: bold; font-size: large"><a target="_blank" href="http://pubs.acs.org/doi/full/10.1021/acs.jproteome.6b01066">Unbiased Protein Association Study on the Public Human Proteome Reveals Biological Connections between Co-Occurring Protein Pairs</a></p>
             	<p>Surya Gupta, Kenneth Verheggen, Jan Tavernier, and Lennart Martens</p>
-            	<p>Journal of Proteome Research Article ASAP</p>
+            	<p>Journal of Proteome Research 2017 16 (6), 2204-2212</p>
             	<p>DOI: 10.1021/acs.jproteome.6b01066</p>
             	<p>PMID: <a target="_blank" href="https://www.ncbi.nlm.nih.gov/pubmed/?term=28480704">28480704</a></p>
             </div>

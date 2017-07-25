@@ -97,21 +97,24 @@ body {
     <div class="container" id="content">
     <div id="pathwayRegion">
       <h1></h1>
-      <p>Please click on the pathway of interest to find relevant proteins, and search the relavant protein pairs</p>
+      <p style="font-weight: bold;">Total number of pathways found: #{controlBean.pathwayDTOs.size()}</p>
+      <p style="color:grey; font-style: italic;">Please click on the pathway of interest to find relevant protein pairs.</p>
       <table class="table table-hover table-expandable table-sticky-header table-custom">
         <thead>
           <tr>
             <th>Pathway Name</th>
             <th>Reactome Accession</th>
+            <th>Associated pair count</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
           <ui:repeat var="pathway" value="#{controlBean.pathwayDTOs}">
-            <tr data-target="'#' + #{pathway.pathWay.reactomeAccession}">
+            <tr data-target="'#' + #{pathway.pathWay.reactomeAccession}"  style="color:purple;">
 
               <td>#{pathway.pathWay.pathwayName}</td>
               <td>#{pathway.pathWay.reactomeAccession}</td>
+              <td>#{pathway.proteinDTOs.size()}</td>
               <td><span class="pull-right clickable"><i class="glyphicon glyphicon-chevron-down"></i></span></td>
             </tr>
             <tr id="#{pathway.pathWay.reactomeAccession}" class="collapse">
@@ -131,13 +134,13 @@ body {
                   <div class="inner_table">
                     <table>
                       <ui:repeat var="proteinDTO" value="#{pathway.proteinDTOs}">
-                        <tr>
+                        <tr >
                           <td style="text-align: center; width: 3%"><a
                             href="/tabloidproteome/dataTable.xhtml?accession1=#{proteinDTO.protein1.uniprotAccession}&amp;accession2=#{proteinDTO.protein2.uniprotAccession}&amp;jaccard=#{proteinDTO.associate[0].jaccSimScore}">
                               <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                           </a></td>
-                          <td style="width: 6%">#{proteinDTO.protein1.uniprotAccession}</td>
-                          <td style="width: 40%">#{proteinDTO.protein1.proteinName}</td>
+                          <td style="width: 6%;">#{proteinDTO.protein1.uniprotAccession}</td>
+                          <td style="width: 40%;">#{proteinDTO.protein1.proteinName}</td>
                           <td style="width: 6%">#{proteinDTO.protein2.uniprotAccession}</td>
                           <td style="width: 40%">#{proteinDTO.protein2.proteinName}</td>
                           <td style="width: 5%">#{proteinDTO.associate[0].jaccSimScore}</td>
@@ -156,25 +159,28 @@ body {
 
     <div id="diseaseRegion" style="display: none;">
     <h1></h1>
-      <p>Please click on the disease of interest to find relevant proteins, and search the relavant protein pairs</p>
+      <p style="font-weight: bold;">Total number of diseases found: #{controlBean.diseaseDTOs.size()}</p>
+      <p style="color:grey; font-style: italic;">Please click on the disease of interest to find relevant protein pairs.</p>
       <table class="table table-hover table-expandable table-sticky-header table-custom">
         <thead>
           <tr>
             <th>Disease Name</th>
             <th>DisGeNet Id</th>
+            <th>Associated pair count</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
           <ui:repeat var="disease" value="#{controlBean.diseaseDTOs}">
-            <tr data-target="'#' + #{disease.disease.disgenetId}">
+            <tr data-target="'#' + #{disease.disease.disgenetId}"  style="color:purple;">
 
               <td>#{disease.disease.diseaseName}</td>
               <td>#{disease.disease.disgenetId}</td>
+              <td>#{disease.proteinDTOs.size()}</td>
               <td><span class="pull-right clickable"><i class="glyphicon glyphicon-chevron-down"></i></span></td>
             </tr>
             <tr id="#{disease.disease.disgenetId}">
-              <td colspan="3">
+              <td colspan="4">
 
                 <div class="wrap">
                   <table class="head">

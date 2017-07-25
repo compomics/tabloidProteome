@@ -45,9 +45,11 @@
 
 	<script
 		src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.7/js/bootstrap-dialog.min.js"
-		type="text/javascript"></script>
-
+		type="text/javascript"></script>  
+    <script src="https://rawgit.com/agershun/alasql/develop/dist/alasql.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/xlsx.full.min.js"></script>
 	<style>
+  
 body {
 	padding-top: 70px;
 	/* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of navigation changes. */
@@ -68,8 +70,29 @@ body {
 
 	function searchSingle(){
 		if($('#singleAccession').val() != ""){
-    		window.location = '/tabloidproteome/dataTable.xhtml?accession='+ $('#singleAccession').val()
-    		+ '&amp;jaccard=' + $('#jaccardSingle').val();
+			if(($('#singleAccession').val().startsWith("P") &#124;&#124; $('#singleAccession').val().startsWith("O") &#124;&#124; 
+				$('#singleAccession').val().startsWith("Q") &#124;&#124; $('#singleAccession').val().startsWith("A")) 
+				&amp;&amp; $('#singleAccession').val().length == 6){
+				window.location = '/tabloidproteome/dataTable.xhtml?accession='+ $('#singleAccession').val()
+	    		+ '&amp;jaccard=' + $('#jaccardSingle').val();
+		
+			}else{
+				passSingleProteinNameToJSFManagedBean ([ {
+                    name : 'protein1',
+                    value :  document.getElementById("singleAccession").value
+                   },
+                   {
+                       name : 'jacc',
+                       value :  document.getElementById("jaccardSingle").value
+                      },
+                   {
+                      name : 'protein2',
+                      value :  ''
+                   }
+                 ]);
+				
+			}
+    		
     	}else{
             var dialogInstance = new BootstrapDialog();
             dialogInstance.setTitle('INPUT ERROR');
@@ -82,8 +105,35 @@ body {
     
 	function searchDouble(){
 		if($('#doubleAccession1').val() != ""  &amp;&amp; $('#doubleAccession2').val() != "" ){
-    		window.location = '/tabloidproteome/dataTable.xhtml?accession1=' + $('#doubleAccession1').val()
-        	+ '&amp;accession2=' + $('#doubleAccession2').val() + '&amp;jaccard=' + $('#jaccardDouble').val();
+			
+			if(($('#doubleAccession1').val().startsWith("P") &#124;&#124; $('#doubleAccession1').val().startsWith("Q")
+			&#124;&#124; $('#doubleAccession1').val().startsWith("O") &#124;&#124; $('#doubleAccession1').val().startsWith("A")) 
+			&amp;&amp; $('#doubleAccession1').val().length() == 6
+			  &amp;&amp; ($('#doubleAccession2').val().startsWith("P") &#124;&#124; $('#doubleAccession2').val().startsWith("Q")
+			  &#124;&#124; $('#doubleAccession2').val().startsWith("O")&#124;&#124; $('#doubleAccession2').val().startsWith("A")) &amp;&amp; $('#doubleAccession2').val().length == 6
+			){
+				window.location = '/tabloidproteome/dataTable.xhtml?accession1=' + $('#doubleAccession1').val()
+	        	+ '&amp;accession2=' + $('#doubleAccession2').val() + '&amp;jaccard=' + $('#jaccardDouble').val();
+		
+			}else{
+				passDoubleProteinNameToJSFManagedBean ([ {
+                    name : 'protein1',
+                    value :  document.getElementById("doubleAccession1").value
+                   },
+                   {
+                       name : 'jacc',
+                       value :  document.getElementById("jaccardDouble").value
+                      },
+                   {
+                      name : 'protein2',
+                      value : document.getElementById("doubleAccession2").value
+                   }
+                 ]);
+				
+			}
+			
+			
+    		
     	}else{
     		var dialogInstance = new BootstrapDialog();
             dialogInstance.setTitle('INPUT ERROR');
@@ -92,6 +142,60 @@ body {
             dialogInstance.open();
     	}
 		return false;
+	}
+	
+	function searchMultipleProtein(){
+		var array1 = [];
+		var array2 = [];
+		var array3 = [];
+		//gets table
+		var oTable = document.getElementById('oneToOneTable');
+
+		//gets rows of table
+		var rowLength = oTable.rows.length;
+
+		//loops through rows    
+		for (i = 0; i &lt; rowLength; i++){
+		   //gets cells of current row
+		   var oCells = oTable.rows.item(i).cells;
+
+		   //gets amount of cells of current row
+		   var cellLength = oCells.length;
+
+		   //loops through each cell in current row
+		   for(var j = 0; j &lt; cellLength; j += 3){
+			   array1.push(oCells.item(j).innerHTML);
+			   array2.push(oCells.item(j+1).innerHTML);
+			   array3.push(oCells.item(j+2).innerHTML);
+		   }
+		   
+		}
+
+		if(array1.length != 0){
+			passProteinsJSONToJSFManagedBean ([ {
+                name : 'array1',
+                value :  array1
+            },
+            {
+                name : 'array2',
+                value :  array2
+             },
+             {
+                name : 'array3',
+                value :  array3
+             },
+             {
+                name : 'jacc',
+                value :  document.getElementById("jaccardOneToOne").value
+             }
+             ]);
+		}else{
+			var dialogInstance = new BootstrapDialog();
+            dialogInstance.setTitle('INPUT ERROR');
+            dialogInstance.setMessage('Please upload CSV file that contains protein pairs!');
+            dialogInstance.setType(BootstrapDialog.TYPE_DANGER);
+            dialogInstance.open();
+		}
 	}
 	
     function searchGene(selection){
@@ -131,31 +235,6 @@ body {
 		return false;
     }
     
-    function searchMultipleProtein(){
-    	var proteinAccessions = "&amp;accessions=";
-    	var array = [];
-    	$('#multipleProtein').find('tr').each(function () {
-            var row = $(this);
-            if (row.find('input[type="checkbox"]').is(':checked')) {
-            	array.push(row.find("td:nth-child(2)").text());
-            }
-        });
-    	
-    	if(array.length != 0){
-    		
-    		proteinAccessions += (array.join('+'));
-    		
-    		window.location = '/tabloidproteome/dataTable.xhtml?jaccard=' + $('#jaccardGene').val() + proteinAccessions;
-    	}else{
-    		var dialogInstance = new BootstrapDialog();
-            dialogInstance.setTitle('INPUT ERROR');
-            dialogInstance.setMessage('You should choose at least one uniprot accession to search!');
-            dialogInstance.setType(BootstrapDialog.TYPE_DANGER);
-            dialogInstance.open();
-    	}
-    	
-    }
-    
     function searchPathway(){
     	if($('#pathwayId').val() != ""){
     		passPathwayNameToJSFManagedBean ([ {
@@ -187,6 +266,8 @@ body {
             dialogInstance.open();
 		}
     }
+    
+    
     function clickButton1() {
         document.getElementById('btnprotein1').click();
         return false;
@@ -206,7 +287,10 @@ body {
     	window.location = '/tabloidproteome/detailedSearch.xhtml?disease';
         return false;
     }
-
+    function clickButton5() {
+    	window.location = '/tabloidproteome/dataTable.xhtml';
+        return false;
+    }
 	function setExampleSingle1() {
 		document.getElementById('singleAccession').value = 'Q13330';
 		return false;
@@ -233,7 +317,7 @@ body {
 	}
 	
 	function setExampleGeneSingle2() {
-		document.getElementById('geneId').value = 'CHD3';
+		document.getElementById('geneId').value = '1107';
 		return false;
 	}
 	
@@ -314,16 +398,16 @@ body {
 					<p style="font-size: medium; margin-left: 75px;">
 						Tabloid Proteome is a database of protein association network
 						generated using publically available mass spectrometry based
-						experiments in PRIDE. These associations includes; protein-protein
-						interaction, complex formation, or different role in single
-						pathway <a href="/tabloidproteome/information.xhtml#about">More
+						experiments in PRIDE.These associations represent a broad scala 
+                        of biological associations between pairs of proteins that goes 
+                        well beyond mere binary protein interactions.<a href="/tabloidproteome/information.xhtml">More
 							info<i class="glyphicon glyphicon-option-horizontal"></i>
 						</a>
 					</p>
 				</div>
 			</div>
 			<div class="row">
-				<div class="col-sm-3 col-sm-offset-2">
+				<div class="col-sm-3 col-sm-offset-1">
 					<ul class="nav nav-pills  nav-stacked">
 						<li class="active"><a>Protein Search</a>
 							<div style="padding-left: 15px;">
@@ -331,6 +415,8 @@ body {
 									Single Protein Search</a><br /> <br /> <a
 									href="#doubleProteinSearch" data-toggle="tab">> Two Protein
 									Search</a><br /> <br />
+                                    <a href="#multipleProteinSearch" data-toggle="tab">> Multiple Protein
+                                      Search</a><br /> <br />
 							</div></li>
 						<li><a>Gene Search</a>
 							<div style="padding-left: 15px;">
@@ -344,7 +430,7 @@ body {
 								Search</a></li>
 					</ul>
 				</div>
-				<div class="col-sm-4">
+				<div class="col-sm-6">
 					<div class="tab-content" id="tabs">
 						<div class="tab-pane active" id="singleProteinSearch">
 							<div class="panel panel-default" id="singleSearch"
@@ -354,16 +440,16 @@ body {
 									<div>
 										<span style="float: right; font-size: 11px;"> <a
 											href="#" style="text-decoration: underline; color: #62605E;"
-											onclick="setExampleSingle2()">#ex2</a></span> <span
+											onclick="setExampleSingle2()">P08134</a></span> <span
 											style="float: right; font-size: 11px;"> <a href="#"
 											style="text-decoration: underline; color: #62605E;"
-											onclick="setExampleSingle1()">#ex1</a>&#160;&#160;
+											onclick="setExampleSingle1()">Q13330</a>,&#160;
 										</span>
 									</div>
 									<form>
 										<div class="input-group col-sm-9 col-sm-offset-1">
 											<input type="text" class="form-control"
-												placeholder="Uniprot Accession" id="singleAccession" />
+												placeholder="Uniprot accession or protein name" id="singleAccession" />
 										</div>
 										<br />
 										<div class="input-group col-sm-9 col-sm-offset-1">
@@ -407,12 +493,12 @@ body {
 									<form>
 										<div class="input-group input-group col-sm-9 col-sm-offset-1">
 											<input type="text" class="form-control"
-												placeholder="1st Uniprot Accession" id="doubleAccession1" />
+												placeholder="1st Uniprot accession or protein name" id="doubleAccession1" />
 										</div>
 										<br />
 										<div class="input-group input-group col-sm-9 col-sm-offset-1">
 											<input type="text" class="form-control"
-												placeholder="2nd Uniprot Accession" id="doubleAccession2" />
+												placeholder="2nd Uniprot accession or protein name" id="doubleAccession2" />
 										</div>
 										<br />
 										<div class="input-group col-sm-9 col-sm-offset-1">
@@ -445,19 +531,132 @@ body {
 					        }
 					    });
 						</script>
+                        <div class="tab-pane" id="multipleProteinSearch">
+                          <div class="panel panel-default" id="multipleSearch">
+                            <div class="panel-heading text-center">PROTEIN SEARCH</div>
+                            <div class="panel-body"> 
+                              <button id="addRow"  onClick="insertRow()" class="btn btn-primary" style="display: none">add new row</button>
+                              <br/>
+                              <div class="wrap" id="oneToOneRegion" style="display: none;">
+                                <table class="head" id="oneToOneHeader">
+                                  <tr>
+                                    <th>1st Uniprot Accession</th>
+                                    <th>2nd Uniprot Accession</th>
+                                    <th>Edge Annotation</th>
+                                  </tr>
+                                </table>
+                                <div class="inner_table">
+                                  <table id="oneToOneTable" class="table table-hover table-striped" style="font-size: 11px; max-height: 35px;">
+                                
+                                  <tr>
+                                    <td><input type="text" style="border:none;" placeholder="Uniprot Accession" disabled="disabled"/></td>
+                                    <td><input type="text" style="border:none;" placeholder="Uniprot Accession" disabled="disabled"/></td>
+                                    <td><input type="text" style="border:none;" placeholder="Edge Annotation" disabled="disabled"/></td>
+                                  </tr>
+                                
+                                  </table>  
+                                </div>
+                                <div class="input-group col-sm-9 ">
+                                  <label class="col-sm-9" style="float: left;">Jaccard
+                                    Similarity Score <span
+                                    class="glyphicon glyphicon-question-sign"
+                                    data-toggle="tooltip" data-placement="top"
+                                    title="Jaccard Similarity Score should be between 0 and 1. You will get associations which have this Jaccard Similarity Score and above." />
+                                  </label> 
+                                  <input type="text" value="0.4" class="col-sm-3" id="jaccardOneToOne" />
+                                </div>
+                              </div>
+                              <p id="informationOneToOne">Please upload a file that contains protein pairs and edge annotaion (if available) in the following file formats: xls, xlsx, csv.
+                              The first two columns should be Uniprot accessions of the proteins. If you have edge annotation, you can add it to the 3rd column.
+                              The file should not include any title.</p>
+                              <p>Select CSV file to upload:</p>
+                              
+                              
+                              <input id="readfile" type="file" onchange="loadFile(event)" />
+                              <script>
+        						function loadFile(event) {
+        							var table=document.getElementById("oneToOneTable");
+        							$("#oneToOneTable tr").remove(); 
+        							
+	        						alasql('SELECT * FROM FILE(?,{headers:false})',[event],function(data){
+	        							for(var obj in data){
+	        							  if(data.hasOwnProperty(obj)){
+	        							      var headerIndex = 0;
+	        							      var row=table.insertRow(table.rows.length);		
+	        								  for(var prop in data[obj]){
+	        							        if(data[obj].hasOwnProperty(prop)){
+	    	        							   var cell=row.insertCell(headerIndex);
+	    	        							   cell.innerHTML=data[obj][prop];
+	    	        							   headerIndex++;
+	        							        }
+	        							      }
+	        								  if(headerIndex != 3){
+	        									  row.insertCell(headerIndex);
+	        								  }
+	        							  }   
+	        							}
+	        							$("#oneToOneRegion").show();
+      								  	$("#informationOneToOne").hide();
+	        						});
+         						}
+        						
+        						function insertRow(){
+                                	
+                            		var table=document.getElementById("oneToOneTable");
+                                    var row=table.insertRow(table.rows.length);
+                                    var cell1=row.insertCell(0);
+                                    var t1=document.createElement("input");
+                                    t1.style.border = 'none';
+                                    t1.placeholder = 'Uniprot Accession';
+                                    cell1.appendChild(t1);
+                                    var cell2=row.insertCell(1);
+                                    var t2=document.createElement("input");
+                                    t2.style.border = 'none';
+                                    t2.placeholder = 'Uniprot Accession';
+                                    cell2.appendChild(t2);
+                                    var cell3=row.insertCell(2);
+                                    var t3=document.createElement("input");
+                                    t3.style.border = 'none';
+                                    t3.placeholder = 'Edge Annotation';
+                                    cell3.appendChild(t3);
+
+                    			}
+                            
+    						</script>
+                              
+                              <br />
+                              <div align="center">
+                                <button class="btn btn-primary" onclick="searchMultipleProtein()"
+                                  style="width: 104px;" >Search</button>
+                              </div>
+                              
+                              
+                            </div>
+                          </div>
+                        </div>
+                       
+                        <script>
+                        
+                        
+                        
+                        </script>
 						<div class="tab-pane" id="singleGeneSearch">
 							<div class="panel panel-default" id="gene"
 								style="display: block;">
 								<div class="panel-heading text-center">GENE SEARCH</div>
 								<div class="panel-body">
 									<div>
+                                    
+                                    <span
+                                      style="float: right; font-size: 11px;"> <a href="#"
+                                      style="text-decoration: underline; color: #62605E;"
+                                      onclick="setExampleGeneSingle1()">MTA1</a>
+                                    </span> 
+                                    <span style="float: right; font-size: 11px; color: #62605E;"> Gene Name: &#160; </span> <br/>
 										<span style="float: right; font-size: 11px;"> <a
 											href="#" style="text-decoration: underline; color: #62605E;"
-											onclick="setExampleGeneSingle2()">#ex2</a></span> <span
-											style="float: right; font-size: 11px;"> <a href="#"
-											style="text-decoration: underline; color: #62605E;"
-											onclick="setExampleGeneSingle1()">#ex1</a>&#160;&#160;
-										</span>
+											onclick="setExampleGeneSingle2()">1107</a></span> 
+                                        <span style="float: right; font-size: 11px; color: #62605E;"> Gene Id: &#160; </span>
 									</div>
 									<form>
 										<div class="input-group input-group col-sm-9 col-sm-offset-1">
@@ -533,13 +732,19 @@ body {
 								<div class="panel-heading text-center">PATHWAY SEARCH</div>
 								<div class="panel-body">
 									<div>
-										<span style="float: right; font-size: 11px;"> <a
-											href="#" style="text-decoration: underline; color: #62605E;"
-											onclick="setExamplePathway2()">#ex2</a></span> <span
+										 <span
 											style="float: right; font-size: 11px;"> <a href="#"
 											style="text-decoration: underline; color: #62605E;"
-											onclick="setExamplePathway1()">#ex1</a>&#160;&#160;
+											onclick="setExamplePathway1()">cancer</a>
 										</span>
+                                        <span style="float: right; font-size: 11px; color: #62605E;"> Pathway name: &#160; </span>
+                                        
+                                        <br/>
+                                        <span style="float: right; font-size: 11px;"> <a
+                                          href="#" style="text-decoration: underline; color: #62605E;"
+                                          onclick="setExamplePathway2()">R-HSA-114604</a></span>
+                                        <span style="float: right; font-size: 11px; color: #62605E;"> Reactome accession: &#160; </span>
+                                        
 									</div>
 									<form>
 										<div class="input-group input-group col-sm-9 col-sm-offset-1">
@@ -569,14 +774,20 @@ body {
 								<div class="panel-heading text-center">DISEASE SEARCH</div>
 								<div class="panel-body">
 									<div>
+                                        <span
+                                          style="float: right; font-size: 11px;"> <a href="#"
+                                          style="text-decoration: underline; color: #62605E;"
+                                          onclick="setExampleDisease1()">lymphoblastic lymphoma</a>
+                                        </span>
+                                        <span style="float: right; font-size: 11px; color: #62605E;">Disease name: &#160; </span>
+                                                                                <br/>
 										<span style="float: right; font-size: 11px;"> <a
 											href="#" style="text-decoration: underline; color: #62605E;"
-											onclick="setExampleDisease2()">#ex2</a></span> <span
-											style="float: right; font-size: 11px;"> <a href="#"
-											style="text-decoration: underline; color: #62605E;"
-											onclick="setExampleDisease1()">#ex1</a>&#160;&#160;
-										</span>
+											onclick="setExampleDisease2()">C0021051</a></span> 
+                                        <span style="float: right; font-size: 11px; color: #62605E;">DisGeNET Id: &#160; </span>
+                                        
 									</div>
+                                    <br/>
 									<form>
 										<div class="input-group input-group col-sm-9 col-sm-offset-1">
 											<input type="text" class="form-control"
@@ -621,17 +832,27 @@ body {
 			
 			<h:form id="newform">
 				<p:remoteCommand name="passGeneToJSFManagedBean"
-					action="#{controlBean.findProteins}" process="@this"
+					action="#{controlBean.findProteinsByGene}" process="@this"
 					oncomplete="clickButton1();" update=":modalForm:proteinPanel1" />
 				<p:remoteCommand name="passGeneDoubleToJSFManagedBean"
-					action="#{controlBean.findProteins}" process="@this"
+					action="#{controlBean.findProteinsByGene}" process="@this"
 					oncomplete="clickButton2();" update=":modalForm:proteinPanel2" />
+                <p:remoteCommand name="passSingleProteinNameToJSFManagedBean"
+					action="#{controlBean.findProteinsByName}" process="@this"
+					oncomplete="clickButton1();" update=":modalForm:proteinPanel1" />
+                <p:remoteCommand name="passDoubleProteinNameToJSFManagedBean"
+                    action="#{controlBean.findProteinsByName}" process="@this"
+                    oncomplete="clickButton2();" update=":modalForm:proteinPanel2" />
 				<p:remoteCommand name="passPathwayNameToJSFManagedBean"
 					action="#{controlBean.findPathwayDTOs}" process="@this"
 					oncomplete="clickButton3();" />
 				<p:remoteCommand name="passDiseaseNameToJSFManagedBean"
 					action="#{controlBean.findDiseaseDTOs}" process="@this"
 					oncomplete="clickButton4();" />
+                <p:remoteCommand name="passProteinsJSONToJSFManagedBean"
+                    action="#{graphDbManagedBean.searchListOfProteins}" process="@this"
+                    oncomplete="clickButton5();" />
+          
 			</h:form>
 
 
@@ -650,7 +871,8 @@ body {
 										<span class="glyphicon glyphicon-remove-sign"
 											aria-hidden="true"></span>
 									</button>
-									<p>Please search the protein/gene of interest. Select Jaccard Similarity Score to see associated protein pairs.</p>
+                                    <p style="font-weight: bold;">Total number of proteins found: #{controlBean.proteinDTOs.size()}</p>
+									<p style="color:grey; font-style: italic;">Please search the protein/gene of interest. Select Jaccard Similarity Score to see associated protein pairs.</p>
 									<table class="table table-hover" id="geneProteinSingle">
 										<thead>
 											<tr>
@@ -706,7 +928,8 @@ body {
 										aria-label="Close">
 										<span aria-hidden="true">&#xA0;</span>
 									</button>
-									<p>Please select the protein/gene pair of interest</p>
+                                    <p style="font-weight: bold;">Total number of protein pairs found: #{controlBean.proteinDTOs.size()}</p>
+									<p style="color:grey; font-style: italic;">Please select the protein/gene pair of interest</p>
 									<table class="table table-hover" id="geneProteinDouble">
 										<thead>
 											<tr>

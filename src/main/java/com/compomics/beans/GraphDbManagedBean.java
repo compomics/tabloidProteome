@@ -33,6 +33,7 @@ public class GraphDbManagedBean implements Serializable{
     private double jaccScore;
     private String selectionType;
     private String control;
+    private List<String> edgeAnnotations = new ArrayList<>();
 
     
     // queries
@@ -103,6 +104,10 @@ public class GraphDbManagedBean implements Serializable{
 		return control;
 	}
 
+	public List<String> getEdgeAnnotations() {
+		return edgeAnnotations;
+	}
+
 	@PostConstruct
     private void init(){
 		dbService = new Service();
@@ -121,7 +126,7 @@ public class GraphDbManagedBean implements Serializable{
 				accession1 = requestParams.get("accession").toUpperCase();
 				accession2 = null;
 				control= "single";
-				setSelectionType("single");
+				setSelectionType("single");		
 				getProteinDTOs();
 			}
 		}else if(requestParams.containsKey("accession1") && requestParams.containsKey("accession2")){
@@ -142,14 +147,21 @@ public class GraphDbManagedBean implements Serializable{
 				}
 				visualisationBean.load(this);
 			}
-		}else if(requestParams.containsKey("accessions")){
-			if(requestParams.get("accessions")!=null && !requestParams.get("accessions").equals("")){
-				accessions = Arrays.asList(requestParams.get("accessions").toUpperCase().split(" "));
-				control= "single";
-				setSelectionType("multiple");
-				getProteinDTOs();
-			}
 		}
+		dbService.closeSession();
+	}
+	
+	public void searchListOfProteins(){
+		dbService.startSession();
+		String array1 = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("array1"); 
+		String array2 = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("array2"); 
+		String array3 = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("array3"); 
+		double jaccScore = Double.valueOf(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("jacc")); 
+		
+		proteinDTOS = dbService.getProteinDTOListForMultipleProteins(Arrays.asList(array1.split("\\s*,\\s*")), Arrays.asList(array2.split("\\s*,\\s*")), jaccScore);
+		
+		visualisationBean.load(this);
+		edgeAnnotations = Arrays.asList(array3.split("\\s*,\\s*"));
 		dbService.closeSession();
 	}
 	
@@ -165,9 +177,6 @@ public class GraphDbManagedBean implements Serializable{
 		} else if (selectionType.equals("double")) {
 			getDoubleProteinDTOs();
 			visualisationBean.load(this);
-		}else if (selectionType.equals("multiple")) {
-			getMultipleProteinDTOs();
-			visualisationBean.load(this);
 		}
 	}
     
@@ -181,10 +190,6 @@ public class GraphDbManagedBean implements Serializable{
         proteinDTOS = dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, accession1, accession2, jaccScore);
     }
     
-    public void getMultipleProteinDTOs(){
-    	proteinDTOS = dbService.getProteinDTOListForMultipleProteins(SINGLE_PROTEIN_QUERY, accessions, jaccScore);
-    }
-   
     public void setSelectionType(){
     	selectionType = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("selectionType");
     }

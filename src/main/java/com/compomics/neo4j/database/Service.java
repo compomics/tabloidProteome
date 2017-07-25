@@ -56,6 +56,9 @@ public class Service implements Serializable{
 	private static final String PATHWAY_FIND_PROTEIN = "findProteinsByPathway";
 	private static final String DISEASE_SEARCH_QUERY = "searchByDisease";
 	private static final String DISEASE_FIND_PROTEIN = "findProteinsByDisease";
+	private static final String PROTEIN_FIND_BY_NAME_SINGLE = "searchByProteinNameSingle";
+	private static final String PROTEIN_FIND_BY_NAME_DOUBLE = "searchByProteinNameDouble";
+	private static final String ONE_TO_ONE_SEARCH = "oneToOneSearch";
 
 	public Service() {
 		connection = new Connection();
@@ -94,6 +97,67 @@ public class Service implements Serializable{
 		}
 		return result;
 	}
+	
+	public List<ProteinDTO> findProteinsByName(String proteinName1, String proteinName2, double jaccScore){
+		List<ProteinDTO> proteins = new ArrayList<>();
+		try {
+			input = getClass().getClassLoader().getResourceAsStream("query.properties");
+			prop.load(input);
+			if(proteinName2.equals("")){
+				proteins = searchProteinByName(PROTEIN_FIND_BY_NAME_SINGLE, proteinName1, proteinName2, jaccScore);
+			}else{
+				proteins = searchProteinByName(PROTEIN_FIND_BY_NAME_DOUBLE, proteinName1, proteinName2, jaccScore);
+			}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (input != null) {
+				try {
+					input.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return proteins;
+	}
+	
+	private List<ProteinDTO> searchProteinByName( String queryName, String proteinName1, String proteinName2, double jaccScore){
+		
+		List<ProteinDTO> proteins = new ArrayList<>();
+		parameters = new HashMap<String, Object>();
+		parameters.put("proteinName1", proteinName1);
+		parameters.put("proteinName2", proteinName2);
+		parameters.put("jacc", jaccScore);
+
+		StatementResult result = session.run(prop.getProperty(queryName), parameters);
+		while (result.hasNext()) {
+			Record record = result.next();
+			ProteinDTO proteinDTO = new ProteinDTO();
+			Protein protein1 = new Protein();
+			protein1.setUniprotAccession(record.get("uniprot_accession1").asString());
+			protein1.setProteinName(record.get("protein_name1").asString());
+			protein1.setGeneNames(record.get("gene_name1").asList());
+			proteinDTO.setProtein1(protein1);
+			if(queryName.equals(PROTEIN_FIND_BY_NAME_DOUBLE)){
+				Protein protein2 = new Protein();
+				protein2.setUniprotAccession(record.get("uniprot_accession2").asString());
+				protein2.setProteinName(record.get("protein_name2").asString());
+				protein2.setGeneNames(record.get("gene_name2").asList());
+				proteinDTO.setProtein2(protein2);
+				Associate associate = new Associate();
+				associate.setJaccSimScore(record.get("jacc_sim_score").asDouble());
+				List<Associate> associates = new ArrayList<>();
+				associates.add(associate);
+				proteinDTO.setAssociate(associates);
+			}
+			proteins.add(proteinDTO);	
+		}
+		
+		return proteins;
+	}
+	
 	/**
 	 * find protein accession by gene id or name
 	 * @param gene
@@ -259,23 +323,23 @@ public class Service implements Serializable{
 	}
 	
 	/**
-	 * Get Protein DTO list for multiple proteins, do single search for each protein
+	 * Get Protein DTO list for multiple proteins, for one to one search
 	 * @param queryName
 	 * @param accessions
 	 * @param jaccScore
 	 * @return
 	 */
-	public List<ProteinDTO> getProteinDTOListForMultipleProteins(String queryName, List<String> accessions, double jaccScore){
+	public List<ProteinDTO> getProteinDTOListForMultipleProteins(List<String> accessions1, List<String> accessions2, double jaccScore){
 		List<ProteinDTO> proteinDTOS = new ArrayList<>();
-		for(String acc : accessions){
+
 			parameters = new HashMap<String, Object>();
-			parameters.put("acc1", acc);
-			parameters.put("acc2", "");
+			parameters.put("array1", accessions1);
+			parameters.put("array2", accessions2);
 			parameters.put("jacc", jaccScore);
 			try {
 				input = getClass().getClassLoader().getResourceAsStream("query.properties");
 				prop.load(input);
-				StatementResult result = session.run(prop.getProperty(queryName), parameters);
+				StatementResult result = session.run(prop.getProperty(ONE_TO_ONE_SEARCH), parameters);
 				proteinDTOS = createProteinDTOList(result, proteinDTOS);
 				
 			} catch (IOException e) {
@@ -289,7 +353,7 @@ public class Service implements Serializable{
 					}
 				}
 			}
-		}
+
 		
 		return proteinDTOS;
 	}
@@ -661,7 +725,7 @@ public class Service implements Serializable{
 		}
 	}
 	/**
-	 * find protein accession by gene id or gene name
+	 * find protein by gene id or gene name
 	 * @param gene gene id or name
 	 * @param queryName
 	 * @return

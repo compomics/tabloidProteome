@@ -93,7 +93,8 @@
                   'width':'data(width)',
                   'curve-style': 'bezier',
                   'line-color': 'data(faveColor)',
-                  'color' : 'black',
+                  'label' : 'data(annotation)',
+                  'color' : 'red',
                   'font-size' : '12',
                   'line-style' : 'data(faveStyle)'
               })
@@ -150,7 +151,7 @@
 	    	cy.zoom(cy.zoom() / 1.2);
 	    	cy.center();
 	    });
-		
+
       });
   		
   
@@ -159,11 +160,11 @@
     	}
    
       function openProteinView(){
-    	  window.location = '/tabloidproteome/graph.xhtml?graph=proteinView';
+    	  window.location = '/tabloidproteome/graph.xhtml?graph=proteinView'; 	  
       }
       
       function openGeneView(){
-    	  window.location = '/tabloidproteome/graph.xhtml?graph=geneView';
+    	  window.location = '/tabloidproteome/graph.xhtml?graph=geneView';   	  
       }
       
       function clickButton() {
@@ -354,7 +355,8 @@
           
           <div class="relations" style="display: none" id="divRelations">
             <h1></h1>
-            <h4 style="text-align: center;">Association between #{visualisationBean.protein1.uniprotAccession} and #{visualisationBean.protein2.uniprotAccession}</h4>
+            <h4 style="text-align: center;" id="proteinTitle"> #{visualisationBean.title}</h4>
+            
             <div class="panel panel-default" style="border:none;">
                 <div class="row" style="margin-top: 3px;">
                   <div class="col-sm-2">

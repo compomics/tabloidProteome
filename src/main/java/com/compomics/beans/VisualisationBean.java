@@ -25,7 +25,6 @@ public class VisualisationBean implements Serializable{
 	private static final long serialVersionUID = -1246774333059415835L;
 
 	private List<String> nodes = new ArrayList<>();
-	private String edges;
 	private String selectedNode;
 	private String selectedEdge;
 	private Protein selectedProtein;
@@ -43,6 +42,8 @@ public class VisualisationBean implements Serializable{
     private List<Go> bp = new ArrayList<>();
     private List<Go> cc = new ArrayList<>();
     private List<Disease> diseases = new ArrayList<>();
+    private String title;
+    
     
 	private GraphDbManagedBean graphDbManagedBean;
 
@@ -50,10 +51,6 @@ public class VisualisationBean implements Serializable{
 
 	public List<String> getNodes() {
 		return nodes;
-	}
-
-	public String getEdges() {
-		return edges;
 	}
 
 	public String getSelectedNode() {
@@ -124,6 +121,10 @@ public class VisualisationBean implements Serializable{
 		return graphDbManagedBean;
 	}
 	
+	public String getTitle() {
+		return title;
+	}
+
 	public void load2(){
 		FacesContext context = FacesContext.getCurrentInstance();
 		Map<String, String> requestParams = context.getExternalContext().getRequestParameterMap();
@@ -165,9 +166,10 @@ public class VisualisationBean implements Serializable{
 	
 	private void uniprotGraph(){
 		StringBuilder edge = new StringBuilder();
-		if(!proteinDTOS.isEmpty()){
+		if(proteinDTOS != null && !proteinDTOS.isEmpty()){
 			edge.append("[");	
 			int counter = 0;
+			int i = 0;
 			for(ProteinDTO proteinDTO : proteinDTOS) {
 				if(!nodes.contains(proteinDTO.getProtein1().getUniprotAccession())){
 					nodes.add(proteinDTO.getProtein1().getUniprotAccession());
@@ -178,11 +180,11 @@ public class VisualisationBean implements Serializable{
 				
 				if(proteinDTO.getAssociate().get(0).getJaccSimScore() >= 0.4){
 					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getUniprotAccession()).append("\",\"target\":\"")
-					.append(proteinDTO.getProtein2().getUniprotAccession()).append("\",\"label\":\"").append(proteinDTO.getAssociate().get(0).getJaccSimScore().toString())
+					.append(proteinDTO.getProtein2().getUniprotAccession()).append("\",\"annotation\":\"").append((graphDbManagedBean.getEdgeAnnotations().size() == proteinDTOS.size()) ? graphDbManagedBean.getEdgeAnnotations().get(i) : "")
 					.append("\",\"width\":\"").append(proteinDTO.getAssociate().get(0).getJaccSimScore()*10).append("\",\"faveColor\":\"black\",\"faveStyle\":\"solid\"}}*");
 				}else{
 					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getUniprotAccession()).append("\",\"target\":\"")
-					.append(proteinDTO.getProtein2().getUniprotAccession()).append("\",\"label\":\"").append(proteinDTO.getAssociate().get(0).getJaccSimScore().toString())
+					.append(proteinDTO.getProtein2().getUniprotAccession()).append("\",\"annotation\":\"").append((graphDbManagedBean.getEdgeAnnotations().size() == proteinDTOS.size()) ? graphDbManagedBean.getEdgeAnnotations().get(i) : "")
 					.append("\",\"width\":\"").append(proteinDTO.getAssociate().get(0).getJaccSimScore()*10).append("\",\"faveColor\":\"gray\",\"faveStyle\":\"solid\"}}*");
 				}
 				
@@ -209,6 +211,7 @@ public class VisualisationBean implements Serializable{
 					.append(" Pathways\",\"width\":\"2\",\"faveColor\":\"orange\",\"faveStyle\":\"dotted\"}}*");
 				}
 				counter++;
+				i++;
 			}
 			
 		}
@@ -228,6 +231,7 @@ public class VisualisationBean implements Serializable{
 		if(!proteinDTOS.isEmpty()){
 			edge.append("[");	
 			int counter = 0;
+			int i=0;
 			for(ProteinDTO proteinDTO : proteinDTOS) {
 				if(!tempNodes.contains(proteinDTO.getProtein1().getUniprotAccession())){
 					tempNodes.add(proteinDTO.getProtein1().getUniprotAccession());
@@ -240,11 +244,11 @@ public class VisualisationBean implements Serializable{
 				
 				if(proteinDTO.getAssociate().get(0).getJaccSimScore() >= 0.4){
 					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getGeneNames().get(0)).append("\",\"target\":\"")
-					.append(proteinDTO.getProtein2().getGeneNames().get(0)).append("\",\"label\":\"").append(proteinDTO.getAssociate().get(0).getJaccSimScore().toString())
+					.append(proteinDTO.getProtein2().getGeneNames().get(0)).append("\",\"annotation\":\"").append((graphDbManagedBean.getEdgeAnnotations().size() == proteinDTOS.size()) ? graphDbManagedBean.getEdgeAnnotations().get(i) : "")
 					.append("\",\"width\":\"").append(proteinDTO.getAssociate().get(0).getJaccSimScore()*10).append("\",\"faveColor\":\"black\",\"faveStyle\":\"solid\"}}*");
 				}else{
 					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getGeneNames().get(0)).append("\",\"target\":\"")
-					.append(proteinDTO.getProtein2().getGeneNames().get(0)).append("\",\"label\":\"").append(proteinDTO.getAssociate().get(0).getJaccSimScore().toString())
+					.append(proteinDTO.getProtein2().getGeneNames().get(0)).append("\",\"annotation\":\"").append((graphDbManagedBean.getEdgeAnnotations().size() == proteinDTOS.size()) ? graphDbManagedBean.getEdgeAnnotations().get(i) : "")
 					.append("\",\"width\":\"").append(proteinDTO.getAssociate().get(0).getJaccSimScore()*10).append("\",\"faveColor\":\"gray\",\"faveStyle\":\"solid\"}}*");
 				}
 				
@@ -271,6 +275,7 @@ public class VisualisationBean implements Serializable{
 					.append(" Pathways\",\"width\":\"2\",\"faveColor\":\"orange\",\"faveStyle\":\"dotted\"}}*");
 				}
 				counter++;
+				i++;
 			}
 			
 		}
@@ -322,6 +327,12 @@ public class VisualisationBean implements Serializable{
 				protein1 = graphDbManagedBean.getProteinDTOS().get(i).getProtein1();
 				protein2 = graphDbManagedBean.getProteinDTOS().get(i).getProtein2();
 				visible = true;
+				
+				if(graphType.equals("geneView")){
+					title = "Association between " + protein1.getGeneNames().get(0) +" and "+ protein2.getGeneNames().get(0);
+				}else if(graphType.equals("proteinView")){
+					title = "Association between " + protein1.getUniprotAccession() +" and "+ protein2.getUniprotAccession();
+				}
 			}
 		}
 	}

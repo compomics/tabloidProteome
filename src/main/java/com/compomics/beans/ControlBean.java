@@ -82,10 +82,11 @@ public class ControlBean implements Serializable{
     private void init(){
 		dbService = new Service();
     }
-	
-	public void findProteins(){
+
+	public void findProteinsByGene(){
 		dbService.startSession();
 		gene1 =  FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("gene").trim().split(",")[0].toUpperCase(); 
+		proteinDTOs.clear();
 		if(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("gene").trim().split(",").length == 2){
 			gene2 = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("gene").trim().split(",")[1].toUpperCase(); 
 		}else{
@@ -99,6 +100,26 @@ public class ControlBean implements Serializable{
     	}
     	dbService.closeSession();
     }
+	
+	public void findProteinsByName(){
+		dbService.startSession();
+		String proteinName1 = "";
+		proteinName1 = String.join(".*", FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("protein1").toUpperCase().split(" "));
+		proteinName1 = "(?i).*" + proteinName1 + ".*";
+		String proteinName2 = "";
+		proteinDTOs.clear();
+		double jaccScore = 0;
+		if(!FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("protein2").equals("")){
+			proteinName2 = String.join(".*", FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("protein2").toUpperCase().split(" "));
+			proteinName2 = "(?i).*" + proteinName2 + ".*";
+		}
+		if(!FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("jacc").equals("")){
+			jaccScore = Double.valueOf(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("jacc")); 
+		}
+    	proteinDTOs = dbService.findProteinsByName(proteinName1, proteinName2, jaccScore);
+    	
+    	dbService.closeSession();
+	}
 	
 	public void findPathwayDTOs(){
 		dbService.startSession();
