@@ -34,6 +34,7 @@ public class GraphDbManagedBean implements Serializable{
     private String selectionType;
     private String control;
     private List<String> edgeAnnotations = new ArrayList<>();
+    private String multiSearchMessage ;
 
     
     // queries
@@ -108,6 +109,11 @@ public class GraphDbManagedBean implements Serializable{
 		return edgeAnnotations;
 	}
 
+	public String getMultiSearchMessage() {
+		return multiSearchMessage;
+	}
+
+
 	@PostConstruct
     private void init(){
 		dbService = new Service();
@@ -159,6 +165,9 @@ public class GraphDbManagedBean implements Serializable{
 		double jaccScore = Double.valueOf(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("jacc")); 
 		
 		proteinDTOS = dbService.getProteinDTOListForMultipleProteins(Arrays.asList(array1.split("\\s*,\\s*")), Arrays.asList(array2.split("\\s*,\\s*")), jaccScore);
+		if(Arrays.asList(array1.split("\\s*,\\s*")).size() - proteinDTOS.size() > 0){
+			multiSearchMessage = Arrays.asList(array1.split("\\s*,\\s*")).size() - proteinDTOS.size() + " protein pair(s) cannot be found.";
+		}
 		
 		visualisationBean.load(this);
 		edgeAnnotations = Arrays.asList(array3.split("\\s*,\\s*"));
@@ -170,6 +179,7 @@ public class GraphDbManagedBean implements Serializable{
 	}
 	
 	private void getProteinDTOs() {
+		multiSearchMessage = "";
 		proteinDTOS.clear();
 		if (selectionType.equals("single")) {
 			getSingleProteinDTOs();
@@ -198,5 +208,8 @@ public class GraphDbManagedBean implements Serializable{
     	TSVExporter tsvExporter = new TSVExporter();
     	tsvExporter.tsvExport(proteinDTOS);
     }
-    
+    public void csvExport(){
+    	TSVExporter csvExporter = new TSVExporter();
+    	csvExporter.csvExport(proteinDTOS);
+    }
 }

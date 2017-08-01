@@ -343,12 +343,12 @@ body {
 	}
 	
 	function setExampleDisease1() {
-		document.getElementById('diseaseId').value = 'lymphoblastic lymphoma';
+		document.getElementById('diseaseId').value = 'Invasive Breast Carcinoma';
 		return false;
 	}
 	
 	function setExampleDisease2() {
-		document.getElementById('diseaseId').value = 'C0021051';
+		document.getElementById('diseaseId').value = 'C0853879';
 		return false;
 	}
 </script>
@@ -454,10 +454,10 @@ body {
 										<br />
 										<div class="input-group col-sm-9 col-sm-offset-1">
 											<label class="col-sm-9" style="float: left;">Jaccard
-												Similarity Score <span
+												Similarity Threshold <span
 												class="glyphicon glyphicon-question-sign"
 												data-toggle="tooltip" data-placement="top"
-												title="Jaccard Similarity Score should be between 0 and 1. You will get associations which have this Jaccard Similarity Score and above." />
+												title="Jaccard Similarity Threshold should be between 0 and 1. You will get associations which have this Jaccard Similarity Threshold and above." />
 											</label> <input type="text" value="0.4" class="col-sm-3"
 												id="jaccardSingle" />
 										</div>
@@ -503,10 +503,10 @@ body {
 										<br />
 										<div class="input-group col-sm-9 col-sm-offset-1">
 											<label class="col-sm-9" style="float: left;">Jaccard
-												Similarity Score <span
+												Similarity Threshold <span
 												class="glyphicon glyphicon-question-sign"
 												data-toggle="tooltip" data-placement="top"
-												title="Jaccard Similarity Score should be between 0 and 1. You will get associations which have this Jaccard Similarity Score and above." />
+												title="Jaccard Similarity Threshold should be between 0 and 1. You will get associations which have this Jaccard Similarity Threshold and above." />
 											</label> <input type="text" value="0.4" class="col-sm-3"
 												id="jaccardDouble" />
 										</div>
@@ -558,10 +558,10 @@ body {
                                 </div>
                                 <div class="input-group col-sm-9 ">
                                   <label class="col-sm-9" style="float: left;">Jaccard
-                                    Similarity Score <span
+                                    Similarity Threshold <span
                                     class="glyphicon glyphicon-question-sign"
                                     data-toggle="tooltip" data-placement="top"
-                                    title="Jaccard Similarity Score should be between 0 and 1. You will get associations which have this Jaccard Similarity Score and above." />
+                                    title="Jaccard Similarity Threshold should be between 0 and 1. You will get associations which have this Jaccard Similarity Threshold and above." />
                                   </label> 
                                   <input type="text" value="0.4" class="col-sm-3" id="jaccardOneToOne" />
                                 </div>
@@ -584,7 +584,7 @@ body {
 	        							      var headerIndex = 0;
 	        							      var row=table.insertRow(table.rows.length);		
 	        								  for(var prop in data[obj]){
-	        							        if(data[obj].hasOwnProperty(prop)){
+	        							        if(data[obj].hasOwnProperty(prop)  &amp;&amp; headerIndex &lt; 3 ){
 	    	        							   var cell=row.insertCell(headerIndex);
 	    	        							   cell.innerHTML=data[obj][prop];
 	    	        							   headerIndex++;
@@ -777,13 +777,13 @@ body {
                                         <span
                                           style="float: right; font-size: 11px;"> <a href="#"
                                           style="text-decoration: underline; color: #62605E;"
-                                          onclick="setExampleDisease1()">lymphoblastic lymphoma</a>
+                                          onclick="setExampleDisease1()">Invasive breast carcinoma</a>
                                         </span>
                                         <span style="float: right; font-size: 11px; color: #62605E;">Disease name: &#160; </span>
                                                                                 <br/>
 										<span style="float: right; font-size: 11px;"> <a
 											href="#" style="text-decoration: underline; color: #62605E;"
-											onclick="setExampleDisease2()">C0021051</a></span> 
+											onclick="setExampleDisease2()">C0853879</a></span> 
                                         <span style="float: right; font-size: 11px; color: #62605E;">DisGeNET Id: &#160; </span>
                                         
 									</div>
@@ -872,7 +872,7 @@ body {
 											aria-hidden="true"></span>
 									</button>
                                     <p style="font-weight: bold;">Total number of proteins found: #{controlBean.proteinDTOs.size()}</p>
-									<p style="color:grey; font-style: italic;">Please search the protein/gene of interest. Select Jaccard Similarity Score to see associated protein pairs.</p>
+									<p style="color:grey; font-style: italic;">Please search the protein/gene of interest. Select Jaccard Similarity Threshold to see associated protein pairs.</p>
 									<table class="table table-hover" id="geneProteinSingle">
 										<thead>
 											<tr>
@@ -880,10 +880,10 @@ body {
 												<th>Uniprot Accession</th>
 												<th>Gene Name</th>
 												<th>Protein Name</th>
-												<th>Jaccard Similarity<span
+												<th>Jaccard Similarity Threshold<span
 												class="glyphicon glyphicon-question-sign"
 												data-toggle="tooltip" data-placement="top"
-												title="Jaccard Similarity Score should be between 0 and 1. You will get associations which have this Jaccard Similarity Score and above." /></th>
+												title="Jaccard Similarity Threshold should be between 0 and 1. You will get associations which have this Jaccard Similarity Threshold and above." /></th>
 											</tr>
 										</thead>
 										<tbody>

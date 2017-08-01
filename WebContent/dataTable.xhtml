@@ -14,8 +14,6 @@
 
 <title>Tabloid Proteome</title>
 
-<!-- Bootstrap Core CSS -->
-<link href="/tabloidproteome/resources/css/bootstrap.min.css" rel="stylesheet" />
 
 <!-- Custom CSS -->
 <link href="/tabloidproteome/resources/css/bootstrap.css" rel="stylesheet" />
@@ -90,15 +88,19 @@ body {
       </button>
       </a>
       <h:form prependId="false">
-        <h:commandLink id="download" actionListener="#{graphDbManagedBean.tsvExport()}"
-          style="float: right;">
-          <button type="submit" class="btn btn-default" style="margin-right:5px">
-          <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
-          Download
+        <div class="dropdown" style="float: right">
+          <button class="btn btn-default dropdown-toggle" type="button" id="download" data-toggle="dropdown" aria-haspopup="true"
+            aria-expanded="true">
+            Download <span class="caret"></span>
           </button>
-        </h:commandLink>
+          <ul class="dropdown-menu" aria-labelledby="download">
+            <li><a><h:commandLink  id="downloadTSV" actionListener="#{graphDbManagedBean.tsvExport()}">TSV format</h:commandLink></a></li>
+            <li><a><h:commandLink id="downloadCSV" actionListener="#{graphDbManagedBean.csvExport()}">CSV format</h:commandLink></a></li>
+          </ul>
+        </div>
       </h:form>
       <p style="font-weight: bold;">Total number of protein pairs found: #{graphDbManagedBean.proteinDTOS.size()}</p>
+      <p style="font-weight: bold;">#{graphDbManagedBean.multiSearchMessage}</p>
       <p style="color:grey; font-style: italic;">Please click on the protein pair of interest</p>
       <h3 style="text-align: center;">Protein Association Data Table</h3>
       <table class="table table-hover table-expandable table-sticky-header table-custom" id="mainTable">
@@ -110,7 +112,7 @@ body {
             <th>1st protein gene name</th>
             <th>2nd protein name</th>
             <th>2nd protein gene name</th>
-            <th>Jacc similarity score</th>
+            <th>Jacc similarity threshold</th>
             <th>Interaction</th>
             <th>Ensembl paralog</th>
             <th># common complex</th>

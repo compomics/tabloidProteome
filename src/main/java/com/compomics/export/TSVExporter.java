@@ -22,8 +22,10 @@ public class TSVExporter implements Serializable{
 
 	private List<ProteinDTO> proteinDTOS;
 	private StringBuilder tsvExport ;
+	private StringBuilder csvExport ;
 	
-	private final String SEPARATOR = "\t";
+	private final String TAB_SEPARATOR = "\t";
+	private final String COMMA_SEPARATOR = ",";
 	private final String END_OF_LINE = "\n";
 	private final String ACCESSION_SEPARATOR = ";";
 	
@@ -57,20 +59,45 @@ public class TSVExporter implements Serializable{
 	public void tsvExport(List<ProteinDTO> proteinDTOS) {
 		this.proteinDTOS = proteinDTOS;
 		tsvExport = new StringBuilder();
-		createTSVString();
-		export();
+		createFileString(tsvExport, TAB_SEPARATOR);
+		export(tsvExport);
 	}
 	
-	private void createTSVString(){
-		tsvExport.append(PROTEIN_1).append(SEPARATOR).append(PROTEIN_2).append(SEPARATOR).append(PROTEIN_1_NAME).append(SEPARATOR).append(PROTEIN_2_NAME)
-			.append(SEPARATOR).append(PROTEIN_1_GENE).append(SEPARATOR).append(PROTEIN_2_GENE).append(SEPARATOR).append(NUM_PROJECT).append(SEPARATOR)
-			.append(PROJECTS).append(SEPARATOR).append(JACC_SIM_SCORE).append(SEPARATOR).append(INTACT).append(SEPARATOR).append(BIOGRID).append(SEPARATOR)
-			.append(NUM_PATHWAY).append(SEPARATOR).append(PATHWAYS).append(SEPARATOR).append(NUM_COMPLEX).append(SEPARATOR).append(COMPLEXES).append(SEPARATOR)
-			.append(PARALOG).append(SEPARATOR).append(NUM_BP).append(SEPARATOR).append(BP).append(SEPARATOR).append(NUM_MF).append(SEPARATOR).append(MF)
-			.append(SEPARATOR).append(NUM_CC).append(SEPARATOR).append(CC)
-			.append(SEPARATOR).append(NUM_DISEASE).append(SEPARATOR).append(DISEASES).append(END_OF_LINE);
+	public void csvExport(List<ProteinDTO> proteinDTOS) {
+		this.proteinDTOS = proteinDTOS;
+		csvExport = new StringBuilder();
+		createFileString(csvExport, COMMA_SEPARATOR);
+		export(csvExport);
+	}
+	
+	private void createFileString(StringBuilder export, String separator){
+		export.append(PROTEIN_1).append(separator).append(PROTEIN_2).append(separator).append(PROTEIN_1_NAME).append(separator).append(PROTEIN_2_NAME)
+			.append(separator).append(PROTEIN_1_GENE).append(separator).append(PROTEIN_2_GENE).append(separator).append(NUM_PROJECT).append(separator)
+			.append(PROJECTS).append(separator).append(JACC_SIM_SCORE).append(separator).append(INTACT).append(separator).append(BIOGRID).append(separator)
+			.append(NUM_PATHWAY).append(separator).append(PATHWAYS).append(separator).append(NUM_COMPLEX).append(separator).append(COMPLEXES).append(separator)
+			.append(PARALOG).append(separator).append(NUM_BP).append(separator).append(BP).append(separator).append(NUM_MF).append(separator).append(MF)
+			.append(separator).append(NUM_CC).append(separator).append(CC)
+			.append(separator).append(NUM_DISEASE).append(separator).append(DISEASES).append(END_OF_LINE);
 		
 		proteinDTOS.forEach(proteinDTO -> {
+			
+			// find genes of the first protein
+			StringBuilder genes1 = new StringBuilder();
+			proteinDTO.getProtein1().getGeneNames().forEach(gene ->{
+				genes1.append(gene).append(ACCESSION_SEPARATOR);
+			});
+			if(genes1.length() > 0){
+				genes1.setLength(genes1.length() - 1);
+			}
+			
+			// find genes of the second protein
+			StringBuilder genes2 = new StringBuilder();
+			proteinDTO.getProtein2().getGeneNames().forEach(gene -> {
+				genes2.append(gene).append(ACCESSION_SEPARATOR);
+			});
+			if (genes2.length() > 0) {
+				genes2.setLength(genes2.length() - 1);
+			}
 			
 			// find projects accessions
 			StringBuilder projects = new StringBuilder();
@@ -141,27 +168,27 @@ public class TSVExporter implements Serializable{
 				diseases.setLength(diseases.length() - 1);
 			}
 			
-			tsvExport.append(proteinDTO.getProtein1().getUniprotAccession()).append(SEPARATOR).append(proteinDTO.getProtein2().getUniprotAccession()).append(SEPARATOR)
-			.append(proteinDTO.getProtein1().getProteinName()).append(SEPARATOR).append(proteinDTO.getProtein2().getProteinName()).append(SEPARATOR)
-			.append(proteinDTO.getProtein1().getGeneNames()).append(SEPARATOR).append(proteinDTO.getProtein2().getGeneNames()).append(SEPARATOR)
-			.append(proteinDTO.getCommonProjectSize()).append(SEPARATOR).append(projects.toString()).append(SEPARATOR)
-			.append(proteinDTO.getAssociate().get(0).getJaccSimScore()).append(SEPARATOR).append(proteinDTO.getAssociate().get(0).getIntact())
-			.append(SEPARATOR).append(proteinDTO.getAssociate().get(0).getBioGrid()).append(SEPARATOR)
-			.append(proteinDTO.getDistinctPathCount()).append(SEPARATOR).append(pathways.toString()).append(SEPARATOR)
-			.append(proteinDTO.getDistinctComplexCount()).append(SEPARATOR).append(complexes.toString()).append(SEPARATOR)
-			.append(proteinDTO.getAssociate().get(0).getParalog()).append(SEPARATOR)
-			.append(bpSize).append(SEPARATOR).append(bps.toString()).append(SEPARATOR)
-			.append(mfSize).append(SEPARATOR).append(mfs.toString()).append(SEPARATOR)
-			.append(ccSize).append(SEPARATOR).append(ccs.toString()).append(SEPARATOR)
-			.append(proteinDTO.getDiseaseCount()).append(SEPARATOR).append(diseases.toString()).append(END_OF_LINE);
+			export.append(proteinDTO.getProtein1().getUniprotAccession()).append(separator).append(proteinDTO.getProtein2().getUniprotAccession()).append(separator)
+			.append(proteinDTO.getProtein1().getProteinName()).append(separator).append(proteinDTO.getProtein2().getProteinName()).append(separator)
+			.append(genes1.toString()).append(separator).append(genes2.toString()).append(separator)
+			.append(proteinDTO.getCommonProjectSize()).append(separator).append(projects.toString()).append(separator)
+			.append(proteinDTO.getAssociate().get(0).getJaccSimScore()).append(separator).append(proteinDTO.getAssociate().get(0).getIntact())
+			.append(separator).append(proteinDTO.getAssociate().get(0).getBioGrid()).append(separator)
+			.append(proteinDTO.getDistinctPathCount()).append(separator).append(pathways.toString()).append(separator)
+			.append(proteinDTO.getDistinctComplexCount()).append(separator).append(complexes.toString()).append(separator)
+			.append(proteinDTO.getAssociate().get(0).getParalog()).append(separator)
+			.append(bpSize).append(separator).append(bps.toString()).append(separator)
+			.append(mfSize).append(separator).append(mfs.toString()).append(separator)
+			.append(ccSize).append(separator).append(ccs.toString()).append(separator)
+			.append(proteinDTO.getDiseaseCount()).append(separator).append(diseases.toString()).append(END_OF_LINE);
 		});
 	}
 	
-	private void export() {
+	private void export(StringBuilder export) {
         FacesContext fc = FacesContext.getCurrentInstance();
         ExternalContext ec = fc.getExternalContext();
 
-        byte[] exportContent = tsvExport.toString().getBytes();
+        byte[] exportContent = export.toString().getBytes();
         // here something bad happens that the user should know about
         // but this message does not go out to the user
         fc.addMessage(null, new FacesMessage("record 2 was flawed"));
@@ -169,7 +196,13 @@ public class TSVExporter implements Serializable{
         ec.responseReset();
         ec.setResponseContentType("text/plain");
         ec.setResponseContentLength(exportContent.length);
-        String attachmentName = "attachment; filename=\"proteinAssociation.txt\"";
+        String attachmentName = "";
+        if(export.equals(tsvExport)){
+        	attachmentName = "attachment; filename=\"proteinAssociation.txt\"";
+        }else if(export.equals(csvExport)){
+        	attachmentName = "attachment; filename=\"proteinAssociation.csv\"";
+        }
+         
         ec.setResponseHeader("Content-Disposition", attachmentName);
         try {
             OutputStream output = ec.getResponseOutputStream();

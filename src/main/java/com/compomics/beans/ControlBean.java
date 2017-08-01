@@ -104,13 +104,13 @@ public class ControlBean implements Serializable{
 	public void findProteinsByName(){
 		dbService.startSession();
 		String proteinName1 = "";
-		proteinName1 = String.join(".*", FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("protein1").toUpperCase().split(" "));
+		proteinName1 = String.join(".*", FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("protein1").toUpperCase().split("[-\\s]"));
 		proteinName1 = "(?i).*" + proteinName1 + ".*";
 		String proteinName2 = "";
 		proteinDTOs.clear();
 		double jaccScore = 0;
 		if(!FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("protein2").equals("")){
-			proteinName2 = String.join(".*", FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("protein2").toUpperCase().split(" "));
+			proteinName2 = String.join(".*", FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("protein2").toUpperCase().split("[-\\s]"));
 			proteinName2 = "(?i).*" + proteinName2 + ".*";
 		}
 		if(!FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("jacc").equals("")){
