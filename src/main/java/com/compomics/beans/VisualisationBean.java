@@ -180,11 +180,11 @@ public class VisualisationBean implements Serializable{
 				
 				if(proteinDTO.getAssociate().get(0).getJaccSimScore() >= 0.4){
 					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getUniprotAccession()).append("\",\"target\":\"")
-					.append(proteinDTO.getProtein2().getUniprotAccession()).append("\",\"annotation\":\"").append((graphDbManagedBean.getEdgeAnnotations().size() == proteinDTOS.size()) ? graphDbManagedBean.getEdgeAnnotations().get(i) : "")
+					.append(proteinDTO.getProtein2().getUniprotAccession()).append("\",\"annotation\":\"").append((graphDbManagedBean.getEdgeAnnotations().size() >= proteinDTOS.size()) ? graphDbManagedBean.getEdgeAnnotations().get(i) : "")
 					.append("\",\"width\":\"").append(proteinDTO.getAssociate().get(0).getJaccSimScore()*10).append("\",\"faveColor\":\"black\",\"faveStyle\":\"solid\"}}*");
 				}else{
 					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getUniprotAccession()).append("\",\"target\":\"")
-					.append(proteinDTO.getProtein2().getUniprotAccession()).append("\",\"annotation\":\"").append((graphDbManagedBean.getEdgeAnnotations().size() == proteinDTOS.size()) ? graphDbManagedBean.getEdgeAnnotations().get(i) : "")
+					.append(proteinDTO.getProtein2().getUniprotAccession()).append("\",\"annotation\":\"").append((graphDbManagedBean.getEdgeAnnotations().size() >= proteinDTOS.size()) ? graphDbManagedBean.getEdgeAnnotations().get(i) : "")
 					.append("\",\"width\":\"").append(proteinDTO.getAssociate().get(0).getJaccSimScore()*10).append("\",\"faveColor\":\"gray\",\"faveStyle\":\"solid\"}}*");
 				}
 				
@@ -244,11 +244,11 @@ public class VisualisationBean implements Serializable{
 				
 				if(proteinDTO.getAssociate().get(0).getJaccSimScore() >= 0.4){
 					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getGeneNames().get(0)).append("\",\"target\":\"")
-					.append(proteinDTO.getProtein2().getGeneNames().get(0)).append("\",\"annotation\":\"").append((graphDbManagedBean.getEdgeAnnotations().size() == proteinDTOS.size()) ? graphDbManagedBean.getEdgeAnnotations().get(i) : "")
+					.append(proteinDTO.getProtein2().getGeneNames().get(0)).append("\",\"annotation\":\"").append((graphDbManagedBean.getEdgeAnnotations().size() >= proteinDTOS.size()) ? graphDbManagedBean.getEdgeAnnotations().get(i) : "")
 					.append("\",\"width\":\"").append(proteinDTO.getAssociate().get(0).getJaccSimScore()*10).append("\",\"faveColor\":\"black\",\"faveStyle\":\"solid\"}}*");
 				}else{
 					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getGeneNames().get(0)).append("\",\"target\":\"")
-					.append(proteinDTO.getProtein2().getGeneNames().get(0)).append("\",\"annotation\":\"").append((graphDbManagedBean.getEdgeAnnotations().size() == proteinDTOS.size()) ? graphDbManagedBean.getEdgeAnnotations().get(i) : "")
+					.append(proteinDTO.getProtein2().getGeneNames().get(0)).append("\",\"annotation\":\"").append((graphDbManagedBean.getEdgeAnnotations().size() >= proteinDTOS.size()) ? graphDbManagedBean.getEdgeAnnotations().get(i) : "")
 					.append("\",\"width\":\"").append(proteinDTO.getAssociate().get(0).getJaccSimScore()*10).append("\",\"faveColor\":\"gray\",\"faveStyle\":\"solid\"}}*");
 				}
 				

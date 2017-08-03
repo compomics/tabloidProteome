@@ -108,7 +108,7 @@ body {
 			
 			if(($('#doubleAccession1').val().startsWith("P") &#124;&#124; $('#doubleAccession1').val().startsWith("Q")
 			&#124;&#124; $('#doubleAccession1').val().startsWith("O") &#124;&#124; $('#doubleAccession1').val().startsWith("A")) 
-			&amp;&amp; $('#doubleAccession1').val().length() == 6
+			&amp;&amp; $('#doubleAccession1').val().length == 6
 			  &amp;&amp; ($('#doubleAccession2').val().startsWith("P") &#124;&#124; $('#doubleAccession2').val().startsWith("Q")
 			  &#124;&#124; $('#doubleAccession2').val().startsWith("O")&#124;&#124; $('#doubleAccession2').val().startsWith("A")) &amp;&amp; $('#doubleAccession2').val().length == 6
 			){
@@ -333,7 +333,7 @@ body {
 	}
 	
 	function setExamplePathway1() {
-		document.getElementById('pathwayId').value = 'cancer';
+		document.getElementById('pathwayId').value = 'NOD1/2 Signaling Pathway';
 		return false;
 	}
 	
@@ -348,7 +348,7 @@ body {
 	}
 	
 	function setExampleDisease2() {
-		document.getElementById('diseaseId').value = 'C0853879';
+		document.getElementById('diseaseId').value = 'C0018802';
 		return false;
 	}
 </script>
@@ -533,7 +533,7 @@ body {
 						</script>
                         <div class="tab-pane" id="multipleProteinSearch">
                           <div class="panel panel-default" id="multipleSearch">
-                            <div class="panel-heading text-center">PROTEIN SEARCH</div>
+                            <div class="panel-heading text-center">ONE TO ONE MULTIPLE PROTEIN SEARCH</div>
                             <div class="panel-body"> 
                               <button id="addRow"  onClick="insertRow()" class="btn btn-primary" style="display: none">add new row</button>
                               <br/>
@@ -566,17 +566,26 @@ body {
                                   <input type="text" value="0.4" class="col-sm-3" id="jaccardOneToOne" />
                                 </div>
                               </div>
-                              <p id="informationOneToOne">Please upload a file that contains protein pairs and edge annotaion (if available) in the following file formats: xls, xlsx, csv.
+                              <p id="informationOneToOne">Please upload a file that contains <a style="font-weight: bold; color: black;">protein pairs</a> and edge annotaion (if available) in the following file formats: xls, xlsx, csv.
                               The first two columns should be Uniprot accessions of the proteins. If you have edge annotation, you can add it to the 3rd column.
                               The file should not include any title.</p>
-                              <p>Select CSV file to upload:</p>
-                              
-                              
+                              <br/>
+                              <p>Select file to upload:</p>    
                               <input id="readfile" type="file" onchange="loadFile(event)" />
+                              <div class="checkbox">
+                                <label>
+                                  <input type="checkbox" id="edgeAnnotationCheckBox"/> Include edge annotation
+                                </label>
+                              </div>
+                              
                               <script>
         						function loadFile(event) {
         							var table=document.getElementById("oneToOneTable");
         							$("#oneToOneTable tr").remove(); 
+        							var maxColumn = 2;
+        							if($('#edgeAnnotationCheckBox').is(':checked')){
+        								maxColumn = 3;
+        							}
         							
 	        						alasql('SELECT * FROM FILE(?,{headers:false})',[event],function(data){
 	        							for(var obj in data){
@@ -584,7 +593,7 @@ body {
 	        							      var headerIndex = 0;
 	        							      var row=table.insertRow(table.rows.length);		
 	        								  for(var prop in data[obj]){
-	        							        if(data[obj].hasOwnProperty(prop)  &amp;&amp; headerIndex &lt; 3 ){
+	        							        if(data[obj].hasOwnProperty(prop)  &amp;&amp; headerIndex &lt; maxColumn ){
 	    	        							   var cell=row.insertCell(headerIndex);
 	    	        							   cell.innerHTML=data[obj][prop];
 	    	        							   headerIndex++;
@@ -598,6 +607,8 @@ body {
 	        							$("#oneToOneRegion").show();
       								  	$("#informationOneToOne").hide();
 	        						});
+	        						
+	        						$("#readfile").val("");
          						}
         						
         						function insertRow(){
@@ -628,6 +639,8 @@ body {
                               <div align="center">
                                 <button class="btn btn-primary" onclick="searchMultipleProtein()"
                                   style="width: 104px;" >Search</button>
+                                  <button class="btn btn-default" onclick="$('#oneToOneRegion').hide(); $('#oneToOneTable tr').remove(); $('#informationOneToOne').show();"
+                                  style="width: 104px;" >Clean</button>
                               </div>
                               
                               
@@ -656,12 +669,12 @@ body {
 										<span style="float: right; font-size: 11px;"> <a
 											href="#" style="text-decoration: underline; color: #62605E;"
 											onclick="setExampleGeneSingle2()">1107</a></span> 
-                                        <span style="float: right; font-size: 11px; color: #62605E;"> Gene Id: &#160; </span>
+                                        <span style="float: right; font-size: 11px; color: #62605E;">Entrez Gene Id: &#160; </span>
 									</div>
 									<form>
 										<div class="input-group input-group col-sm-9 col-sm-offset-1">
 											<input type="text" class="form-control"
-												placeholder="Gene Name or Gene Id" id="geneId" />
+												placeholder="Gene Name or Entrez Gene Id" id="geneId" />
 										</div>
 										<br />
 										
@@ -697,12 +710,12 @@ body {
 									<form>
 										<div class="input-group input-group col-sm-9 col-sm-offset-1">
 											<input type="text" class="form-control"
-												placeholder="1st Gene Name or Gene Id" id="geneId1" />
+												placeholder="1st Gene Name or Entrez Gene Id" id="geneId1" />
 										</div>
 										<br />
 										<div class="input-group input-group col-sm-9 col-sm-offset-1">
 											<input type="text" class="form-control"
-												placeholder="2nd Gene Name or Gene Id" id="geneId2" />
+												placeholder="2nd Gene Name or Entrez Gene Id" id="geneId2" />
 										</div>
 										<br />
 										
@@ -735,7 +748,7 @@ body {
 										 <span
 											style="float: right; font-size: 11px;"> <a href="#"
 											style="text-decoration: underline; color: #62605E;"
-											onclick="setExamplePathway1()">cancer</a>
+											onclick="setExamplePathway1()">NOD1/2 Signaling Pathway</a>
 										</span>
                                         <span style="float: right; font-size: 11px; color: #62605E;"> Pathway name: &#160; </span>
                                         
@@ -783,7 +796,7 @@ body {
                                                                                 <br/>
 										<span style="float: right; font-size: 11px;"> <a
 											href="#" style="text-decoration: underline; color: #62605E;"
-											onclick="setExampleDisease2()">C0853879</a></span> 
+											onclick="setExampleDisease2()">C0018802</a></span> 
                                         <span style="float: right; font-size: 11px; color: #62605E;">DisGeNET Id: &#160; </span>
                                         
 									</div>
@@ -940,7 +953,8 @@ body {
 												<th>2nd Uniprot Accession</th>
 												<th>2nd Gene Name</th>
 												<th>2nd Protein Name</th>
-												<th></th>
+												<th>2nd Protein Name</th>
+												<th>Jaccard Similarity Threshold</th>
 											</tr>
 										</thead>
 										<tbody>

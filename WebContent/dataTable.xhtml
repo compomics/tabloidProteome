@@ -80,6 +80,7 @@ body {
     <!-- Page Content -->
     <div class="container" id="content">
       <input type="hidden" id="control" value="#{graphDbManagedBean.control}" />
+      <input type="hidden" id="msg" value="#{graphDbManagedBean.multiSearchMessage}" />
       <h1></h1>
       <a href="/tabloidproteome/graph.xhtml?graph=proteinView" style="float: right;">
       <button type="button"  class="btn btn-default">
@@ -100,7 +101,10 @@ body {
         </div>
       </h:form>
       <p style="font-weight: bold;">Total number of protein pairs found: #{graphDbManagedBean.proteinDTOS.size()}</p>
-      <p style="font-weight: bold;">#{graphDbManagedBean.multiSearchMessage}</p>
+      <div id="multiSearchMessage" style="display: none;">
+        <p style="font-weight: bold;">#{graphDbManagedBean.multiSearchMessage} Click <a target="_blank"  href="/tabloidproteome/pairs.xhtml">here</a> to see the pair(s)</p>
+      </div>
+      
       <p style="color:grey; font-style: italic;">Please click on the protein pair of interest</p>
       <h3 style="text-align: center;">Protein Association Data Table</h3>
       <table class="table table-hover table-expandable table-sticky-header table-custom" id="mainTable">
@@ -485,6 +489,10 @@ body {
 	  		
 	  	 	if ($('#mainTable > tbody > tr').length == 0){
 	  			$("#mainTable").find('tbody').append("<tr><td>No relation found for the given protein(s)</td></tr>")
+	  	 	}
+	  	 	
+	  	 	if($('#msg').val() != ""){
+	  	 		document.getElementById('multiSearchMessage').style.display = 'block';
 	  	 	}
 	  	});
 	  	

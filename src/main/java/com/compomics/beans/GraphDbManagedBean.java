@@ -35,7 +35,7 @@ public class GraphDbManagedBean implements Serializable{
     private String control;
     private List<String> edgeAnnotations = new ArrayList<>();
     private String multiSearchMessage ;
-
+    private List<String> pairsNotFound = new ArrayList<>();
     
     // queries
     private static final String SINGLE_PROTEIN_QUERY = "singleProteinSearch";
@@ -113,6 +113,10 @@ public class GraphDbManagedBean implements Serializable{
 		return multiSearchMessage;
 	}
 
+	public List<String> getPairsNotFound() {
+		return pairsNotFound;
+	}
+
 
 	@PostConstruct
     private void init(){
@@ -158,6 +162,8 @@ public class GraphDbManagedBean implements Serializable{
 	}
 	
 	public void searchListOfProteins(){
+		multiSearchMessage = "";
+		pairsNotFound.clear();
 		dbService.startSession();
 		String array1 = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("array1"); 
 		String array2 = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("array2"); 
@@ -165,12 +171,24 @@ public class GraphDbManagedBean implements Serializable{
 		double jaccScore = Double.valueOf(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("jacc")); 
 		
 		proteinDTOS = dbService.getProteinDTOListForMultipleProteins(Arrays.asList(array1.split("\\s*,\\s*")), Arrays.asList(array2.split("\\s*,\\s*")), jaccScore);
+		
 		if(Arrays.asList(array1.split("\\s*,\\s*")).size() - proteinDTOS.size() > 0){
+			List<String> accessions1 = new ArrayList<>();
+			List<String> accessions2 = new ArrayList<>();
+			proteinDTOS.forEach(p->{
+				accessions1.add(p.getProtein1().getUniprotAccession());
+				accessions2.add(p.getProtein2().getUniprotAccession());
+			});
 			multiSearchMessage = Arrays.asList(array1.split("\\s*,\\s*")).size() - proteinDTOS.size() + " protein pair(s) cannot be found.";
+			for(int i=0; i<array1.split("\\s*,\\s*").length; i++){
+				if(!accessions1.contains(array1.split("\\s*,\\s*")[i]) || !accessions2.contains(array2.split("\\s*,\\s*")[i])){
+					pairsNotFound.add(array1.split("\\s*,\\s*")[i] + ", "+ array2.split("\\s*,\\s*")[i]);
+				}
+			}
 		}
 		
 		visualisationBean.load(this);
-		edgeAnnotations = Arrays.asList(array3.split("\\s*,\\s*"));
+		edgeAnnotations = Arrays.asList(array3.split(","));
 		dbService.closeSession();
 	}
 	
@@ -180,6 +198,8 @@ public class GraphDbManagedBean implements Serializable{
 	
 	private void getProteinDTOs() {
 		multiSearchMessage = "";
+		pairsNotFound.clear();
+
 		proteinDTOS.clear();
 		if (selectionType.equals("single")) {
 			getSingleProteinDTOs();
