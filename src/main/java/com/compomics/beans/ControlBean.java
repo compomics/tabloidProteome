@@ -2,12 +2,15 @@ package com.compomics.beans;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.compomics.neo4j.database.Service;
 import com.compomics.neo4j.model.dataTransferObjects.DiseaseDTO;
@@ -104,13 +107,32 @@ public class ControlBean implements Serializable{
 	public void findProteinsByName(){
 		dbService.startSession();
 		String proteinName1 = "";
-		proteinName1 = String.join(".*", FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("protein1").toUpperCase().split("[-\\s]"));
+		
+		if(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("protein1").toUpperCase().split("[-\\s]")
+				[FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("protein1").toUpperCase().split("[-\\s]").length -1].
+				equals("PROTEIN")){
+			proteinName1 = String.join(".*", Arrays.copyOf(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("protein1").toUpperCase().split("[-\\s]"), 
+					FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("protein1").toUpperCase().split("[-\\s]").length-1));
+				
+		}else{
+			proteinName1 = String.join(".*", FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("protein1").toUpperCase().split("[-\\s]"));
+		}
+		
 		proteinName1 = "(?i).*" + proteinName1 + ".*";
 		String proteinName2 = "";
 		proteinDTOs.clear();
 		double jaccScore = 0;
 		if(!FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("protein2").equals("")){
-			proteinName2 = String.join(".*", FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("protein2").toUpperCase().split("[-\\s]"));
+		
+			if(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("protein2").toUpperCase().split("[-\\s]")
+					[FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("protein2").toUpperCase().split("[-\\s]").length -1].
+					equals("PROTEIN")){
+				proteinName2 = String.join(".*", Arrays.copyOf(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("protein2").toUpperCase().split("[-\\s]"), 
+						FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("protein2").toUpperCase().split("[-\\s]").length-1));
+					
+			}else{
+				proteinName2 = String.join(".*", FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("protein2").toUpperCase().split("[-\\s]"));
+			}
 			proteinName2 = "(?i).*" + proteinName2 + ".*";
 		}
 		if(!FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("jacc").equals("")){
@@ -127,6 +149,9 @@ public class ControlBean implements Serializable{
 		if(pathway.startsWith("R-HSA")){
 			pathwayDTOs = dbService.findPathwayDTOs(pathway);
 		}else{
+			if(pathway.split(" ")[pathway.split(" ").length-1].equals("PATHWAY")){
+				pathway = StringUtils.join(Arrays.copyOf(pathway.split(" "), pathway.split(" ").length-1), " ");
+			}
 			pathwayDTOs = dbService.findPathwayDTOs(".*"+pathway+".*");
 		}
 		dbService.closeSession();
@@ -138,6 +163,9 @@ public class ControlBean implements Serializable{
 		if(disease.startsWith("C") && disease.length()==8){
 			diseaseDTOs = dbService.findDiseaseDTOs(disease);
 		}else{
+			if(disease.split(" ")[disease.split(" ").length-1].equals("DISEASE")){
+				disease = StringUtils.join(Arrays.copyOf(disease.split(" "), disease.split(" ").length-1), " ");
+			}
 			diseaseDTOs = dbService.findDiseaseDTOs(".*"+disease+".*");
 		}
 		dbService.closeSession();

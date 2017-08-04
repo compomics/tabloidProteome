@@ -470,13 +470,7 @@ body {
 								</div>
 							</div>
 						</div>
-						<script>
-						$("#singleAccession").keyup(function(event){
-					        if(event.keyCode == 13){
-					            $("#btnSingle").click();
-					        }
-					    });
-						</script>
+						
 						<div class="tab-pane" id="doubleProteinSearch">
 							<div class="panel panel-default" id="doubleSearch">
 								<div class="panel-heading text-center">PROTEIN SEARCH</div>
@@ -519,18 +513,7 @@ body {
 								</div>
 							</div>
 						</div>
-						<script>
-						$("#doubleAccession1").keyup(function(event){
-					        if(event.keyCode == 13){
-					            $("#btnDouble").click();
-					        }
-					    });
-					    $("#doubleAccession2").keyup(function(event){
-					        if(event.keyCode == 13){
-					            $("#btnDouble").click();
-					        }
-					    });
-						</script>
+						
                         <div class="tab-pane" id="multipleProteinSearch">
                           <div class="panel panel-default" id="multipleSearch">
                             <div class="panel-heading text-center">ONE TO ONE MULTIPLE PROTEIN SEARCH</div>
@@ -648,11 +631,7 @@ body {
                           </div>
                         </div>
                        
-                        <script>
-                        
-                        
-                        
-                        </script>
+                       
 						<div class="tab-pane" id="singleGeneSearch">
 							<div class="panel panel-default" id="gene"
 								style="display: block;">
@@ -686,13 +665,7 @@ body {
 								</div>
 							</div>
 						</div>
-						<script>
-						$("#geneId").keyup(function(event){
-					        if(event.keyCode == 13){
-					            $("#btnSingleGene").click();
-					        }
-					    });				   
-						</script>
+						
 						<div class="tab-pane" id="doubleGeneSearch">
 							<div class="panel panel-default" id="gene"
 								style="display: block;">
@@ -727,18 +700,7 @@ body {
 								</div>
 							</div>
 						</div>
-						<script>
-						$("#geneId1").keyup(function(event){
-					        if(event.keyCode == 13){
-					            $("#btnDoubleGene").click();
-					        }
-					    });	
-						$("#geneId2").keyup(function(event){
-					        if(event.keyCode == 13){
-					            $("#btnDoubleGene").click();
-					        }
-					    });			
-						</script>
+						
 						<div class="tab-pane" id="pathwaySearch">
 							<div class="panel panel-default" id="pathway"
 								style="display: block;">
@@ -774,13 +736,7 @@ body {
 								</div>
 							</div>
 						</div>
-						<script>
-						$("#pathwayId").keyup(function(event){
-					        if(event.keyCode == 13){
-					            $("#btnPathwaySearch").click();
-					        }
-					    });			
-						</script>
+						
 						<div class="tab-pane" id="diseaseSearch">
 							<div class="panel panel-default" id="disease"
 								style="display: block;">
@@ -815,13 +771,7 @@ body {
 								</div>
 							</div>
 						</div>
-						<script>
-						$("#diseaseId").keyup(function(event){
-					        if(event.keyCode == 13){
-					            $("#btnDiseaseSearch").click();
-					        }
-					    });			
-						</script>
+						
 					</div>
 				</div>
 			</div>
@@ -952,7 +902,6 @@ body {
 												<th>1st Protein Name</th>
 												<th>2nd Uniprot Accession</th>
 												<th>2nd Gene Name</th>
-												<th>2nd Protein Name</th>
 												<th>2nd Protein Name</th>
 												<th>Jaccard Similarity Threshold</th>
 											</tr>
