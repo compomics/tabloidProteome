@@ -69,10 +69,9 @@ body {
 	<script type="text/javascript">
 
 	function searchSingle(){
+
 		if($('#singleAccession').val() != ""){
-			if(($('#singleAccession').val().startsWith("P") &#124;&#124; $('#singleAccession').val().startsWith("O") &#124;&#124; 
-				$('#singleAccession').val().startsWith("Q") &#124;&#124; $('#singleAccession').val().startsWith("A")) 
-				&amp;&amp; $('#singleAccession').val().length == 6){
+			if(isValidUniprotAcc($('#singleAccession').val())){
 				window.location = '/tabloidproteome/dataTable.xhtml?accession='+ $('#singleAccession').val()
 	    		+ '&amp;jaccard=' + $('#jaccardSingle').val();
 		
@@ -106,12 +105,7 @@ body {
 	function searchDouble(){
 		if($('#doubleAccession1').val() != ""  &amp;&amp; $('#doubleAccession2').val() != "" ){
 			
-			if(($('#doubleAccession1').val().startsWith("P") &#124;&#124; $('#doubleAccession1').val().startsWith("Q")
-			&#124;&#124; $('#doubleAccession1').val().startsWith("O") &#124;&#124; $('#doubleAccession1').val().startsWith("A")) 
-			&amp;&amp; $('#doubleAccession1').val().length == 6
-			  &amp;&amp; ($('#doubleAccession2').val().startsWith("P") &#124;&#124; $('#doubleAccession2').val().startsWith("Q")
-			  &#124;&#124; $('#doubleAccession2').val().startsWith("O")&#124;&#124; $('#doubleAccession2').val().startsWith("A")) &amp;&amp; $('#doubleAccession2').val().length == 6
-			){
+			if(isValidUniprotAcc($('#doubleAccession1').val()) &amp;&amp; isValidUniprotAcc($('#doubleAccession2').val())){
 				window.location = '/tabloidproteome/dataTable.xhtml?accession1=' + $('#doubleAccession1').val()
 	        	+ '&amp;accession2=' + $('#doubleAccession2').val() + '&amp;jaccard=' + $('#jaccardDouble').val();
 		
@@ -142,6 +136,20 @@ body {
             dialogInstance.open();
     	}
 		return false;
+	}
+	
+	function isValidUniprotAcc(accession){
+		if (accession.trim() == "") {
+            return false;
+        }
+        if (accession.length != 6 &amp;&amp; accession.length != 10) {
+        	return false;
+        }
+        var r = new RegExp("[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}", "i");
+        if(accession.match(r)){
+        	return true;
+        }
+        return false;
 	}
 	
 	function searchMultipleProtein(){
@@ -984,6 +992,7 @@ body {
             <div class="col-sm-1">
               <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml" class="text-muted">Help</a></p>
               <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml#documentation" class="text-sub">Documentation</a></p>
+              <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml#sourceCode" class="text-sub">Source Code &amp; Api</a></p>
               <p class="credit"><a href="/tabloidproteome/help.xhtml#contact" class="text-sub">Contact</a></p>
             </div>
           </div>
