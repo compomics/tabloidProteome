@@ -58,6 +58,7 @@ public class Service implements Serializable{
 	private static final String DISEASE_FIND_PROTEIN = "findProteinsByDisease";
 	private static final String PROTEIN_FIND_BY_NAME_SINGLE = "searchByProteinNameSingle";
 	private static final String PROTEIN_FIND_BY_NAME_DOUBLE = "searchByProteinNameDouble";
+	private static final String PROTEIN_FIND_BY_TISSUE = "findProteinsByTissue";
 	private static final String ONE_TO_ONE_SEARCH = "oneToOneSearch";
 
 	public Service() {
@@ -107,6 +108,14 @@ public class Service implements Serializable{
 				proteins = searchProteinByName(PROTEIN_FIND_BY_NAME_SINGLE, proteinName1, proteinName2, jaccScore);
 			}else{
 				proteins = searchProteinByName(PROTEIN_FIND_BY_NAME_DOUBLE, proteinName1, proteinName2, jaccScore);
+				for(int i=0; i<proteins.size(); i++){
+				      for(int j=i; j<proteins.size(); j++){
+				      	if(proteins.get(i).getProtein1().getUniprotAccession().equals(proteins.get(j).getProtein2().getUniprotAccession()) 
+				      			&& proteins.get(i).getProtein2().getUniprotAccession().equals(proteins.get(j).getProtein1().getUniprotAccession())){
+				      		proteins.remove(j);
+				        }
+				      }
+				 }
 			}
 			
 		} catch (IOException e) {
@@ -120,6 +129,9 @@ public class Service implements Serializable{
 				}
 			}
 		}
+		
+		
+		
 		return proteins;
 	}
 	
@@ -152,6 +164,7 @@ public class Service implements Serializable{
 				associates.add(associate);
 				proteinDTO.setAssociate(associates);
 			}
+			
 			proteins.add(proteinDTO);	
 		}
 		
@@ -311,6 +324,61 @@ public class Service implements Serializable{
 		
 			proteinDTOS.add(proteinDTO);		
 		}
+		
+		Collections.sort(proteinDTOS, new Comparator<ProteinDTO>() {
+			@Override
+			public int compare(ProteinDTO o1, ProteinDTO o2) {
+				return o2.getAssociate().get(0).getJaccSimScore().compareTo(o1.getAssociate().get(0).getJaccSimScore());
+			}
+		});
+		
+		return proteinDTOS;
+	}
+	
+	/**
+	 * Get Protein DTO list by tissue name
+	 * @param tissue : tissue name
+	 * @return List of proteinDTO
+	 */
+	public List<ProteinDTO> getProteinDTOsByTissue(String tissue){
+		List<ProteinDTO> proteinDTOS = new ArrayList<>();
+		try{
+			input = getClass().getClassLoader().getResourceAsStream("query.properties");
+			prop.load(input);
+			parameters = new HashMap<String, Object>();
+			parameters.put("tissueName", tissue);
+			StatementResult result = session.run(prop.getProperty(PROTEIN_FIND_BY_TISSUE), parameters);
+			while (result.hasNext()) {
+				Record record = result.next();
+				ProteinDTO proteinDTO = new ProteinDTO();
+				Protein protein1 = new Protein();
+				protein1.setUniprotAccession(record.get("uniprot_accession1").asString());
+				protein1.setProteinName(record.get("protein_name1").asString());
+				proteinDTO.setProtein1(protein1);
+				Protein protein2 = new Protein();
+				protein2.setUniprotAccession(record.get("uniprot_accession2").asString());
+				protein2.setProteinName(record.get("protein_name2").asString());
+				proteinDTO.setProtein2(protein2);
+				Associate associate = new Associate();
+				associate.setJaccSimScore(record.get("jacc_sim_score").asDouble());
+				List<Associate> associates = new ArrayList<>();
+				associates.add(associate);
+				proteinDTO.setAssociate(associates);
+				proteinDTO.setTissueName(record.get("tissue_name").asString());
+				proteinDTOS.add(proteinDTO);		
+			}
+		}catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (input != null) {
+				try {
+					input.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
 		
 		Collections.sort(proteinDTOS, new Comparator<ProteinDTO>() {
 			@Override
@@ -761,5 +829,7 @@ public class Service implements Serializable{
 		}
 		return proteins;
 	}
+	
+	
 	
 }

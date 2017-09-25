@@ -45,6 +45,8 @@ public class ProteinDTO implements Serializable{
     private int commonProjectSize;
    
     private int diseaseCount;
+    
+    private String tissueName;
 
     public ProteinDTO() {
     }
@@ -159,6 +161,14 @@ public class ProteinDTO implements Serializable{
 
 	public void setDiseaseCount(int diseaseCount) {
 		this.diseaseCount = diseaseCount;
+	}
+
+	public String getTissueName() {
+		return tissueName;
+	}
+
+	public void setTissueName(String tissueName) {
+		this.tissueName = tissueName;
 	}
 
 

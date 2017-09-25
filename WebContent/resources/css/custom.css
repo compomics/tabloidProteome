@@ -52,6 +52,11 @@
     max-height: 100px;
     overflow-y: auto;
 } 
+
+.inner_table_large {
+    max-height: 300px;
+    overflow-y: auto;
+} 
  #cy {
 	height: 200px;
 	width: 100%;
@@ -118,4 +123,33 @@ tr.shown td.details-control {
     padding: 6px 12px;
     cursor: pointer;
     background-color: white;
+}
+
+  .select_join {
+   
+width: 170px;
+   height: 28px;
+   overflow: hidden;
+   border: gray 1px solid;
+-webkit-border-radius: 3px;
+background: url('http://s24.postimg.org/lyhytocf5/dropdown.png') no-repeat right #FEFEFE;
+border-radius: 3px;
+-webkit-box-shadow: inset 0px 0px 10px 1px #FEFEFE;
+box-shadow: inset 0px 0px 10px 1px #FEFEFE;
+   }
+.select_join select {
+  
+   background: transparent;
+   width: 170px;
+   font-size:12pt;
+   color:black;
+   border: 0;
+   border-radius: 0;
+   height: 28px;
+   -webkit-appearance: none;
+   
+   }
+   .select_join select:focus {
+    outline: none;
+
 }

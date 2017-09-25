@@ -52,10 +52,16 @@ body {
 			$(function() {
 				if (window.location.search == "?pathway") {
 					document.getElementById("diseaseRegion").style.display = 'none';
+					document.getElementById("tissueRegion").style.display = 'none';
 					document.getElementById("pathwayRegion").style.display = 'block';
 				} else if (window.location.search == "?disease") {
 					document.getElementById("pathwayRegion").style.display = 'none';
+					document.getElementById("tissueRegion").style.display = 'none';
 					document.getElementById("diseaseRegion").style.display = 'block';
+				}else if (window.location.search == "?tissue") {
+					document.getElementById("pathwayRegion").style.display = 'none';
+					document.getElementById("diseaseRegion").style.display = 'none';
+					document.getElementById("tissueRegion").style.display = 'block';
 				}
 			});
 		</script>
@@ -131,7 +137,7 @@ body {
                       <th style="width: 5%">Jaccard Similarity</th>
                     </tr>
                   </table>
-                  <div class="inner_table">
+                  <div class="inner_table_large">
                     <table>
                       <ui:repeat var="proteinDTO" value="#{pathway.proteinDTOs}">
                         <tr >
@@ -194,7 +200,7 @@ body {
                       <th style="width: 5%">Jaccard Similarity</th>
                     </tr>
                   </table>
-                  <div class="inner_table">
+                  <div class="inner_table_large">
                     <table>
                       <ui:repeat var="proteinDTO" value="#{disease.proteinDTOs}">
                         <tr>
@@ -218,6 +224,44 @@ body {
         </tbody>
       </table>
     </div>
+    
+    <div id="tissueRegion" style="display: none;">
+    <h1></h1>
+      <p>Jaccard similarity threshold is set as 0.4 for this search. If you want to see more results with lower threshold, please contact us.</p>
+      <p style="font-weight: bold;">Total number of protein pairs found: #{controlBean.proteinDTOs.size()}</p>
+
+      <table class="table table-hover table-sticky-header table-custom">
+        <thead>
+          <tr>
+            <th></th>
+            <th>1st Uniprot Accession</th>
+            <th>1st Protein Name</th>
+            <th>2nd Uniprot Accession</th>
+            <th>2nd Protein Name</th>
+            <th>Jaccard Similarity</th>
+            <th>Tissue Name</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <ui:repeat var="proteinDTO" value="#{controlBean.proteinDTOs}">
+            <tr>
+              <td><a href="/tabloidproteome/dataTable.xhtml?accession1=#{proteinDTO.protein1.uniprotAccession}&amp;accession2=#{proteinDTO.protein2.uniprotAccession}&amp;jaccard=#{proteinDTO.associate[0].jaccSimScore}">
+               <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+               </a></td>
+              <td>#{proteinDTO.protein1.uniprotAccession}</td>
+              <td>#{proteinDTO.protein1.proteinName}</td>
+              <td>#{proteinDTO.protein2.uniprotAccession}</td>
+              <td>#{proteinDTO.protein2.proteinName}</td>
+              <td>#{proteinDTO.associate[0].jaccSimScore}</td>
+              <td>#{proteinDTO.tissueName}</td>
+            </tr>
+          </ui:repeat>
+        </tbody>
+      </table>
+    </div>
+    
+    
     </div>
     <div id="footer">
           <div class="container">
@@ -258,8 +302,8 @@ body {
             </div>
             <div class="col-sm-1">
               <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml" class="text-muted">Help</a></p>
-              <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml#documentation" class="text-sub">Documentation</a></p>
-              <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml#sourceCode" class="text-sub">Source Code  &amp; Api</a></p>
+              <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml#faq" class="text-sub">FAQ</a></p>
+              <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml#userGuide" class="text-sub">User Guide</a></p>
               <p class="credit"><a href="/tabloidproteome/help.xhtml#contact" class="text-sub">Contact</a></p>
             </div>
           </div>

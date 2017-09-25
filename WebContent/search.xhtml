@@ -48,6 +48,8 @@
 		type="text/javascript"></script>  
     <script src="https://rawgit.com/agershun/alasql/develop/dist/alasql.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/xlsx.full.min.js"></script>
+    
+    <script src="/tabloidproteome/resources/js/tissue.js"></script>
 	<style>
   
 body {
@@ -67,6 +69,14 @@ body {
 
 </script>
 	<script type="text/javascript">
+	
+	$('html').bind('keypress', function(e)
+			{
+			   if(e.keyCode == 13)
+			   {
+			      return false;
+			   }
+			});
 
 	function searchSingle(){
 
@@ -76,6 +86,7 @@ body {
 	    		+ '&amp;jaccard=' + $('#jaccardSingle').val();
 		
 			}else{
+				
 				passSingleProteinNameToJSFManagedBean ([ {
                     name : 'protein1',
                     value :  document.getElementById("singleAccession").value
@@ -275,9 +286,30 @@ body {
 		}
     }
     
+    function searchTissue(){
+    	var e = document.getElementById("selectTissue");   	
+    	
+    	if(e.selectedIndex != 0){
+    		passTissueNameToJSFManagedBean ([ {
+                name : 'tissue',
+                value :  e.options[e.selectedIndex].value
+               }
+             ]);
+		}else{
+			var dialogInstance = new BootstrapDialog();
+            dialogInstance.setTitle('INPUT ERROR');
+            dialogInstance.setMessage('Please select a tissue to search!');
+            dialogInstance.setType(BootstrapDialog.TYPE_DANGER);
+            dialogInstance.open();
+		}
+    }
     
     function clickButton1() {
         document.getElementById('btnprotein1').click();
+        var els=document.getElementsByName("jaccValue");
+		for (var i=0; i &lt; els.length; i++) {
+			document.getElementById(els[i].id).value  = document.getElementById("jaccardSingle").value;
+		}
         return false;
     }
     function clickButton2() {
@@ -297,6 +329,12 @@ body {
     }
     function clickButton5() {
     	window.location = '/tabloidproteome/dataTable.xhtml';
+        return false;
+    }
+    
+    function clickButton6() {
+    	$('#progressModal').modal('hide');
+    	window.location = '/tabloidproteome/detailedSearch.xhtml?tissue';
         return false;
     }
 	function setExampleSingle1() {
@@ -359,6 +397,7 @@ body {
 		document.getElementById('diseaseId').value = 'C0018802';
 		return false;
 	}
+	
 </script>
 </h:head>
 
@@ -423,7 +462,7 @@ body {
 									Single Protein Search</a><br /> <br /> <a
 									href="#doubleProteinSearch" data-toggle="tab">> Two Protein
 									Search</a><br /> <br />
-                                    <a href="#multipleProteinSearch" data-toggle="tab">> Multiple Protein
+                                    <a href="#multipleProteinSearch" data-toggle="tab">> Multiple Protein Pair
                                       Search</a><br /> <br />
 							</div></li>
 						<li><a>Gene Search</a>
@@ -436,6 +475,8 @@ body {
 								Search</a></li>
 						<li><a href="#diseaseSearch" data-toggle="tab">Disease
 								Search</a></li>
+                        <li><a href="#tissueSearch" data-toggle="tab">Tissue
+                          Search</a></li>
 					</ul>
 				</div>
 				<div class="col-sm-6">
@@ -524,7 +565,7 @@ body {
 						
                         <div class="tab-pane" id="multipleProteinSearch">
                           <div class="panel panel-default" id="multipleSearch">
-                            <div class="panel-heading text-center">ONE TO ONE MULTIPLE PROTEIN SEARCH</div>
+                            <div class="panel-heading text-center">ONE TO ONE MULTIPLE PROTEIN PAIR SEARCH</div>
                             <div class="panel-body"> 
                               <button id="addRow"  onClick="insertRow()" class="btn btn-primary" style="display: none">add new row</button>
                               <br/>
@@ -780,6 +821,31 @@ body {
 							</div>
 						</div>
 						
+            <div class="tab-pane" id="tissueSearch">
+              <div class="panel panel-default" id="tissue"
+                style="display: block;">
+                <div class="panel-heading text-center">TISSUE SEARCH</div>
+                <div class="panel-body">
+                  <div class= "row">
+                    <div class= "col-sm-4">
+                      <div class="select_join" align="center">
+                        <select id="selectTissue" style="">
+                          <option>Choose a tissue</option>
+                         </select>
+                      </div>
+                    </div>
+                    <div class= "col-sm-4">
+                      <div align="center">
+                      <button type="button" class="btn btn-primary"  data-toggle="modal" data-target="#progressModal" id="btnTissueSearch"
+                        style="width: 104px;" onclick="searchTissue()">Search</button>
+                    </div>
+                    </div>
+                  </div>          
+
+                </div>
+              </div>
+            </div>
+            
 					</div>
 				</div>
 			</div>
@@ -823,7 +889,9 @@ body {
                 <p:remoteCommand name="passProteinsJSONToJSFManagedBean"
                     action="#{graphDbManagedBean.searchListOfProteins}" process="@this"
                     oncomplete="clickButton5();" />
-          
+                <p:remoteCommand name="passTissueNameToJSFManagedBean"
+                    action="#{controlBean.findProteinDTOsByTissue}" process="@this"
+                    oncomplete="clickButton6();" />
 			</h:form>
 
 
@@ -837,11 +905,8 @@ body {
 
 							<div class="modal-content">
 								<div class="modal-body">
-									<button type="button" class="close btn btn-default"
-										aria-label="Close" data-dismiss="modal">
-										<span class="glyphicon glyphicon-remove-sign"
-											aria-hidden="true"></span>
-									</button>
+									<button type="button" class="btn btn-default" style="float: right;"
+										data-dismiss="modal">Close</button>
                                     <p style="font-weight: bold;">Total number of proteins found: #{controlBean.proteinDTOs.size()}</p>
 									<p style="color:grey; font-style: italic;">Please search the protein/gene of interest. Select Jaccard Similarity Threshold to see associated protein pairs.</p>
 									<table class="table table-hover" id="geneProteinSingle">
@@ -872,7 +937,7 @@ body {
                      			</ui:repeat>
                      			</td>
 													<td>#{protein.protein1.proteinName}</td>
-													<td><input type="text" value="0.4" id="jaccardGeneSingle#{protein.protein1.uniprotAccession}" /></td>
+													<td><input name="jaccValue" type="text" id="jaccardGeneSingle#{protein.protein1.uniprotAccession}" /></td>
 												</tr>
 											</ui:repeat>
 										</tbody>
@@ -891,14 +956,12 @@ body {
 				<h:panelGroup layout="block" id="proteinPanel2">
 					<div class="modal fade" tabindex="-1" role="dialog" id="proteins2"
 						aria-hidden="true">
-						<div class="modal-dialog-lg" role="document">
+						<div class="modal-dialog-lg" role="document" style="width : 80%;">
 
 							<div class="modal-content">
 								<div class="modal-body">
-									<button type="button" class="close" data-dismiss="modal"
-										aria-label="Close">
-										<span aria-hidden="true">&#xA0;</span>
-									</button>
+									<button type="button" class="btn btn-default" style="float: right;"
+										data-dismiss="modal">Close</button>
                                     <p style="font-weight: bold;">Total number of protein pairs found: #{controlBean.proteinDTOs.size()}</p>
 									<p style="color:grey; font-style: italic;">Please select the protein/gene pair of interest</p>
 									<table class="table table-hover" id="geneProteinDouble">
@@ -991,8 +1054,8 @@ body {
             </div>
             <div class="col-sm-1">
               <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml" class="text-muted">Help</a></p>
-              <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml#documentation" class="text-sub">Documentation</a></p>
-              <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml#sourceCode" class="text-sub">Source Code &amp; Api</a></p>
+              <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml#faq" class="text-sub">FAQ</a></p>
+              <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml#userGuide" class="text-sub">User Guide</a></p>
               <p class="credit"><a href="/tabloidproteome/help.xhtml#contact" class="text-sub">Contact</a></p>
             </div>
           </div>

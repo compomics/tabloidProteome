@@ -3,6 +3,8 @@ package com.compomics.beans;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -155,6 +157,13 @@ public class ControlBean implements Serializable{
 			pathwayDTOs = dbService.findPathwayDTOs(".*"+pathway+".*");
 		}
 		dbService.closeSession();
+		
+		Collections.sort(pathwayDTOs, new Comparator<PathwayDTO>() {
+			@Override
+			public int compare(PathwayDTO o1, PathwayDTO o2) {
+				return new Integer(o2.getProteinDTOs().size()).compareTo(o1.getProteinDTOs().size());
+			}
+		});
 	}
 	
 	public void findDiseaseDTOs(){
@@ -169,5 +178,23 @@ public class ControlBean implements Serializable{
 			diseaseDTOs = dbService.findDiseaseDTOs(".*"+disease+".*");
 		}
 		dbService.closeSession();
+		
+		
+		Collections.sort(diseaseDTOs, new Comparator<DiseaseDTO>() {
+			@Override
+			public int compare(DiseaseDTO o1, DiseaseDTO o2) {
+				return new Integer(o2.getProteinDTOs().size()).compareTo(o1.getProteinDTOs().size());
+			}
+		});
+	}
+	
+	public void findProteinDTOsByTissue(){
+		dbService.startSession();
+		String tissue = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("tissue"); 
+		
+		proteinDTOs = dbService.getProteinDTOsByTissue("(?i).*"+tissue+".*");
+		
+		dbService.closeSession();
+		
 	}
 }
