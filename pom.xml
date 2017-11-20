@@ -81,6 +81,7 @@
   			<artifactId>swagger-jersey-jaxrs</artifactId>
   			<version>1.5.0</version>
 		</dependency>
+		
 	</dependencies>
 	<repositories>
 		<repository>

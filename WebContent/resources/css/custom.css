@@ -58,10 +58,10 @@
     overflow-y: auto;
 } 
  #cy {
-	height: 200px;
+	height: 180px;
 	width: 100%;
 	overflow: hidden;
-
+	border: 1px solid 	#E0E0E0;
 }
 
 @media (min-height:  450px) { #cy { height: 250px; width: 100%; overflow: hidden;} }
