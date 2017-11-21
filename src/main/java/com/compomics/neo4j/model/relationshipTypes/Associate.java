@@ -24,6 +24,8 @@ public class Associate implements Serializable{
 
     private String commonProject;
     
+    private String intactId;
+    
     private String intactConfidence;
     
     private String intactDetection;
@@ -72,6 +74,14 @@ public class Associate implements Serializable{
     public void setCommonProject(String commonProject) {
         this.commonProject = commonProject;
     }
+
+	public String getIntactId() {
+		return intactId;
+	}
+
+	public void setIntactId(String intactId) {
+		this.intactId = intactId;
+	}
 
 	public String getIntactConfidence() {
 		return intactConfidence;
