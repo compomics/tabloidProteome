@@ -599,6 +599,7 @@ public class Service implements Serializable{
 					associate.setInteract(record.get("interact").asString());
 					associate.setParalog(record.get("paralog").asString());
 					associate.setCommonAssayCount(record.get("common_assay_count").asString());
+					associate.setIntactId(record.get("intact_id").asList().get(i).toString());
 					associate.setIntactConfidence(record.get("intact_confidence").asList().get(i).toString());
 					associate.setIntactDetection(record.get("intact_detection").asList().get(i).toString());
 					associate.setIntactInteractionType(record.get("intact_interaction_type").asList().get(i).toString());

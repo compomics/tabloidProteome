@@ -24,8 +24,8 @@ nbdist/
 .nb-gradle/
 
 ### project specific
-target/*
+*/target/**
 out.sql
 .gitignore
 .mvn/*
-*/SecreteSiteApplicationCopy.java
+
