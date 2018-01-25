@@ -9,7 +9,7 @@ import java.util.List;
 public class Protein implements Serializable {
 
     private static final long serialVersionUID = -1879461966536472891L;
-
+    
     private List<Object> geneNames;
     
     private List<Object> geneIds;
@@ -27,6 +27,7 @@ public class Protein implements Serializable {
     private String uniprotStatus;
     
     private int group;
+    
 
     public Protein() {
     }

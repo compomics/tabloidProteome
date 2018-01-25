@@ -88,7 +88,7 @@
   </style>
   <script src="http://d3js.org/d3.v3.min.js"></script>
   
-      <script>
+      <script type="text/javascript">
       	var dataNodes = [],
       		dataLinks = [];
   		var data = "";
@@ -100,24 +100,33 @@
       $(function(){
     	  $("#ex8").slider();
     	  $("#tooltip1").width($("#cy").width()) ;
-    	  alert($("#graphJson").val());
+ 
     	  width = $("#cy").width(),
           height = $("#cy").height();
-		  data = jQuery.parseJSON($("#graphJson").val());
-		  
-    	  for (var i=0; i &lt; data.proteins.length; ++i) {
-              dataNodes.push(data.proteins[i]);
-          }
-          for (var i=0; i &lt; data.links.length; ++i) {
 
-              if (data.links[i].associate[0].jaccSimScore &gt; 0.399) {
-            	  dataLinks.push(data.links[i]);
-              }
+    	  data = JSON.parse(jQuery('#graphForm\\:graphJson').val());
+
+          for (var i=0; i &lt; data.proteins.length; ++i) {
+             dataNodes.push(data.proteins[i]);
           }
+          
+          data.links.forEach(function(e) { 
+        	  
+        	var sourceNode = data.proteins.filter(function(n) { return n.uniprotAccession === e.source; })[0],
+          	      targetNode = data.proteins.filter(function(n) { return n.uniprotAccession === e.target; })[0];
+          	    	
+        	dataLinks.push({source: sourceNode, target: targetNode, associate: e.associate, projects: e.projects,
+        			  pathWays: e.pathWays, complexes: e.complexes, mf: e.mf, bp: e.bp, cc: e.cc, diseases: e.diseases});
+        		   
+        	  
+           });
+          
           createForce();
           createSVG();
-      	  restart();     
+          restart();     
       });
+      
+     
       
       function createForce(){
     	  force = d3.layout.force()
@@ -142,31 +151,78 @@
         link = svg.selectAll(".link");
       }
       
-      function clicked(d, i) {
+      function expand(d, i) {
     	  
-    	  passNodeToJSFManagedBean ([ {
+    	  passNodeToExpand ([ {
               name : 'selectedNode',
               value : d.uniprotAccession
+             },
+             {
+            	 name : 'jacc',
+            	 value : $("#ex8").val()
              }
            ]);
       }
       
       function addNewNodes(){
     	  
-    	  var th = $("#ex8").val() - 0.001;
-    	  data = jQuery.parseJSON($("#graphJson").val());
-    	  alert(data.proteins.length);
-    	  for (var i=0; i &lt; data.proteins.length; ++i) {
-              dataNodes.push(data.proteins[i]);
-          }
-          for (var i=0; i &lt; data.links.length; ++i) {
-              if (data.links[i].associate[0].jaccSimScore &gt; th) {
-            	  dataLinks.push(data.links[i]);
-              }
-          }
+
+    	  addeddata = JSON.parse(jQuery('#graphForm\\:graphJsonNewNodes').val());
     	  
+    	  for (var i=0; i &lt; addeddata.proteins.length; ++i) {
+    			  dataNodes.push(addeddata.proteins[i]); 
+          }
+    	  addeddata.links.forEach(function(e) { 
+    		  
+    	  var sourceNode = dataNodes.filter(function(n) { return n.uniprotAccession === e.source; })[0],
+          	      targetNode = dataNodes.filter(function(n) { return n.uniprotAccession === e.target; })[0];
+ 
+          dataLinks.push({source: sourceNode, target: targetNode, associate: e.associate, projects: e.projects,
+        			  pathWays: e.pathWays, complexes: e.complexes, mf: e.mf, bp: e.bp, cc: e.cc, diseases: e.diseases});
+        		  
+        	  
+           });
+
           restart();
       }
+      
+	function collapse(d, i) {
+    	  
+    	  passNodeToCollapse ([ {
+              name : 'selectedNode',
+              value : d.uniprotAccession
+             }
+           ]);
+      }
+	
+	function removeNodes(){
+
+  	  removedGraph = JSON.parse(jQuery('#graphForm\\:removedNodes').val());
+
+  	  for (var i=0; i &lt; removedGraph.proteins.length; ++i) {
+
+  		  var index = -1;
+  		  for(var j=0; j &lt; dataNodes.length; ++j ){
+  			 if(dataNodes[j].uniprotAccession == removedGraph.proteins[i].uniprotAccession){
+  				 index = j;
+  			 }
+  		  }
+  		  if(index != -1){dataNodes.splice(index, 1);}
+      }
+  	  
+  	  for (var i=0; i &lt; removedGraph.links.length; ++i) {
+
+		  var index = -1;
+		  for(var k=0; k &lt; dataLinks.length; ++k){
+			  if(dataLinks[k].target.uniprotAccession == removedGraph.links[i].target){
+ 				 index = k;
+ 			 }
+		  }
+		  if(index != -1){dataLinks.splice(index, 1); } 
+      }
+
+      restart();
+    }
 
       function tick() {
           link.attr("x1", function(d) { return d.source.x; })
@@ -241,7 +297,7 @@
                   .on("click",function(d) {
 
                       if(d.data.label == "expand"){
-                          clicked(node, node.index);
+                          expand(node, node.index);
                       }else if(d.data.label == "info"){
                     	  $('#info_acc').html($("<a></a>").attr("href", 'http://www.uniprot.org/uniprot/' +node.uniprotAccession )
                     			  .attr("target", "_blank")
@@ -255,6 +311,8 @@
                     	  $('#info_length').html(node.length)
                     	  
                     	  document.getElementById('btnproteinDetail').click(); 
+                      }else if(d.data.label == "collapse"){
+                    	  collapse(node, node.index);
                       }
 
                   })
@@ -268,16 +326,18 @@
 
   		
       function restart() {
+    	  
         var drag = force.drag()
             .on("dragstart", dragstart);
 			
         force.start();
 
         link = link.data(dataLinks);
+        node = node.data(dataNodes);
 
         link.enter().insert("line", ".node")
             .attr("class", "link")
-            .style("stroke-width", function(d) { return (d.associate[0].jaccSimScore * 10) +  "px"; })
+            .style("stroke-width", function(d) {return (d.associate[0].jaccSimScore * 10) +  "px"; })
             .on("mouseover", function(d) {
             	
                 //Update the tooltip position and value
@@ -294,10 +354,9 @@
 
             })
             .on("click", addDetails);
-        link.exit()
-            .remove();
         
-        node = node.data(dataNodes);
+        
+        
 
         node.enter().append("circle")
             .attr("class", "node")
@@ -315,11 +374,12 @@
                 }
             })
             .style("visibility", function (d) {
-  			if( d.weight == 0 ){
-  				return "hidden";
-  			}else{
-  				return "visible";
-  			}
+  				
+            	if( d.weight == 0 ){		
+            		return "hidden";	
+            	}else{
+            		return "visible";
+            	}
           	
 			  })
             .on("click", appendRingToNode)
@@ -340,11 +400,10 @@
             })
             .call(drag);
 
+        link.exit()
+        .remove();
         node.exit()
-            .remove();
-
-        
- 
+        .remove();
     }
       
       function addDetails(link){
@@ -446,19 +505,48 @@
 
       }
       function threshold(threshold) {
-		 var th = threshold - 0.001;
-          dataLinks = [];
-          
-          for (var i = 0; i &lt; data.links.length; i++) {
-              if (data.links[i].associate[0].jaccSimScore &gt; th) {dataLinks.push(data.links[i]);}
-          }
-
-          d3.select("svg")
-              .remove();
-          createForce();
-          createSVG();
-          restart();
+    	  passJaccToJSFManagedBean ([ 
+             {
+            	 name : 'jacc',
+            	 value : threshold
+             }
+           ]);
+    	  
     }
+      
+      function thresholdChanged(){
+    	  dataLinks = [];
+    	  dataNodes = [];
+    	  data = JSON.parse(jQuery('#graphForm\\:graphJson').val());
+			
+    	  if(data.proteins != null){
+    		  
+    		  for (var i=0; i &lt; data.proteins.length; ++i) {
+    	             dataNodes.push(data.proteins[i]);
+    	          }
+    		  
+    	  }
+          
+          if(data.links != null){
+        	  data.links.forEach(function(e) { 
+            	  
+              	var sourceNode = data.proteins.filter(function(n) { return n.uniprotAccession === e.source; })[0],
+                	      targetNode = data.proteins.filter(function(n) { return n.uniprotAccession === e.target; })[0];
+                	    	
+              	dataLinks.push({source: sourceNode, target: targetNode, associate: e.associate, projects: e.projects,
+              			  pathWays: e.pathWays, complexes: e.complexes, mf: e.mf, bp: e.bp, cc: e.cc, diseases: e.diseases});
+              		   
+              	  
+                 });
+          }
+          
+          d3.select("svg")
+          .remove();
+      	createForce();
+      	createSVG();
+      	restart();
+      }
+      
       window.onbeforeunload = function () {
     	  window.scrollTo(0, 0);
     	}
@@ -521,9 +609,17 @@
         
       <h:form id="graphForm">
         
-        <p:remoteCommand name="passNodeToJSFManagedBean" id="passNodeToJSFManagedBeancmd" action="#{visualisationBean.getNode}" process="@this"
-          oncomplete="addNewNodes();" update="graphForm:graphJson"/>
+        <p:remoteCommand name="passNodeToExpand" id="passNodeToExpandcmd" action="#{visualisationBean.getNodeExpand}" process="@this"
+          oncomplete="addNewNodes();" update="graphForm:graphJsonNewNodes"/>
+          <p:remoteCommand name="passNodeToCollapse" id="passNodeToCollapsecmd" action="#{visualisationBean.getNodeCollapse}" process="@this"
+          oncomplete="removeNodes();" update="graphForm:removedNodes"/>
         <h:inputHidden id="graphJson" value="#{visualisationBean.jsonString}"/>
+        <h:inputHidden id="graphJsonNewNodes" value="#{visualisationBean.graphJsonNewNodes}"/>
+        <h:inputHidden id="removedNodes" value="#{visualisationBean.removedNodes}"/>
+        
+        <p:remoteCommand name="passJaccToJSFManagedBean" id="passJaccToJSFManagedBeancmd" action="#{visualisationBean.changeThreshold}" process="@this"
+          oncomplete="thresholdChanged();" update="graphForm:graphJson"/>
+        
         <h1></h1>
         <div class="row">
         	<div class="col-md-6">
@@ -694,20 +790,8 @@
                     </tr>
                   </table>
                   <div class="inner_table">
-<<<<<<< HEAD
+
                     <table id="intactTable"></table>
-=======
-                    <table>
-                      <ui:repeat var="associate" value="#{visualisationBean.association}">
-                        <tr>
-                          <td style="width: 12%;"><a target="_blank" href="https://www.ebi.ac.uk/intact/query/#{associate.intactId}">#{associate.intactId}</a></td>
-                          <td style="width: 12%;">#{associate.intactConfidence}</td>
-                          <td style="width: 26%;">#{associate.intactDetection}</td>
-                          <td style="width: 26%;">#{associate.intactInteractionType}</td>
-                        </tr>
-                      </ui:repeat>
-                    </table>
->>>>>>> master
                   </div>
                 </div>
               </div>

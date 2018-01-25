@@ -17,9 +17,9 @@ public class LinkDTO implements Serializable{
 
     private static final long serialVersionUID = -1191827964699580119L;
 
-    private int source;
+    private String source;
 
-    private int target;
+    private String target;
 
     private List<Associate> associate;
 
@@ -40,11 +40,11 @@ public class LinkDTO implements Serializable{
     public LinkDTO() {
     }
 
-	public int getSource() {
+	public String getSource() {
 		return source;
 	}
 
-	public int getTarget() {
+	public String getTarget() {
 		return target;
 	}
 
@@ -80,11 +80,11 @@ public class LinkDTO implements Serializable{
 		return diseases;
 	}
 
-	public void setSource(int source) {
+	public void setSource(String source) {
 		this.source = source;
 	}
 
-	public void setTarget(int target) {
+	public void setTarget(String target) {
 		this.target = target;
 	}
 

@@ -4,6 +4,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.el.ELContext;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
+import javax.faces.bean.SessionScoped;
+import javax.faces.context.FacesContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -11,6 +16,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.compomics.beans.VisualisationBean;
 import com.compomics.neo4j.database.Service;
 import com.compomics.neo4j.model.dataTransferObjects.GraphDTO;
 import com.compomics.neo4j.model.dataTransferObjects.LinkDTO;
@@ -19,6 +25,8 @@ import com.compomics.neo4j.model.nodes.Protein;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
 
+@ManagedBean
+@SessionScoped
 @Path("/graph")
 public class GraphJSON implements Serializable{
 
@@ -31,13 +39,45 @@ public class GraphJSON implements Serializable{
 	private GraphDTO graphElements;
 	
 	private List<String> accessions= new ArrayList<>();
-
 	
+	
+	@ManagedProperty(value="#{visualisationBean}")
+	private VisualisationBean visualisationBean;
+	
+	public GraphDTO getGraphElements() {
+		return graphElements;
+	}
+
+	public void setGraphElements(GraphDTO graphElements) {
+		this.graphElements = graphElements;
+	}
+	
+	public static Object getBean(String beanName){
+	    Object bean = null;
+	    FacesContext fc = FacesContext.getCurrentInstance();
+	    if(fc!=null){
+	         ELContext elContext = fc.getELContext();
+	         bean = elContext.getELResolver().getValue(elContext, null, beanName);
+	    }
+
+	    return bean;
+	}
+
 	@GET
 	@Path("/create/{accession}/")
 	@Produces(MediaType.APPLICATION_JSON)
 	@JacksonFeatures(serializationEnable =  { SerializationFeature.INDENT_OUTPUT })
 	public Response getNodesLinksInJSONSingle(@PathParam("accession") String accession){
+		
+		visualisationBean = (VisualisationBean) getBean("visualisationBean");
+		
+		if(graphElements == null){
+			return Response.status(Response.Status.NOT_FOUND).entity("Resource not found for accession: " +  accession).build();
+		}else{
+			return Response.ok(graphElements).build();
+		}
+		
+		/**
 		Service dbService = new Service();
 		dbService.startSession();
 		try{
@@ -84,7 +124,7 @@ public class GraphJSON implements Serializable{
 			e.printStackTrace();
 			return Response.status(Response.Status.BAD_REQUEST).entity("Jaccard Similarity Score should be between 0 and 1.").build();
 		}
-		
+		*/
 	}
 	
 	@GET
@@ -117,8 +157,8 @@ public class GraphJSON implements Serializable{
 					}
 					// add links between nodes
 					LinkDTO linkDTO = new LinkDTO();
-					linkDTO.setSource(accessions.lastIndexOf(proteinDTO.getProtein1().getUniprotAccession()));
-					linkDTO.setTarget(accessions.lastIndexOf(proteinDTO.getProtein2().getUniprotAccession()));
+				//	linkDTO.setSource(accessions.lastIndexOf(proteinDTO.getProtein1().getUniprotAccession()));
+				//	linkDTO.setTarget(accessions.lastIndexOf(proteinDTO.getProtein2().getUniprotAccession()));
 					linkDTO.setAssociate(proteinDTO.getAssociate());
 					linkDTO.setBp(proteinDTO.getBp());
 					linkDTO.setCc(proteinDTO.getCc());
@@ -167,8 +207,8 @@ public class GraphJSON implements Serializable{
 					}
 					// add links between nodes
 					LinkDTO linkDTO = new LinkDTO();
-					linkDTO.setSource(accessions.lastIndexOf(proteinDTO.getProtein1().getUniprotAccession()));
-					linkDTO.setTarget(accessions.lastIndexOf(proteinDTO.getProtein2().getUniprotAccession()));
+				//	linkDTO.setSource(accessions.lastIndexOf(proteinDTO.getProtein1().getUniprotAccession()));
+				//	linkDTO.setTarget(accessions.lastIndexOf(proteinDTO.getProtein2().getUniprotAccession()));
 					linkDTO.setAssociate(proteinDTO.getAssociate());
 					linkDTO.setBp(proteinDTO.getBp());
 					linkDTO.setCc(proteinDTO.getCc());
