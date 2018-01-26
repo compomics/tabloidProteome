@@ -3,6 +3,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' http://primefaces.org/ui http://xmlns.jcp.org http://java.sun.com http://www.w3.org; 
+      script-src 'self' 'nonce-d4pE9VlO9o4D9bd4Nc272ic9FH' http://code.jquery.com/jquery-2.1.4.min.js https://www.google-analytics.com 
+      https://cdnjs.cloudflare.com http://maxcdn.bootstrapcdn.com;
+      style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; 
+      font-src 'self' https://cdnjs.cloudflare.com https://fonts.googleapis.com;
+      img-src 'self' https://www.google-analytics.com;
+      object-src 'self'"/>
   <title>Tabloid Proteome</title>
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Source+Code+Pro:300,600|Titillium+Web:400,600,700" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="/tabloidproteome/resources/css/swagger-ui.css" >
@@ -68,7 +75,7 @@
 
 <script src="/tabloidproteome/resources/js/swagger-ui-bundle.js"> </script>
 <script src="/tabloidproteome/resources/js/swagger-ui-standalone-preset.js"> </script>
-<script>
+<script nonce = "d4pE9VlO9o4D9bd4Nc272ic9FH">
 window.onload = function() {
   
   // Build a system
