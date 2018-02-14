@@ -2,18 +2,29 @@ function searchSingle(){
 
 		if($('#singleAccession').val() != ""){
 			if(isValidUniprotAcc($('#singleAccession').val())){
-				window.location = '/tabloidproteome/dataTable.xhtml?accession='+ $('#singleAccession').val()
-	    		+ '&jaccard=' + $('#jaccardSingle').val();
+								
+				try {    
+					var surl = '/tabloidproteome/dataTable.xhtml?accession='+ $('#singleAccession').val()
+		    		+ '&jaccard=' + $('#jaccardSingle').val();
+	                if (validateURL(surl))  
+	                    window.location = surl; 
+	                else {  
+	                    throw new InvalidURLException();  
+	                }  
+	            } catch (e) {  
+	                if (e instanceof InvalidURLException)  
+	                    alert(e.message);  
+	            }  
 		
 			}else{
 				
 				passSingleProteinNameToJSFManagedBean ([ {
                     name : 'protein1',
-                    value :  document.getElementById("singleAccession").value
+                    value :  isSafe(document.getElementById("singleAccession").value)
                    },
                    {
                        name : 'jacc',
-                       value :  document.getElementById("jaccardSingle").value
+                       value :  isSafe(document.getElementById("jaccardSingle").value)
                       },
                    {
                       name : 'protein2',
@@ -37,21 +48,31 @@ function searchSingle(){
 		if($('#doubleAccession1').val() != ""  && $('#doubleAccession2').val() != "" ){
 			
 			if(isValidUniprotAcc($('#doubleAccession1').val()) && isValidUniprotAcc($('#doubleAccession2').val())){
-				window.location = '/tabloidproteome/dataTable.xhtml?accession1=' + $('#doubleAccession1').val()
-	        	+ '&accession2=' + $('#doubleAccession2').val() + '&jaccard=' + $('#jaccardDouble').val();
+				try {    
+					var surl = '/tabloidproteome/dataTable.xhtml?accession1=' + $('#doubleAccession1').val()
+		        	+ '&accession2=' + $('#doubleAccession2').val() + '&jaccard=' + $('#jaccardDouble').val();
+	                if (validateURL(surl))  
+	                    window.location = surl; 
+	                else {  
+	                    throw new InvalidURLException();  
+	                }  
+	            } catch (e) {  
+	                if (e instanceof InvalidURLException)  
+	                    alert(e.message);  
+	            }
 		
 			}else{
 				passDoubleProteinNameToJSFManagedBean ([ {
                     name : 'protein1',
-                    value :  document.getElementById("doubleAccession1").value
+                    value :  isSafe(document.getElementById("doubleAccession1").value)
                    },
                    {
                        name : 'jacc',
-                       value :  document.getElementById("jaccardDouble").value
+                       value :  isSafe(document.getElementById("jaccardDouble").value)
                       },
                    {
                       name : 'protein2',
-                      value : document.getElementById("doubleAccession2").value
+                      value : isSafe(document.getElementById("doubleAccession2").value)
                    }
                  ]);
 				
@@ -113,19 +134,19 @@ function searchSingle(){
 		if(array1.length != 0){
 			passProteinsJSONToJSFManagedBean ([ {
                 name : 'array1',
-                value :  array1
+                value :  isSafe(array1)
             },
             {
                 name : 'array2',
-                value :  array2
+                value :  isSafe(array2)
              },
              {
                 name : 'array3',
-                value :  array3
+                value :  isSafe(array3)
              },
              {
                 name : 'jacc',
-                value :  document.getElementById("jaccardOneToOne").value
+                value :  isSafe(document.getElementById("jaccardOneToOne").value)
              }
              ]);
 		}else{
@@ -142,7 +163,7 @@ function searchSingle(){
     		if($('#geneId').val() != ""){
     			passGeneToJSFManagedBean ([ {
                     name : 'gene',
-                    value :  document.getElementById("geneId").value
+                    value :  isSafe(document.getElementById("geneId").value)
                    }
                  ]);
     		}else{
@@ -157,7 +178,7 @@ function searchSingle(){
     		if($('#geneId1').val() != ""  && $('#geneId2').val() != "" ){
     			passGeneDoubleToJSFManagedBean ([ {
                     name : 'gene',
-                    value :  document.getElementById("geneId1").value + "," + document.getElementById("geneId2").value
+                    value :  isSafe(document.getElementById("geneId1").value) + "," + isSafe(document.getElementById("geneId2").value)
                    }
                  ]);
     		}else{
@@ -178,7 +199,7 @@ function searchSingle(){
     	if($('#pathwayId').val() != ""){
     		passPathwayNameToJSFManagedBean ([ {
                 name : 'pathway',
-                value :  document.getElementById("pathwayId").value
+                value :  isSafe(document.getElementById("pathwayId").value)
                }
              ]);
 		}else{
@@ -194,7 +215,7 @@ function searchSingle(){
     	if($('#diseaseId').val() != ""){
     		passDiseaseNameToJSFManagedBean ([ {
                 name : 'disease',
-                value :  document.getElementById("diseaseId").value
+                value :  isSafe(document.getElementById("diseaseId").value)
                }
              ]);
 		}else{
@@ -239,22 +260,63 @@ function searchSingle(){
     
     function clickButton3() {
     	$('#progressModal').modal('hide');
-    	window.location = '/tabloidproteome/detailedSearch.xhtml?pathway';
+    	try {    
+			var surl = '/tabloidproteome/detailedSearch.xhtml?pathway';
+            if (validateURL(surl))  
+                window.location = surl; 
+            else {  
+                throw new InvalidURLException();  
+            }  
+        } catch (e) {  
+            if (e instanceof InvalidURLException)  
+                alert(e.message);  
+        }  
         return false;
     }
     function clickButton4() {
     	$('#progressModal').modal('hide');
-    	window.location = '/tabloidproteome/detailedSearch.xhtml?disease';
+    	try {    
+			var surl = '/tabloidproteome/detailedSearch.xhtml?disease';
+            if (validateURL(surl))  
+                window.location = surl; 
+            else {  
+                throw new InvalidURLException();  
+            }  
+        } catch (e) {  
+            if (e instanceof InvalidURLException)  
+                alert(e.message);  
+        }  
         return false;
     }
     function clickButton5() {
-    	window.location = '/tabloidproteome/dataTable.xhtml';
+    	try {    
+			var surl = '/tabloidproteome/dataTable.xhtml';
+            if (validateURL(surl))  
+                window.location = surl; 
+            else {  
+                throw new InvalidURLException();  
+            }  
+        } catch (e) {  
+            if (e instanceof InvalidURLException)  
+                alert(e.message);  
+        }  
+    	
         return false;
     }
     
     function clickButton6() {
     	$('#progressModal').modal('hide');
-    	window.location = '/tabloidproteome/detailedSearch.xhtml?tissue';
+    	try {    
+			var surl = '/tabloidproteome/detailedSearch.xhtml?tissue';
+            if (validateURL(surl))  
+                window.location = surl; 
+            else {  
+                throw new InvalidURLException();  
+            }  
+        } catch (e) {  
+            if (e instanceof InvalidURLException)  
+                alert(e.message);  
+        }  
         return false;
     }
 	function setExampleSingle1() {
@@ -370,5 +432,14 @@ function searchSingle(){
         t3.placeholder = 'Edge Annotation';
         cell3.appendChild(t3);
 
+	}
+	
+	function isSafe(text){
+		if(text.includes("<script>")){
+			safe = text.replace("<script>", "safe");
+			return safe;
+		}else{
+			return text;
+		}
 	}
 	
