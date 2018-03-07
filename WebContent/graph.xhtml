@@ -1,20 +1,17 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:h="http://xmlns.jcp.org/jsf/html"
  xmlns:p="http://primefaces.org/ui" >
-<f:metadata>
-  <f:event listener="#{visualisationBean.load2}" type="preRenderView" />
-</f:metadata>
 <h:head>
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' http://primefaces.org/ui http://xmlns.jcp.org http://java.sun.com http://www.w3.org; 
-      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://code.jquery.com/jquery-2.1.4.min.js https://www.google-analytics.com 
-      https://cdnjs.cloudflare.com https://maxcdn.bootstrapcdn.com;
-      style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; 
-      font-src 'self' https://cdnjs.cloudflare.com;
-      img-src 'self' https://www.google-analytics.com;"/>
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://code.jquery.com/jquery-2.1.4.min.js https://www.google-analytics.com https://cdn.rawgit.com https://rawgit.com 
+      https://cdnjs.cloudflare.com https://maxcdn.bootstrapcdn.com https://d3js.org/d3.v3.min.js https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.9.0/bootstrap-slider.js;
+      style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://maxcdn.bootstrapcdn.com; 
+      font-src 'self' https://cdnjs.cloudflare.com https://maxcdn.bootstrapcdn.com;
+      img-src * 'self' data: https:;"/>
 
   <title>Tabloid Proteome</title>
 
@@ -28,152 +25,656 @@
   <link href="/tabloidproteome/resources/css/custom.css" rel="stylesheet" />
   <link href="/tabloidproteome/resources/css/sticky-footer.css" rel="stylesheet" />
   <link href="/tabloidproteome/resources/css/bootstrap-table-expandable.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.9.0/css/bootstrap-slider.css"/>  
+   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"/>
 
   <!-- Bootstrap Core JavaScript -->
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" 
       integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
   <script src="/tabloidproteome/resources/js/bootstrap-table-expandable.js"></script>
+  <script src="https://rawgit.com/exupero/saveSvgAsPng/gh-pages/saveSvgAsPng.js"></script>
+  <script src ="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.9.0/bootstrap-slider.js"></script>
+  <script src="https://cdn.rawgit.com/eligrey/canvas-toBlob.js/f1a01896135ab378aa5c0118eadd81da55e698d8/canvas-toBlob.js"></script>
+  <script src="https://cdn.rawgit.com/eligrey/FileSaver.js/e9d941381475b5df8b7d7691013401e171014e89/FileSaver.min.js"></script>
+  
   <style>
     body {
 	 padding-top: 70px;
 	 /* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of navigation changes. */
-    }   
+    } 
+    rect {
+        fill: none;
+        pointer-events: all;
+    }
+    circle.node {
+        stroke: #fff;
+        stroke-width: 3.5px;
+    }
+    path {
+        fill: #D3D3D3;
+        stroke: white;
+    }
+    #tooltip1 {
+        position: absolute;
+        height: 30px;
+        padding: 0px;
+        margin :0px;
+        border: 1px solid 	#E0E0E0;
+        overflow: hidden;
+        bottom: 0px;
+        text-align: center;
+    }
+    #tooltip1 p {
+        font-family: sans-serif;
+        font-size: 16px;
+        margin :0px;
+        margin-top: 4px;
+    }  
+    #ex1Slider .slider-selection {
+            background: #e2e0e0;
+        }
+    #threshold {
+            color: #1ABC9C;
+            text-align:center;
+            font-style: italic;
+            font-size: 14px;
+            font-family: "Helvetica";
+    }
+    .form-horizontal .control-label{
+      /* text-align:right; */
+      text-align:left;
+    }
   </style>
-  <script src="/tabloidproteome/resources/js/cytoscape.js"></script>
+  <script src="https://d3js.org/d3.v3.min.js"></script>
+  <script src ="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.9.0/bootstrap-slider.js"></script>
   
-      <script>
+      <script type="text/javascript">
+      	var dataNodes = [],
+      		dataLinks = [];
+  		var data = "";
+  		var preNode = "";
+  		var node ="", link="";
+  		var svg = "";
+  		var force= "";
+  		var width = "", height = "";
+  		var proteinOpacity = 0;
+  		var geneOpacity = 0;
       $(function(){
-    	var edges =  document.getElementById('testJson').value.slice(1, document.getElementById('testJson').value.length-1).split('*');
-    	var offsets = document.getElementById('cy').getBoundingClientRect();
-        var height = offsets.height;
-        var width = offsets.width;
-        var nodes = document.getElementById('nodes').value.slice(1, document.getElementById('nodes').value.length-1).split(',');
-        var newObj = [];
-        var count;
-        if(nodes.length == 2){
-            for(count = 0; count &lt; nodes.length; count++){
-              newObj.push({ group: "nodes", data: { id: nodes[count].trim() }, position: { x: width/3 +( width/3)*count , y: height/3 } });
-            }
-        }
-        if(nodes.length &gt; 2){
-          if(nodes.length &lt; 5){
-        	  var angle = 2 * Math.PI /(nodes.length);
-              
-              for(count = 0; count &lt; nodes.length; count++){
-                newObj.push({ group: "nodes", data: { id: nodes[count].trim() }, position: { x: width/2 + (width/4) * Math.cos(angle * (count-1)) , y: height/2 + (height/3) * Math.sin(angle * (count-1)) } });
-              }
-          }else{
-        	  var angle = 2 * Math.PI /(nodes.length);
-              for(count = 0; count &lt; nodes.length; count++){
-                newObj.push({ group: "nodes", data: { id: nodes[count].trim() }, position: { x: width/2 + (width/3) * Math.cos(angle * (count-1)) , y: height/2 + (height/2-30) * Math.sin(angle * (count-1)) } });
-              } 
+    	  $("#ex8").attr('data-slider-value', jQuery('#graphForm\\:thresholdValue').val());
+    	  $("#ex8").slider();
+    	  $("#tooltip1").width($("#cy").width()) ;
+    	
+    	  width = $("#cy").width(),
+          height = $("#cy").height();
+    	  data = JSON.parse(jQuery('#graphForm\\:graphJson').val());
+          for (var i=0; i &lt; data.proteins.length; ++i) {
+             dataNodes.push(data.proteins[i]);
           }
-        }
-
-        for(count=0; count &lt; edges.length; count++){
-            newObj.push(JSON.parse(edges[count]));
-        }
-        var cy = cytoscape({
-          container: document.getElementById('cy'),
-          boxSelectionEnabled: false,
-          autounselectify: true,
-          style: cytoscape.stylesheet()
-              .selector('node')
-              .css({
-                  'content': 'data(id)',
-                  'text-valign': 'center',
-                  'background-color': '#66c2ff',
-                  'width' : '50px',
-                  'height' : '30px',
-                  'font-size' : '12'
-              })
-              .selector('node:selected')
-                .css({
-                  'background-color': '#E4860D'
-                })  
-              .selector('edge')
-              .css({
-                  'width':'data(width)',
-                  'curve-style': 'bezier',
-                  'line-color': 'data(faveColor)',
-                  'label' : 'data(annotation)',
-                  'color' : 'red',
-                  'font-size' : '12',
-                  'line-style' : 'data(faveStyle)'
-              })
-              .selector('.highlighted')
-              .css({
-                'line-color': '#E4860D',
-                  'transition-property': 'line-color',
-                  'transition-duration': '0.5s'
-               }),
-          layout: {
-              name: 'circle',
-              directed: true,
-              padding: 10
-          },
-          userZoomingEnabled: false,
-        }); 
-        cy.add(newObj);	
-        cy.on('tap', 'node', function (evt) {
-
-            passNodeToJSFManagedBean ([ {
-                  name : 'selectedNode',
-                  value : this.data('id')
-                 }
-               ]); 
-            
-            return false;
+          
+          data.links.forEach(function(e) { 
+        	  
+        	var sourceNode = data.proteins.filter(function(n) { return n.uniprotAccession === e.source; })[0],
+          	      targetNode = data.proteins.filter(function(n) { return n.uniprotAccession === e.target; })[0];   	
+        	dataLinks.push({source: sourceNode, target: targetNode, edgeAnnotation: e.edgeAnnotation, associate: e.associate, projects: e.projects,
+        			  pathWays: e.pathWays, complexes: e.complexes, mf: e.mf, bp: e.bp, cc: e.cc, diseases: e.diseases});
+        		   
+        	  
+           });
+          
+          createForce();
+          createSVG();
+          restart();  
+      
+          
+       // Set-up the export button
+          d3.select('#click-me').on('click', function(){
+        	  saveSvgAsPng(d3.select('svg').node(), 'association.png');
           });
-        cy.on('tap', 'edge', function (evt) {
-            passEdgeToJSFManagedBean ([ {
-                  name : 'selectedEdge',
-                  value :  this.data('target')
-                 }
-               ]);
-            $(window).scrollTop(200);
-            return false;
-            
-          });
-        $("#click-me").click(function(e) {
-     		var pngData = cy.png();
-     	    $('#click-me').attr('href', pngData);
-     	});
         
-		if(document.getElementById('buttonVisible').value == "true"){
-
-			document.getElementById('geneView').style.display = 'block';
-			document.getElementById('proteinView').style.display = 'block';
-  		}
-		
-		  $('#zoom-in').click(function () {
-			 cy.zoom(cy.zoom() * 1.2);
-			 cy.center();
-	    });
-	    $('#zoom-out').click(function () {
-	    	cy.zoom(cy.zoom() / 1.2);
-	    	cy.center();
-	    });
-
       });
+      
+   
+      function createForce(){
+    	  force = d3.layout.force()
+          .size([width, height])
+          .nodes(dataNodes)
+          .links(dataLinks)
+          .linkDistance(200)
+          .charge(-400)
+          .on("tick", tick);
+      }
+      
+      function createSVG(){
+    	  svg = d3.select("#cy").append("svg")
+         	.attr("width", width)
+         	.attr("height", height)
+    	  svg.append("rect")
+        .attr("width", width)
+        .attr("height", height);
+        node = svg.selectAll(".node"),
+        link = svg.selectAll(".link");
+   
+        buttonLabels = ["protein","gene","none"];
+        
+        var allButtons= svg.append("g")
+        .attr("id","allButtons") ;
+        
+        allButtons
+		.append("svg:text")
+        .attr("x", 10)
+        .attr("y", 10)
+        .attr("dy", ".25em")
+        .style("fill", "black")   
+        .text("click below for labels");
+        
+        allButtons.selectAll("g.button")
+        .data(buttonLabels)
+        .enter().append("svg:rect")
+    	.attr("x",  function(d,i){return (10 + 55*i);})             
+    	.attr("y", 20)  
+    	.attr("width", 50).attr("height", 20)
+    	.attr("class", "legend")
+    	.style("fill", "steelblue")         
+    	.on("click", function(d){
+    		if(d == "protein"){
+        		d3.selectAll("#geneLabel").style("opacity", 0);
+        		d3.selectAll("#proteinLabel").style("opacity", 1);
+        		proteinOpacity=1;
+        		geneOpacity=0;
+    		}else if(d == "gene"){
+    			d3.selectAll("#proteinLabel").style("opacity", 0);
+        		d3.selectAll("#geneLabel").style("opacity", 1);
+        		proteinOpacity=0;
+        		geneOpacity=1;
+    		}else{
+    			d3.selectAll("#proteinLabel").style("opacity", 0);
+        		d3.selectAll("#geneLabel").style("opacity", 0);
+        		proteinOpacity=0;
+        		geneOpacity=0;
+    		}
+    		
+    	})
+    	.on("mouseover", function(d) {
+            d3.select(this).style("cursor", "pointer"); 
+        });
+
+        allButtons.selectAll("g.button")
+        .data(buttonLabels)
+        .enter().append("svg:text")
+    	.attr("x", function(d,i){return (12 + 55*i);})
+        .attr("y", 28)
+        .attr("dy", ".35em")
+        .style("fill", "white")    
+        .text(function(d){return d})
+        .on("click", function(d){
+    		if(d == "protein"){
+        		d3.selectAll("#geneLabel").style("opacity", 0);
+        		d3.selectAll("#proteinLabel").style("opacity", 1);
+        		proteinOpacity=1;
+        		geneOpacity=0;
+    		}else if(d == "gene"){
+    			d3.selectAll("#proteinLabel").style("opacity", 0);
+        		d3.selectAll("#geneLabel").style("opacity", 1);
+        		proteinOpacity=0;
+        		geneOpacity=1;
+    		}else{
+    			d3.selectAll("#proteinLabel").style("opacity", 0);
+        		d3.selectAll("#geneLabel").style("opacity", 0);
+        		proteinOpacity=0;
+        		geneOpacity=0;
+    		}
+    		
+    	})
+    	.on("mouseover", function(d) {
+            d3.select(this).style("cursor", "pointer"); 
+        });        
+      }
+      
+      function restart() {
+          var drag = force.drag()
+              .on("dragstart", dragstart);
+  			
+          force.start();
+          link = link.data(dataLinks);
+          node = node.data(dataNodes);
+          link.enter().insert("line", ".node")
+              .attr("class", "link")
+              .style("stroke", function(d){
+            	  if(d.associate[0].jaccSimScore &lt; 0.4){
+            		  return "#999";
+            	  }else{
+            		  return "black";
+            	  }
+              })
+              .style("stroke-width", function(d) {return (d.associate[0].jaccSimScore * 10) +  "px"; })
+              .on("mouseover", function(d) {
+              	
+                  //Update the tooltip position and value
+                  d3.select("#tooltip1")
+                      .select("#value")
+                      .html(function(x) {
+                    	  if(d.edgeAnnotation != ""){
+                    		  return "<strong>Jaccard Similarity:</strong>" + d.associate[0].jaccSimScore + " | "
+    						+"<strong>Interaction:</strong>" + d.associate[0].interact + " | "
+    						+"<strong>Paralog:</strong>" + d.associate[0].paralog + " | "
+    						+"<strong>Pathways:</strong>" + d.pathWays.length + " | "
+    						+"<strong>Diseases:</strong>" + d.diseases.length + " | "
+    						+"<strong>Edge Annotation:</strong>" + d.edgeAnnotation;
+                    	  }else{
+                    		  return "<strong>Jaccard Similarity:</strong>" + d.associate[0].jaccSimScore + " | "
+      						+"<strong>Interaction:</strong>" + d.associate[0].interact + " | "
+      						+"<strong>Paralog:</strong>" + d.associate[0].paralog + " | "
+      						+"<strong>Pathways:</strong>" + d.pathWays.length + " | "
+      						+"<strong>Diseases:</strong>" + d.diseases.length;
+                    	  }
+    					
+  					  })
+                      
+                      .style("font-size", "13px");
+                  
+                  d3.select(this).style("cursor", "pointer"); 
+              })
+              .on("mouseout", function() {
+                  //Hide the tooltip
+                  d3.select("#tooltip1").select("#value").text("");
+              })
+              .on("click", addDetails);
+          
+          
+          
+          node.enter().append("circle")
+              .attr("class", "node")
+              .attr("r",function (d) {
+                  if(d.group &lt; 2){
+                      return "15";
+                  }else{
+                      return "10";
+                  }})
+               .style("fill", function (d) {
+                  if(d.group &lt; 2){
+                      return "#22aa99";
+                  }else if(d.group == 2){
+                      return "darkorange";
+                  }else{
+                	  return "#660066";
+                  }
+              })
+              .style("stroke", function(d){
+            	  if(d.group == 0){
+            		  return "#C0C0C0";
+            	  }
+              })
+              .style("visibility", function (d) {
+              	if( d.weight == 0 ){		
+              		return "hidden";	
+              	}else{
+              		return "visible";
+              	}
+            	
+  			  })
+              .on("click", appendRingToNode)
+              .on("mouseover", function(d) {
+                  //Update the tooltip position and value
+                  d3.select("#tooltip1")
+                      .select("#value")
+                      .text(d.uniprotAccession +" | " + d.geneNames)
+                      .style("font-size", "13px");
+                  
+                  
+                  d3.select(this).style("cursor", "pointer"); 
+              })
+              .on("mouseout", function() {
+                  //Hide the tooltip
+                  d3.select("#tooltip1").select("#value").text("");
+              })
+              .call(drag);
+   
+          proteinlabels = svg.selectAll(".proteinlabels") 
+          .data(dataNodes)
+          .enter()
+          .append("text")
+          .attr("id", "proteinLabel")
+          .attr({"class":"proteinlabels",
+                 "stroke":"gray",
+                 "font-size": "11px",
+                 "stroke-width" : "0.6px"})
+          .style("opacity", proteinOpacity)
+          .text(function(d){return d.uniprotAccession;})
+          .call(drag);
+          
+          genelabels = svg.selectAll(".genelabels") 
+          .data(dataNodes)
+          .enter()
+          .append("text")
+          .attr("id", "geneLabel")
+          .attr({"class":"genelabels",
+                 "stroke":"gray",
+                 "font-size": "11px",
+                 "stroke-width" : "0.6px"})
+          .style("opacity", geneOpacity)
+          .text(function(d){return d.geneNames;})
+          .call(drag);
+          
+          
+          link.exit()
+          .remove();
+          node.exit()
+          .remove();
+      }
+      function expand(d, i) {
+    	 
+    	passNodeToExpand ([ {
+        	name : 'selectedNode',
+            value : d.uniprotAccession
+          },
+          {
+            name : 'jacc',
+            value : $("#ex8").val()
+          },
+          {
+            name : 'groupNo',
+            value : d.group
+          }]);  
+      }
+      
+      function addNewNodes(){
+    	  addeddata = JSON.parse(jQuery('#graphForm\\:graphJsonNewNodes').val());
+    	  
+    	  for (var i=0; i &lt; addeddata.proteins.length; ++i) {
+    	  	dataNodes.push(addeddata.proteins[i]); 
+          }
+    	  addeddata.links.forEach(function(e) { 
+    		  
+    	  var sourceNode = dataNodes.filter(function(n) { return n.uniprotAccession === e.source; })[0],
+          	      targetNode = dataNodes.filter(function(n) { return n.uniprotAccession === e.target; })[0];
+ 
+          dataLinks.push({source: sourceNode, target: targetNode, edgeAnnotation: e.edgeAnnotation, associate: e.associate, projects: e.projects,
+        			  pathWays: e.pathWays, complexes: e.complexes, mf: e.mf, bp: e.bp, cc: e.cc, diseases: e.diseases});
+        		  
+        	  
+           });
+    	  
+    	  svg.selectAll(".proteinlabels").remove();
+    	  svg.selectAll(".genelabels").remove();
+    	  
+          restart();
+      }
+      
+	function collapse(d, i) {
+
+		passNodeToCollapse ([ {
+	      name : 'selectedNode',
+	      value : d.uniprotAccession
+	    }]);
+
+      }
+	
+	function removeNodes(){
+  	  removedGraph = JSON.parse(jQuery('#graphForm\\:removedNodes').val());
+  	  for (var i=0; i &lt; removedGraph.proteins.length; ++i) {
+  		  var index = -1;
+  		  for(var j=0; j &lt; dataNodes.length; ++j ){
+  			 if(dataNodes[j].uniprotAccession == removedGraph.proteins[i].uniprotAccession){
+  				 index = j;
+  			 }
+  		  }
+  		  if(index != -1){dataNodes.splice(index, 1);}
+      }
+  	  
+  	  for (var i=0; i &lt; removedGraph.links.length; ++i) {
+		  var index = -1;
+		  for(var k=0; k &lt; dataLinks.length; ++k){
+			  if(dataLinks[k].target.uniprotAccession == removedGraph.links[i].target){
+ 				 index = k;
+ 			 }
+		  }
+		  if(index != -1){dataLinks.splice(index, 1); } 
+      }
+  	  
+  	  svg.selectAll(".proteinlabels").remove();
+  	  svg.selectAll(".genelabels").remove();
+      restart();
+    }
+      function tick() {
+          link.attr("x1", function(d) { return d.source.x; })
+              .attr("y1", function(d) { return d.source.y; })
+              .attr("x2", function(d) { return d.target.x; })
+              .attr("y2", function(d) { return d.target.y; });
+          node.attr("cx", function(d) { return d.x; })
+              .attr("cy", function(d) { return d.y; });
+          
+          proteinlabels.attr("x", function(d) { return (d.x + 20); }) 
+          .attr("y", function(d) { return d.y; });
+          genelabels.attr("x", function(d) { return (d.x + 20); }) 
+          .attr("y", function(d) { return d.y; });
+      }
+      
+      function dragstart(d) {
+          d3.select(this).classed("fixed", d.fixed = true);
+      }
+      function appendRingToNode(node) {
+          var path = svg.selectAll("path");
+          if(path != ""){
+              path.remove();
+              svg.selectAll("g.slice").remove();
+          }
+          if(preNode != node){
+              var datapie = [
+                  {"label":"expand", "value":1, "icon": "\uF055", "message":"Expand the child nodes"},
+                  {"label":"info", "value":1, "icon": "\uF05A", "message":"Click here for more information about the protein"},
+                  {"label":"collapse", "value":1, "icon": "\uF056", "message":"Collapse the child nodes"}
+              ];
+              var vis = svg.data([datapie]).attr("width", width).attr("height", height).append("svg:g").attr("transform", "translate(" + node.x + "," + node.y + ")");
+              var pie = d3.layout.pie().value(function(d){return d.value;});
+              // declare an arc generator function
+              var arc = d3.svg.arc().outerRadius(40).innerRadius(17);
+              // select paths, use arc generator to draw
+              var arcs = vis.selectAll("g.slice").data(pie).enter().append("svg:g").attr("class", "slice");
+              arcs.append("svg:path")
+                  .attr("d", function (d) {
+                      return arc(d);
+                  });
+              // add the image
+              arcs.append('text')
+                  .attr("transform", function(d){
+                      return "translate(" + arc.centroid(d)[0] + ", "+ (arc.centroid(d)[1]+7)+ ")";
+                  })
+                  .attr('text-anchor', 'middle')
+                  .attr('font-family', 'FontAwesome')
+                  .attr('font-size', function(d) { return 20+'px'} )
+                  .text(function(d) { return  d.data.icon })
+                  .style("fill", "gray");
+              arcs
+                  .on("mouseover", function(d) {
+                      //Update the tooltip position and value
+                      d3.select("#tooltip1")
+                          .select("#value")
+                          .text(d.data.message);
+                      
+                      d3.select(this).style("cursor", "pointer"); 
+                  })
+                  .on("mouseout", function() {
+                      //Hide the tooltip
+                      d3.select("#tooltip1").select("#value").text("");
+                  })
+                  .on("click",function(d) {
+                      if(d.data.label == "expand"){
+                          expand(node, node.index);
+                      }else if(d.data.label == "info"){
+                    	  $('#info_acc').html($("<a></a>").attr("href", 'http://www.uniprot.org/uniprot/' +node.uniprotAccession )
+                    			  .attr("target", "_blank")
+                    			  .text(node.uniprotAccession));
+                    	  $('#info_status').html(node.uniprotStatus)
+                    	  $('#info_name').html(node.proteinName)
+                    	  $('#info_entryName').html(node.uniprotEntryName)
+                    	  $('#info_geneName').html(node.geneNames.join(","))
+                    	  $('#info_geneId').html(node.geneIds)
+                    	  $('#info_species').html(node.species)
+                    	  $('#info_length').html(node.length)
+                    	  
+                    	  document.getElementById('btnproteinDetail').click(); 
+                      }else if(d.data.label == "collapse"){
+                    	  collapse(node, node.index);
+                      }
+                  })
+              preNode = node;
+          }else{
+              preNode = "";
+          }
+      }
   		
-  
+      
+      
+      
+      function addDetails(link){
+    	$('#divRelations').css("display", "block");
+    	$('#proteinTitle').html(link.source.uniprotAccession + " and " + link.target.uniprotAccession);
+      	$('#rel_jacc').html(link.associate[0].jaccSimScore);
+      	$('#rel_interact').html(link.associate[0].interact);
+      	$('#rel_paralog').html(link.associate[0].paralog);
+      	$("#intactTable tr").remove();
+      	
+      	$('#rel_intact').html(link.associate[0].intact);
+      	$('#rel_bioGrid').html(link.associate[0].bioGrid);
+      	for(var i in link.associate){
+      		var newtr = $('<tr></tr>').append(
+      				$('<td></td>').html($("<a></a>").attr("href", 'https://www.ebi.ac.uk/intact/query/#' +link.associate[i].intactId )
+                			  .attr("target", "_blank").text(link.associate[i].intactId)).width('12%'),
+     	            $('<td></td>').text(link.associate[i].intactConfidence).width('12%'),
+     	            $('<td></td>').text(link.associate[i].intactDetection).width('19%'),
+     	            $('<td></td>').text(link.associate[i].intactInteractionType).width('19%')
+     	        );
+      		 $('#intactTable').append(newtr);
+      	}
+      	$("#projectTable tr").remove();
+      	for(var i in link.projects){
+      		var newtr = $('<tr></tr>').append(
+     	            $('<td></td>').text(parseInt(i)+1).width('5%'),
+     	            $('<td></td>').html($("<a></a>").attr("href", 'https://www.ebi.ac.uk/pride/archive/projects/' +link.projects[i].projectAccession )
+              			  .attr("target", "_blank").text(link.projects[i].projectAccession)).width('12%'),
+     	            $('<td></td>').text(link.projects[i].keywords).width('25%'),
+     	            $('<td></td>').text(link.projects[i].tissue).width('20%'),
+     	            $('<td></td>').text(link.projects[i].tags).width('15%'),
+     	            $('<td></td>').text(link.projects[i].instruments).width('23%')
+     	        );
+      		 $('#projectTable').append(newtr);
+      	}
+      	$("#pathwayTable tr").remove();
+      	for(var i in link.pathWays){
+      		var newtr = $('<tr></tr>').append(
+     	            $('<td></td>').text(parseInt(i)+1).width('5%'),
+     	            $('<td></td>').html($("<a></a>").attr("href", 'http://www.reactome.org/PathwayBrowser/#/' +link.pathWays[i].reactomeAccession )
+              			  .attr("target", "_blank").text(link.pathWays[i].reactomeAccession)).width('25%'),
+     	            $('<td></td>').text(link.pathWays[i].pathwayName).width('50%'),
+     	            $('<td></td>').text(link.pathWays[i].evidenceCode).width('20%')
+     	        );
+      		 $('#pathwayTable').append(newtr);
+      	}
+      	$("#complexTable tr").remove();
+      	for(var i in link.complexes){
+      		var newtr = $('<tr></tr>').append(
+     	            $('<td></td>').text(parseInt(i)+1).width('3%'),
+     	            $('<td></td>').html($("<a></a>").attr("href", 'http://mips.helmholtz-muenchen.de/corum/' +link.complexes[i].corumId )
+              			  .attr("target", "_blank").text(link.complexes[i].corumId)).width('6%'),
+     	            $('<td></td>').text(link.complexes[i].complexName).width('14%'),
+     	            $('<td></td>').text(link.complexes[i].complexComment).width('20%'),
+     	            $('<td></td>').text(link.complexes[i].cellLine).width('7%'),
+     	            $('<td></td>').text(link.complexes[i].diseaseComment).width('14%'),
+     	            $('<td></td>').text(link.complexes[i].subUnitComment).width('11%'),
+     	            $('<td></td>').html($("<a></a>").attr("href", 'https://www.ncbi.nlm.nih.gov/pubmed?cmd=search&amp;term=' +link.complexes[i].pubmedId )
+               			  .attr("target", "_blank").text(link.complexes[i].pubmedId)).width('7%'),
+               	    $('<td></td>').text(link.complexes[i].purificationMethod).width('18%')
+     	        );
+      		 $('#complexTable').append(newtr);
+      	}
+      	$("#mfTable tr").remove();
+      	for(var i in link.mf){
+      		var newtr = $('<tr></tr>').append(
+     	            $('<td></td>').text(parseInt(i)+1).width('5%'),
+     	            $('<td></td>').html($("<a></a>").attr("href", 'http://www.ebi.ac.uk/QuickGO/GTerm?id=' +link.mf[i].id )
+              			  .attr("target", "_blank").text(link.mf[i].id)).width('45%'),
+     	            $('<td></td>').text(link.mf[i].name).width('50%')
+     	        );
+      		 $('#mfTable').append(newtr);
+      	}
+      	$("#bpTable tr").remove();
+      	for(var i in link.bp){
+      		var newtr = $('<tr></tr>').append(
+     	            $('<td></td>').text(parseInt(i)+1).width('5%'),
+     	            $('<td></td>').html($("<a></a>").attr("href", 'http://www.ebi.ac.uk/QuickGO/GTerm?id=' +link.bp[i].id )
+              			  .attr("target", "_blank").text(link.bp[i].id)).width('45%'),
+     	            $('<td></td>').text(link.bp[i].name).width('50%')
+     	        );
+      		 $('#bpTable').append(newtr);
+      	}
+      	$("#ccTable tr").remove();
+      	for(var i in link.cc){
+      		var newtr = $('<tr></tr>').append(
+     	            $('<td></td>').text(parseInt(i)+1).width('5%'),
+     	            $('<td></td>').html($("<a></a>").attr("href", 'http://www.ebi.ac.uk/QuickGO/GTerm?id=' +link.cc[i].id )
+              			  .attr("target", "_blank").text(link.cc[i].id)).width('45%'),
+     	            $('<td></td>').text(link.cc[i].name).width('50%')
+     	        );
+      		 $('#ccTable').append(newtr);
+      	}
+      	$("#diseaseTable tr").remove();
+      	for(var i in link.diseases){
+      		var newtr = $('<tr></tr>').append(
+     	            $('<td></td>').text(parseInt(i)+1).width('5%'),
+     	            $('<td></td>').html($("<a></a>").attr("href", 'http://www.disgenet.org/web/DisGeNET/menu/search?0' +link.diseases[i].disgenetId )
+              			  .attr("target", "_blank").text(link.diseases[i].disgenetId)).width('45%'),
+     	            $('<td></td>').text(link.diseases[i].diseaseName).width('50%')
+     	        );
+      		 $('#diseaseTable').append(newtr);
+      	}
+      }
+      function threshold(threshold) {
+    	  passJaccToJSFManagedBean ([ 
+             {
+            	 name : 'jaccThreshold',
+            	 value : threshold
+             }
+           ]);
+    	  
+    }
+      
+      function thresholdChanged(){
+    	  dataLinks = [];
+    	  dataNodes = [];
+    	  data = JSON.parse(jQuery('#graphForm\\:graphJson').val());
+			
+    	  if(data.proteins != null){
+    		  
+    		  for (var i=0; i &lt; data.proteins.length; ++i) {
+    	             dataNodes.push(data.proteins[i]);
+    	          }
+    		  
+    	  }
+          
+          if(data.links != null){
+        	  data.links.forEach(function(e) { 
+            	  
+              	var sourceNode = data.proteins.filter(function(n) { return n.uniprotAccession === e.source; })[0],
+                	      targetNode = data.proteins.filter(function(n) { return n.uniprotAccession === e.target; })[0];
+                	    	
+              	dataLinks.push({source: sourceNode, target: targetNode, edgeAnnotation: e.edgeAnnotation, associate: e.associate, projects: e.projects,
+              			  pathWays: e.pathWays, complexes: e.complexes, mf: e.mf, bp: e.bp, cc: e.cc, diseases: e.diseases});
+              		   
+              	  
+                 });
+          }
+          
+          d3.select("svg")
+          .remove();
+      	createForce();
+      	createSVG();
+      	restart();
+      }
+      
       window.onbeforeunload = function () {
     	  window.scrollTo(0, 0);
     	}
    
-      function openProteinView(){
-    	  window.location = '/tabloidproteome/graph.xhtml?graph=proteinView'; 	  
-      }
-      
-      function openGeneView(){
-    	  window.location = '/tabloidproteome/graph.xhtml?graph=geneView';   	  
-      }
-      
-      function clickButton() {
-          document.getElementById('btnproteinDetail').click();
-          return false;
-      }
       
       function displayPanel() {
           document.getElementById('divRelations').style.display = 'block';
@@ -228,53 +729,63 @@
     </nav>
 
 
-    
     <!-- Page Content -->
     <div class="container" id="content">
         
       <h:form id="graphForm">
-        <input type="hidden" id="nodes" value="#{visualisationBean.nodes}" />
-        <input type="hidden" id= "testJson" value="#{visualisationBean.jsonString}"/>
-        <input type="hidden" id="buttonVisible" value = "#{visualisationBean.buttonVisible}"/>
+        
+        <p:remoteCommand name="passNodeToExpand" id="passNodeToExpandcmd" action="#{visualisationBean.getNodeExpand}" process="@this"
+          oncomplete="addNewNodes();" update="graphForm:graphJsonNewNodes"/>
+          <p:remoteCommand name="passNodeToCollapse" id="passNodeToCollapsecmd" action="#{visualisationBean.getNodeCollapse}" process="@this"
+          oncomplete="removeNodes();" update="graphForm:removedNodes"/>
+        <h:inputHidden id="graphJson" value="#{visualisationBean.jsonString}"/>
+        <h:inputHidden id="graphJsonNewNodes" value="#{visualisationBean.graphJsonNewNodes}"/>
+        <h:inputHidden id="removedNodes" value="#{visualisationBean.removedNodes}"/>
+         <h:inputHidden id="thresholdValue" value="#{visualisationBean.graphDbManagedBean.jaccScore}"/>
+        
+        <p:remoteCommand name="passJaccToJSFManagedBean" id="passJaccToJSFManagedBeancmd" action="#{visualisationBean.changeThreshold}" process="@this"
+          oncomplete="thresholdChanged();" update="graphForm:graphJson"/>
+        
         <h1></h1>
         <div class="row">
-        	<div class="col-md-6">
-        		<div class="alert alert-info alert-dismissible" role="alert" >
-          		<div style="margin-bottom:15px;"><button type="button" class="close" data-dismiss="alert" aria-label="Close" ><span aria-hidden="true">&#215;</span></button></div>
-          		Click on the node/edge for more information.
-        		</div>
-        	</div>
-        	<div class="col-md-6">
-        		<button type="button" id="zoom-in"  class="btn btn-default" ><span class="glyphicon glyphicon-plus" data-toggle="tooltip" data-placement="top"
-												title="zoom-in" aria-hidden="true"></span></button>
-        		<button type="button" id="zoom-out" class="btn btn-default" ><span class="glyphicon glyphicon-minus" data-toggle="tooltip" data-placement="top"
-												title="zoom-out" aria-hidden="true"></span></button>
-        	</div>
+          <div class="col-md-6">
+            <div class="alert alert-info alert-dismissible" role="alert" >
+              <div style="margin-bottom:15px;"><button type="button" class="close" data-dismiss="alert" aria-label="Close" ><span aria-hidden="true">&#215;</span></button></div>
+              Click on the node/edge for more information. You can expand/collapse the links and add/remove labels on the nodes.
+            </div>
+          </div>
+            <div class="col-md-5">
+            <h4 id="threshold" style="float: left;"> Link threshold:
+                  <input id="ex8" data-slider-id='ex1Slider' type="text" data-slider-min="0.1" data-slider-max="0.8" data-slider-step="0.05"
+                    onchange="threshold(this.value);"/>
+                </h4>
+            </div>
         </div>
         
         <div class="row">
-          <div class="col-md-2">
+        
+          <div class="col-sm-10">
+            <div id="cy">
+            <div id="tooltip1">
+              <p><span id="value"></span></p>
+            </div>
+            </div>
+            
+          </div>
+          <div class="col-sm-2">
             <a download="graph.png" id="click-me"><i class="glyphicon glyphicon-cloud-download"></i> Download Graph</a>
             <button type="button" id="geneView" class="btn btn-default" style="width: 100px; display: none;" onclick="openGeneView();">GeneView</button>
             <br/>
             <button type="button" id="proteinView" class="btn btn-default" style="width:100px; display: none;" onclick="openProteinView();">ProteinView</button>
             <h4>Edges</h4>
-            <p> <img border="0" src="/tabloidproteome/resources/images/black.png" width="68px" height="10px" /> Jaccard Similarity >= 0.4</p>
-            <p> <img border="0" src="/tabloidproteome/resources/images/gray.png" width="68px" height="10px" /> Jaccard Similarity &#60; 0.4</p>
-            <p> <img border="0" src="/tabloidproteome/resources/images/purple.png" width="68px" height="10px" /> Interaction</p>
-            <p> <img border="0" src="/tabloidproteome/resources/images/blue.png" width="68px" height="10px" /> Paralog</p>
-            <p> <img border="0" src="/tabloidproteome/resources/images/green.png" width="68px" height="10px" /> Pathway</p>
-            <p> <img border="0" src="/tabloidproteome/resources/images/orange.png" width="68px" height="10px" /> Disease</p>
+            <p> <img border="0" src="/tabloidproteome/resources/images/black.png" width="54px" height="15px" /> Jaccard Similarity >= 0.4</p>
+            <p> <img border="0" src="/tabloidproteome/resources/images/gray.png" width="54px" height="15px" /> Jaccard Similarity &#60; 0.4</p>
  
           </div>
-          <div class="col-md-10">
-            <div id="cy"></div>
-          </div>
+          
+          
         </div>
         
- 
-        <p:remoteCommand name="passNodeToJSFManagedBean" id="passNodeToJSFManagedBeancmd" action="#{visualisationBean.getNode}" process="@this"
-          oncomplete="clickButton();" update="graphForm:proteinDetailPanel" />
         <input type="button" id="btnproteinDetail" data-toggle="modal" data-target="#proteinDetails" style="display: none;"></input>
         <h:panelGroup layout="block" id="proteinDetailPanel">
           <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true"
@@ -289,43 +800,36 @@
                 <table class="table table-hover">
                   <tr>
                     <td width="20%">Uniprot Accession :</td>
-                    <td><a target="_blank" href="http://www.uniprot.org/uniprot/#{visualisationBean.selectedProtein.uniprotAccession}">#{visualisationBean.selectedProtein.uniprotAccession}</a></td>
+                    <td id="info_acc"/>
                   </tr>
                   <tr>
                     <td width="20%">Uniprot Status :</td>
-                    <td>#{visualisationBean.selectedProtein.uniprotStatus}</td>
+                    <td id="info_status"/>
                   </tr>
                   <tr>
                     <td width="20%">Protein Name :</td>
-                    <td>#{visualisationBean.selectedProtein.proteinName}</td>
+                    <td id="info_name"/>
                   </tr>
                   <tr>
                     <td width="20%">Protein Entry Name :</td>
-                    <td>#{visualisationBean.selectedProtein.uniprotEntryName}</td>
+                    <td id="info_entryName"/>
                   </tr>
                   <tr>
                     <td width="20%">Gene Name :</td>
-                    <td>
-                     <ui:repeat var="geneName" value="#{visualisationBean.selectedProtein.geneNames}">
-                        <a target="_blank" href="http://www.genecards.org/cgi-bin/carddisp.pl?gene=#{geneName}">#{geneName}</a>
-                     </ui:repeat>
-                     </td>
+                    <td id="info_geneName"/>  
                   </tr>
                   <tr>
                     <td width="20%">Entrez Gene Id :</td>
-                    <td>
-                      <ui:repeat var="geneId" value="#{visualisationBean.selectedProtein.geneIds}">
-                        <a target="_blank" href="https://www.ncbi.nlm.nih.gov/gene/?term=#{geneId}">#{geneId}</a>
-                      </ui:repeat>
-                    </td>
+                    <td id="info_geneId"/>
+                      
                   </tr>
                   <tr>
                     <td width="20%">Species :</td>
-                    <td>#{visualisationBean.selectedProtein.species}</td>
+                    <td id="info_species"/>
                   </tr>
                   <tr>
                     <td width="20%">Length :</td>
-                    <td>#{visualisationBean.selectedProtein.getLenghth()}</td>
+                    <td id="info_length"/>
                   </tr>
                 </table>
                 </div>
@@ -358,18 +862,18 @@
           
           <div class="relations" style="display: none" id="divRelations">
             <h1></h1>
-            <h4 style="text-align: center;" id="proteinTitle"> #{visualisationBean.title}</h4>
+            <h4 style="text-align: center;" id="proteinTitle"/>
             
             <div class="panel panel-default" style="border:none;">
                 <div class="row" style="margin-top: 3px;">
                   <div class="col-sm-2">
-                    <label>Jacc Similarity threshold : </label> #{visualisationBean.association[0].jaccSimScore}
+                    <label>Jacc Similarity threshold : </label> <p id="rel_jacc"/>
                   </div>
                   <div class="col-sm-2">
-                    <label>Interaction : </label> #{visualisationBean.association[0].interact}
+                    <label>Interaction : </label> <p id="rel_interact"/>
                   </div>
                   <div class="col-sm-2">
-                    <label>Ensembl Paralog : </label> #{visualisationBean.association[0].paralog}
+                    <label>Ensembl Paralog : </label> <p id="rel_paralog"/>
                   </div>
               </div>
             </div>
@@ -378,19 +882,37 @@
               <div class="panel-heading">
                 <span class="clickable panel-collapsed">
                     <h3 class="panel-title">
-                    	Interactions <i class="pull-right glyphicon glyphicon-chevron-down"/>
+                      Interactions <i class="pull-right glyphicon glyphicon-chevron-down"/>
                     </h3>
                 </span>
               </div>
               <div class="panel-body panel-collapse collapse ">
-                <div class="row" style="margin-top: 3px;">
-                  <div class="col-sm-2">
-                    <label>IntAct : </label> #{visualisationBean.association[0].intact}
-                  </div>
-                  <div class="col-sm-2">
-                    <label>BioGRID : </label> #{visualisationBean.association[0].bioGrid}
+                <div class="row" style="margin:0; padding:0;">
+                  <div class="col-xs-8" style="margin:0; padding:0;">
+                    
+                      <div class="form-group" style="margin:0; padding:0;">
+                        <label for="rel_bioGrid" class="col-xs-2">BioGRID : </label>
+                        <div class="col-xs-1">
+                          <p id="rel_bioGrid"/>
+                        </div>
+                      </div>
+                   
                   </div>
                 </div>
+                
+                <div class="row" style="margin:0; padding:0;">
+                  <div class="col-xs-8" style="margin:0; padding:0;">
+                   
+                      <div class="form-group" style="margin:0; padding:0;">
+                        <label for="rel_intact" class="col-xs-2">IntAct : </label>
+                        <div class="col-xs-1">
+                          <p id="rel_intact"/>
+                        </div>
+                      </div>
+                  
+                  </div>
+                </div>
+               
                 <div class="wrap">
                   <table class="head ">
                     <tr>
@@ -401,26 +923,18 @@
                     </tr>
                   </table>
                   <div class="inner_table">
-                    <table>
-                      <ui:repeat var="associate" value="#{visualisationBean.association}">
-                        <tr>
-                          <td style="width: 12%;"><a target="_blank" href="https://www.ebi.ac.uk/intact/query/#{associate.intactId}">#{associate.intactId}</a></td>
-                          <td style="width: 12%;">#{associate.intactConfidence}</td>
-                          <td style="width: 26%;">#{associate.intactDetection}</td>
-                          <td style="width: 26%;">#{associate.intactInteractionType}</td>
-                        </tr>
-                      </ui:repeat>
-                    </table>
+
+                    <table id="intactTable"></table>
                   </div>
                 </div>
               </div>
             </div>
             <div class="panel panel-default ">
                   <div class="panel-heading">
-                    <span class="clickable panel-collapsed">  	
-                    	<h3 class="panel-title">
-                    		Common Projects <i class="pull-right glyphicon glyphicon-chevron-down"/>
-                    	</h3>
+                    <span class="clickable panel-collapsed">    
+                      <h3 class="panel-title">
+                        Common Projects <i class="pull-right glyphicon glyphicon-chevron-down"/>
+                      </h3>
                     </span>
                   </div>
                   <div class="panel-body panel-collapse collapse" >
@@ -436,18 +950,7 @@
                         </tr>
                       </table>
                       <div class="inner_table">
-                        <table>
-                          <ui:repeat var="project" value="#{visualisationBean.projects}" varStatus="status">
-                          <tr>
-                            <td style="width: 5%;">#{status.index+1}</td>
-                            <td style="width: 12%;"><a target="_blank" href="https://www.ebi.ac.uk/pride/archive/projects/#{project.projectAccession}">#{project.projectAccession}</a></td>
-                            <td style="width: 25%;">#{project.keywords}</td>
-                            <td style="width: 20%;">#{project.tissue}</td>
-                            <td style="width: 15%;">#{project.tags}</td>
-                            <td style="width: 23%;">#{project.instruments}</td>
-                          </tr>
-                        </ui:repeat>
-                        </table>
+                        <table id="projectTable"></table>
                       </div>
                     </div>
                   </div>
@@ -455,9 +958,9 @@
                 <div class="panel panel-default ">
                   <div class="panel-heading">
                     <span class="clickable panel-collapsed">
-                    	<h3 class="panel-title">
-                    		Pathways <i class="pull-right glyphicon glyphicon-chevron-down"/>
-                    	</h3>
+                      <h3 class="panel-title">
+                        Pathways <i class="pull-right glyphicon glyphicon-chevron-down"/>
+                      </h3>
                     </span>
                   </div>
                   <div class="panel-body panel-collapse collapse" >
@@ -471,16 +974,7 @@
                         </tr>
                       </table>
                       <div class="inner_table">
-                        <table>
-                          <ui:repeat var="pathWay" value="#{visualisationBean.pathWays}" varStatus="status">
-                          <tr>
-                            <td style="width: 5%;">#{status.index+1}</td>
-                            <td style="width: 25%;"><a target="_blank" href="http://www.reactome.org/PathwayBrowser/#/#{pathWay.reactomeAccession}">#{pathWay.reactomeAccession}</a></td>
-                            <td style="width: 50%;">#{pathWay.pathwayName}</td>
-                            <td style="width: 20%;">#{pathWay.evidenceCode}</td>
-                          </tr>
-                        </ui:repeat>
-                        </table>
+                        <table id="pathwayTable"></table>
                       </div>
                     </div>
                   </div>
@@ -488,9 +982,9 @@
                 <div class="panel panel-default ">
                   <div class="panel-heading">
                     <span class="clickable panel-collapsed">
-                    	<h3 class="panel-title">
-                    		Complexes <i class="pull-right glyphicon glyphicon-chevron-down"/>
-                    	</h3>
+                      <h3 class="panel-title">
+                        Complexes <i class="pull-right glyphicon glyphicon-chevron-down"/>
+                      </h3>
                     </span>
                   </div>
                   <div class="panel-body panel-collapse collapse" >
@@ -509,22 +1003,7 @@
                         </tr>
                       </table>
                       <div class="inner_table">
-                        <table>
-                          <ui:repeat var="complex" value="#{visualisationBean.complexs}" varStatus="status">
-                            <tr>
-                              <td style="width: 3%;">#{status.index+1}</td>
-                              <td style="width: 6%;"><a target="_blank" href="http://mips.helmholtz-muenchen.de/corum/">#{complex.corumId}</a></td>
-                              <td style="width: 14%;">#{complex.complexName}</td>
-                              <td style="width: 20%;">#{complex.complexComment}</td>
-                              <td style="width: 7%;">#{complex.cellLine}</td>
-                              <td style="width: 14%;">#{complex.diseaseComment}</td>
-                              <td style="width: 11%;">#{complex.subUnitComment}</td>
-                              <td style="width: 7%;"><a target="_blank"
-                                href="https://www.ncbi.nlm.nih.gov/pubmed?cmd=search&amp;term=#{complex.pubmedId}">#{complex.pubmedId}</a></td>
-                              <td style="width: 18%;">#{complex.purificationMethod}</td>
-                            </tr>
-                          </ui:repeat>
-                        </table>
+                        <table id="complexTable"></table>
                       </div>
                     </div>
                   </div>
@@ -532,9 +1011,9 @@
                 <div class="panel panel-default ">
                   <div class="panel-heading">
                     <span class="clickable panel-collapsed">
-                    	<h3 class="panel-title">
-                    		GO <i class="pull-right glyphicon glyphicon-chevron-down"/>
-                    	</h3>
+                      <h3 class="panel-title">
+                        GO <i class="pull-right glyphicon glyphicon-chevron-down"/>
+                      </h3>
                     </span>
                   </div>
                   <div class="panel-body panel-collapse collapse" >
@@ -548,15 +1027,7 @@
                         </tr>
                       </table>
                       <div class="inner_table">
-                        <table>
-                          <ui:repeat var="mf" value="#{visualisationBean.mf}" varStatus="status">
-                          <tr>
-                            <td style="width: 5%;">#{status.index+1}</td>
-                            <td style="width: 45%;"><a target="_blank" href="http://www.ebi.ac.uk/QuickGO/GTerm?id=#{mf.id}">#{mf.id}</a></td>
-                            <td style="width: 50%;">#{mf.name}</td>
-                          </tr>
-                        </ui:repeat>
-                        </table>
+                        <table id="mfTable"></table>
                         </div>
                       </div>
                       <div class="wrap">
@@ -569,15 +1040,7 @@
                           </tr>
                         </table>
                         <div class="inner_table">
-                          <table>
-                            <ui:repeat var="bp" value="#{visualisationBean.bp}" varStatus="status">
-                              <tr>
-                                <td style="width: 5%;">#{status.index+1}</td>
-                                <td style="width: 45%;"><a target="_blank" href="http://www.ebi.ac.uk/QuickGO/GTerm?id=#{bp.id}">#{bp.id}</a></td>
-                                <td style="width: 50%;">#{bp.name}</td>
-                              </tr>
-                            </ui:repeat>
-                          </table>
+                          <table id="bpTable"></table>
                         </div>
                       </div> 
                       <div class="wrap">
@@ -590,15 +1053,7 @@
                           </tr>
                         </table>
                         <div class="inner_table">
-                          <table>
-                            <ui:repeat var="cc" value="#{visualisationBean.cc}" varStatus="status">
-                              <tr>
-                                <td style="width: 5%;">#{status.index+1}</td>
-                                <td style="width: 45%;"><a target="_blank" href="http://www.ebi.ac.uk/QuickGO/GTerm?id=#{cc.id}">#{cc.id}</a></td>
-                                <td style="width: 50%;">#{cc.name}</td>
-                              </tr>
-                            </ui:repeat>
-                          </table>
+                          <table id="ccTable"></table>
                         </div>
                       </div>                  
                   </div>
@@ -606,9 +1061,9 @@
                 <div class="panel panel-default ">
                   <div class="panel-heading">
                     <span class="clickable panel-collapsed">
-                    	<h3 class="panel-title">
-                    		Diseases <i class="pull-right glyphicon glyphicon-chevron-down"/>
-                    	</h3>
+                      <h3 class="panel-title">
+                        Diseases <i class="pull-right glyphicon glyphicon-chevron-down"/>
+                      </h3>
                     </span>
                   </div>
                   <div class="panel-body panel-collapse collapse" >
@@ -621,15 +1076,7 @@
                         </tr>
                       </table>
                       <div class="inner_table">
-                        <table>
-                          <ui:repeat var="disease" value="#{visualisationBean.diseases}" varStatus="status">
-                          <tr>
-                            <td style="width: 5%;">#{status.index+1}</td>
-                            <td style="width: 45%;"><a target="_blank" href="http://www.disgenet.org/web/DisGeNET/menu/search?0">#{disease.disgenetId}</a></td>
-                            <td style="width: 50%;">#{disease.diseaseName}</td>
-                          </tr>
-                        </ui:repeat>
-                        </table>
+                        <table id="diseaseTable"></table>
                       </div>
                     </div>
                   </div>
@@ -640,7 +1087,7 @@
       
     </div>
     <!-- /.container -->
-
+    
         <div id="footer">
           <div class="container">
             <div class="row">

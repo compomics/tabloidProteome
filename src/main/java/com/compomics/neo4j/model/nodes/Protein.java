@@ -9,7 +9,7 @@ import java.util.List;
 public class Protein implements Serializable {
 
     private static final long serialVersionUID = -1879461966536472891L;
-
+    
     private List<Object> geneNames;
     
     private List<Object> geneIds;
@@ -25,6 +25,9 @@ public class Protein implements Serializable {
     private String uniprotAccession;
 
     private String uniprotStatus;
+    
+    private int group;
+    
 
     public Protein() {
     }
@@ -61,7 +64,7 @@ public class Protein implements Serializable {
         this.proteinName = proteinName;
     }
 
-    public String getLenghth() {
+    public String getLength() {
         return length;
     }
 
@@ -91,6 +94,14 @@ public class Protein implements Serializable {
 
 	public void setGeneIds(List<Object> geneIds) {
 		this.geneIds = geneIds;
+	}
+
+	public int getGroup() {
+		return group;
+	}
+
+	public void setGroup(int group) {
+		this.group = group;
 	}
 
 }

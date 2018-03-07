@@ -8,19 +8,18 @@ import com.compomics.neo4j.model.nodes.Disease;
 import com.compomics.neo4j.model.nodes.Go;
 import com.compomics.neo4j.model.nodes.PathWay;
 import com.compomics.neo4j.model.nodes.Project;
-import com.compomics.neo4j.model.nodes.Protein;
 import com.compomics.neo4j.model.relationshipTypes.Associate;
 
 /**
  * Created by demet on 12/19/2016.
  */
-public class ProteinDTO implements Serializable{
+public class LinkDTO implements Serializable{
 
     private static final long serialVersionUID = -1191827964699580119L;
 
-    private Protein protein1;
+    private String source;
 
-    private Protein protein2;
+    private String target;
 
     private List<Associate> associate;
 
@@ -38,25 +37,17 @@ public class ProteinDTO implements Serializable{
     
     private List<Disease> diseases;
     
-    private int distinctComplexCount;
+    private String edgeAnnotation;
 
-    private int distinctPathCount;
-    
-    private int commonProjectSize;
-   
-    private int diseaseCount;
-    
-    private String tissueName;
-
-    public ProteinDTO() {
+	public LinkDTO() {
     }
 
-	public Protein getProtein1() {
-		return protein1;
+	public String getSource() {
+		return source;
 	}
 
-	public Protein getProtein2() {
-		return protein2;
+	public String getTarget() {
+		return target;
 	}
 
 	public List<Associate> getAssociate() {
@@ -87,24 +78,16 @@ public class ProteinDTO implements Serializable{
 		return cc;
 	}
 
-	public int getDistinctComplexCount() {
-		return distinctComplexCount;
+	public List<Disease> getDiseases() {
+		return diseases;
 	}
 
-	public int getDistinctPathCount() {
-		return distinctPathCount;
+	public void setSource(String source) {
+		this.source = source;
 	}
 
-	public int getCommonProjectSize() {
-		return commonProjectSize;
-	}
-
-	public void setProtein1(Protein protein1) {
-		this.protein1 = protein1;
-	}
-
-	public void setProtein2(Protein protein2) {
-		this.protein2 = protein2;
+	public void setTarget(String target) {
+		this.target = target;
 	}
 
 	public void setAssociate(List<Associate> associate) {
@@ -135,40 +118,16 @@ public class ProteinDTO implements Serializable{
 		this.cc = cc;
 	}
 
-	public void setDistinctComplexCount(int distinctComplexCount) {
-		this.distinctComplexCount = distinctComplexCount;
-	}
-
-	public void setDistinctPathCount(int distinctPathCount) {
-		this.distinctPathCount = distinctPathCount;
-	}
-
-	public void setCommonProjectSize(int commonProjectSize) {
-		this.commonProjectSize = commonProjectSize;
-	}
-
-	public List<Disease> getDiseases() {
-		return diseases;
-	}
-
-	public int getDiseaseCount() {
-		return diseaseCount;
-	}
-
 	public void setDiseases(List<Disease> diseases) {
 		this.diseases = diseases;
 	}
 
-	public void setDiseaseCount(int diseaseCount) {
-		this.diseaseCount = diseaseCount;
+	public String getEdgeAnnotation() {
+		return edgeAnnotation;
 	}
 
-	public String getTissueName() {
-		return tissueName;
-	}
-
-	public void setTissueName(String tissueName) {
-		this.tissueName = tissueName;
+	public void setEdgeAnnotation(String edgeAnnotation) {
+		this.edgeAnnotation = edgeAnnotation;
 	}
 
 

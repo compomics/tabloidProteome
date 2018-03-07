@@ -2,27 +2,36 @@ package com.compomics.beans;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 
+import com.compomics.neo4j.database.Service;
+import com.compomics.neo4j.model.dataTransferObjects.GraphDTO;
+import com.compomics.neo4j.model.dataTransferObjects.LinkDTO;
 import com.compomics.neo4j.model.dataTransferObjects.ProteinDTO;
-import com.compomics.neo4j.model.nodes.Complex;
-import com.compomics.neo4j.model.nodes.Disease;
-import com.compomics.neo4j.model.nodes.Go;
-import com.compomics.neo4j.model.nodes.PathWay;
-import com.compomics.neo4j.model.nodes.Project;
 import com.compomics.neo4j.model.nodes.Protein;
-import com.compomics.neo4j.model.relationshipTypes.Associate;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 @ManagedBean
 @SessionScoped
 public class VisualisationBean implements Serializable{
 
 	private static final long serialVersionUID = -1246774333059415835L;
+	
+	private static final String SINGLE_PROTEIN_QUERY = "singleProteinSearch";
+	private static final String DOUBLE_PROTEIN_QUERY = "doubleProteinSearch";
+		
+	private GraphDTO graphElements;
+	private GraphDTO allAddedElements;
+
+	private List<String> accessions= new ArrayList<>();
 
 	private List<String> nodes = new ArrayList<>();
 	private String selectedNode;
@@ -30,24 +39,15 @@ public class VisualisationBean implements Serializable{
 	private Protein selectedProtein;
 	private boolean visible = false;
 	private boolean buttonVisible = true;
-	private String graphType = "proteinView";
 	private List<ProteinDTO> proteinDTOS;
 	private Protein protein1;
 	private Protein protein2;
-	private List<Project> projects = new ArrayList<>();
-	private List<Associate> association = new ArrayList<>();
-	private List<PathWay> pathWays = new ArrayList<>();
-	private List<Complex> complexs = new ArrayList<>();
-	private List<Go> mf = new ArrayList<>();
-    private List<Go> bp = new ArrayList<>();
-    private List<Go> cc = new ArrayList<>();
-    private List<Disease> diseases = new ArrayList<>();
-    private String title;
-    
-    
+
 	private GraphDbManagedBean graphDbManagedBean;
 
 	private String jsonString;
+	private String graphJsonNewNodes;
+	private String removedNodes;
 
 	public List<String> getNodes() {
 		return nodes;
@@ -81,38 +81,6 @@ public class VisualisationBean implements Serializable{
 		return protein2;
 	}
 
-	public List<Project> getProjects() {
-		return projects;
-	}
-
-	public List<Associate> getAssociation() {
-		return association;
-	}
-
-	public List<PathWay> getPathWays() {
-		return pathWays;
-	}
-
-	public List<Complex> getComplexs() {
-		return complexs;
-	}
-
-	public List<Go> getMf() {
-		return mf;
-	}
-
-	public List<Go> getBp() {
-		return bp;
-	}
-
-	public List<Go> getCc() {
-		return cc;
-	}
-
-	public List<Disease> getDiseases() {
-		return diseases;
-	}
-
 	public String getJsonString() {
 		return jsonString;
 	}
@@ -121,29 +89,31 @@ public class VisualisationBean implements Serializable{
 		return graphDbManagedBean;
 	}
 	
-	public String getTitle() {
-		return title;
+
+	public List<ProteinDTO> getProteinDTOS() {
+		return proteinDTOS;
 	}
 
-	public void load2(){
-		FacesContext context = FacesContext.getCurrentInstance();
-		Map<String, String> requestParams = context.getExternalContext().getRequestParameterMap();
-		if(requestParams.containsKey("graph")){
-			graphType = requestParams.get("graph");
-			switchGraph();
-		}
+	public String getGraphJsonNewNodes() {
+		return graphJsonNewNodes;
 	}
+
+	public String getRemovedNodes() {
+		return removedNodes;
+	}
+
 	
 	public void load(GraphDbManagedBean bean) {
 		proteinDTOS = new ArrayList<>();
 		visible = false;
 		graphDbManagedBean = bean;
 		nodes = new ArrayList<>();
-		graphType = "proteinView";
 		proteinDTOS = graphDbManagedBean.getProteinDTOS();
+		allAddedElements = new GraphDTO();
+		allAddedElements.setProteins(new ArrayList<Protein>());
+		allAddedElements.setLinks(new ArrayList<LinkDTO>());
 		controlGeneNames();
-		switchGraph();
-
+		getNodesLinksInJSONSingle();
 	}
 
 	private void controlGeneNames(){
@@ -154,204 +124,289 @@ public class VisualisationBean implements Serializable{
 		});
 	}
 	
-	private void switchGraph(){
-		nodes.clear();
-		jsonString = "";
-		if(graphType.equals("geneView")){
-			geneGraph();
-		}else if(graphType.equals("proteinView")){
-			uniprotGraph();
+	
+	/**
+	 * Get all the nodes and links having default threshold (coming from data table search)
+	 * Clean everything when the page is refreshed
+	 * @param accession
+	 */
+	public void getNodesLinksInJSONSingle(){
+
+		accessions.clear();
+		graphElements = new GraphDTO();
+
+		if (!proteinDTOS.isEmpty()) {
+			List<Protein> proteins = new ArrayList<>();
+			List<LinkDTO> links = new ArrayList<>();
+			int counter =0;
+			for (ProteinDTO proteinDTO : proteinDTOS) {
+				// add nodes if they are not in the list
+				if (!accessions.contains(proteinDTO.getProtein1().getUniprotAccession())) {
+					proteinDTO.getProtein1().setGroup(0);
+					proteins.add(proteinDTO.getProtein1());
+					accessions.add(proteinDTO.getProtein1().getUniprotAccession());
+
+				}
+				if (!accessions.contains(proteinDTO.getProtein2().getUniprotAccession())) {
+					proteinDTO.getProtein2().setGroup(1);
+					proteins.add(proteinDTO.getProtein2());
+					accessions.add(proteinDTO.getProtein2().getUniprotAccession());
+
+				}
+				// add links between nodes
+				LinkDTO linkDTO = new LinkDTO();
+				linkDTO.setSource(proteinDTO.getProtein1().getUniprotAccession());
+				linkDTO.setTarget(proteinDTO.getProtein2().getUniprotAccession());
+				linkDTO.setAssociate(proteinDTO.getAssociate());
+				linkDTO.setBp(proteinDTO.getBp());
+				linkDTO.setCc(proteinDTO.getCc());
+				linkDTO.setMf(proteinDTO.getMf());
+				linkDTO.setComplexes(proteinDTO.getComplexes());
+				linkDTO.setDiseases(proteinDTO.getDiseases());
+				linkDTO.setPathWays(proteinDTO.getPathWays());
+				linkDTO.setProjects(proteinDTO.getProjects());
+				linkDTO.setEdgeAnnotation((graphDbManagedBean.getEdgeAnnotations().size() >= proteinDTOS.size()) ? graphDbManagedBean.getEdgeAnnotations().get(counter) : "");
+				links.add(linkDTO);
+				counter++;
+			}
+			graphElements.setProteins(proteins);
+			graphElements.setLinks(links);
 		}
+		Gson gson = new GsonBuilder().serializeNulls().create();
+		jsonString = gson.toJson(graphElements).toString();
 	}
 	
-	private void uniprotGraph(){
-		StringBuilder edge = new StringBuilder();
-		if(proteinDTOS != null && !proteinDTOS.isEmpty()){
-			edge.append("[");	
-			int counter = 0;
-			int i = 0;
-			for(ProteinDTO proteinDTO : proteinDTOS) {
-				if(!nodes.contains(proteinDTO.getProtein1().getUniprotAccession())){
-					nodes.add(proteinDTO.getProtein1().getUniprotAccession());
-				}
-				if(!nodes.contains(proteinDTO.getProtein2().getUniprotAccession())){
-					nodes.add(proteinDTO.getProtein2().getUniprotAccession());
+	/**
+	 * When threshold changes, all added nodes will be cleared only main search will be visible with new threshold.
+	 */
+	public void changeThreshold(){
+		graphElements = new GraphDTO();
+		accessions.clear();
+		allAddedElements = new GraphDTO();
+		allAddedElements.setProteins(new ArrayList<Protein>());
+		allAddedElements.setLinks(new ArrayList<LinkDTO>());
+		
+		double jacc = Double.valueOf(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("jaccThreshold").trim()); 
+		Service dbService = new Service();
+		dbService.startSession();	
+
+			try{
+				List<ProteinDTO> proteinDTOs = new ArrayList<>();
+				if(graphDbManagedBean.getSelectionType() != null && !graphDbManagedBean.getSelectionType().equals("")){
+					if(graphDbManagedBean.getSelectionType().equals("single")){
+						proteinDTOs = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY, proteinDTOS.get(0).getProtein1().getUniprotAccession(), null, jacc);
+					}else if(graphDbManagedBean.getSelectionType().equals("double")){
+						proteinDTOs = dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, proteinDTOS.get(0).getProtein1().getUniprotAccession(), proteinDTOS.get(0).getProtein2().getUniprotAccession(), jacc);
+					}
+				}else if(graphDbManagedBean.isMultipleSearch()){
+					proteinDTOs = dbService.getProteinDTOListForMultipleProteins(Arrays.asList(graphDbManagedBean.getArray1().split("\\s*,\\s*")), Arrays.asList(graphDbManagedBean.getArray2().split("\\s*,\\s*")), jacc);
 				}
 				
-				if(proteinDTO.getAssociate().get(0).getJaccSimScore() >= 0.4){
-					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getUniprotAccession()).append("\",\"target\":\"")
-					.append(proteinDTO.getProtein2().getUniprotAccession()).append("\",\"annotation\":\"").append((graphDbManagedBean.getEdgeAnnotations().size() >= proteinDTOS.size()) ? graphDbManagedBean.getEdgeAnnotations().get(i) : "")
-					.append("\",\"width\":\"").append(proteinDTO.getAssociate().get(0).getJaccSimScore()*10).append("\",\"faveColor\":\"black\",\"faveStyle\":\"solid\"}}*");
-				}else{
-					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getUniprotAccession()).append("\",\"target\":\"")
-					.append(proteinDTO.getProtein2().getUniprotAccession()).append("\",\"annotation\":\"").append((graphDbManagedBean.getEdgeAnnotations().size() >= proteinDTOS.size()) ? graphDbManagedBean.getEdgeAnnotations().get(i) : "")
-					.append("\",\"width\":\"").append(proteinDTO.getAssociate().get(0).getJaccSimScore()*10).append("\",\"faveColor\":\"gray\",\"faveStyle\":\"solid\"}}*");
+				dbService.closeSession();
+				if(!proteinDTOs.isEmpty()){
+					
+					List<Protein> proteins = new ArrayList<>();
+					List<LinkDTO> links = new ArrayList<>();
+					for(ProteinDTO proteinDTO : proteinDTOs){
+						// add nodes if they are not in the list
+						if (!accessions.contains(proteinDTO.getProtein1().getUniprotAccession())) {
+							proteinDTO.getProtein1().setGroup(0);
+							proteins.add(proteinDTO.getProtein1());
+							accessions.add(proteinDTO.getProtein1().getUniprotAccession());
+
+						}
+						
+						proteinDTO.getProtein2().setGroup(1);
+						proteins.add(proteinDTO.getProtein2());
+						accessions.add(proteinDTO.getProtein2().getUniprotAccession());
+
+						// add links between nodes
+						LinkDTO linkDTO = new LinkDTO();
+						linkDTO.setSource(proteinDTO.getProtein1().getUniprotAccession());
+						linkDTO.setTarget(proteinDTO.getProtein2().getUniprotAccession());
+						linkDTO.setAssociate(proteinDTO.getAssociate());
+						linkDTO.setBp(proteinDTO.getBp());
+						linkDTO.setCc(proteinDTO.getCc());
+						linkDTO.setMf(proteinDTO.getMf());
+						linkDTO.setComplexes(proteinDTO.getComplexes());
+						linkDTO.setDiseases(proteinDTO.getDiseases());
+						linkDTO.setPathWays(proteinDTO.getPathWays());
+						linkDTO.setProjects(proteinDTO.getProjects());
+						linkDTO.setEdgeAnnotation("");
+						links.add(linkDTO);
+					}
+					graphElements.setProteins(proteins);
+					graphElements.setLinks(links);
 				}
-				
-				if(proteinDTO.getAssociate().get(0).getInteract().equals("yes")){
-					counter++;
-					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getUniprotAccession()).append("\",\"target\":\"")
-					.append(proteinDTO.getProtein2().getUniprotAccession()).append("\",\"width\":\"2\",\"label\":\"Interact\",\"faveColor\":\"purple\",\"faveStyle\":\"dotted\"}}*");
-				}
-				if(proteinDTO.getAssociate().get(0).getParalog().equals("yes")){
-					counter++;
-					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getUniprotAccession()).append("\",\"target\":\"")
-					.append(proteinDTO.getProtein2().getUniprotAccession()).append("\",\"width\":\"2\",\"label\":\"Paralog\",\"faveColor\":\"blue\",\"faveStyle\":\"dotted\"}}*");
-				}
-				if(proteinDTO.getPathWays().size()>0){
-					counter++;
-					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getUniprotAccession()).append("\",\"target\":\"")
-					.append(proteinDTO.getProtein2().getUniprotAccession()).append("\",\"label\":\"").append(proteinDTO.getPathWays().size())
-					.append(" Pathways\",\"width\":\"2\",\"faveColor\":\"green\",\"faveStyle\":\"dotted\"}}*");
-				}
-				if(proteinDTO.getDiseaseCount()>0){
-					counter++;
-					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getUniprotAccession()).append("\",\"target\":\"")
-					.append(proteinDTO.getProtein2().getUniprotAccession()).append("\",\"label\":\"").append(proteinDTO.getDiseaseCount())
-					.append(" Pathways\",\"width\":\"2\",\"faveColor\":\"orange\",\"faveStyle\":\"dotted\"}}*");
-				}
-				counter++;
-				i++;
+			}catch(NumberFormatException e){
+				e.printStackTrace();
 			}
 			
-		}
+		Gson gson = new GsonBuilder().serializeNulls().create();
+		jsonString = gson.toJson(graphElements).toString();
 		
-		if(edge.length()>0){
-			edge.setLength(edge.length() - 1);
-			edge.append("]");
-		}
-		
-		jsonString = edge.toString();
 	}
 	
-	
-	private void geneGraph(){
-		StringBuilder edge = new StringBuilder();
-		List<String> tempNodes = new ArrayList<>();
-		if(!proteinDTOS.isEmpty()){
-			edge.append("[");	
-			int counter = 0;
-			int i=0;
-			for(ProteinDTO proteinDTO : proteinDTOS) {
-				if(!tempNodes.contains(proteinDTO.getProtein1().getUniprotAccession())){
-					tempNodes.add(proteinDTO.getProtein1().getUniprotAccession());
-					nodes.add(proteinDTO.getProtein1().getGeneNames().get(0).toString());
-				}
-				if(!tempNodes.contains(proteinDTO.getProtein2().getUniprotAccession())){
-					tempNodes.add(proteinDTO.getProtein2().getUniprotAccession());
-					nodes.add(proteinDTO.getProtein2().getGeneNames().get(0).toString());
-				}
-				
-				if(proteinDTO.getAssociate().get(0).getJaccSimScore() >= 0.4){
-					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getGeneNames().get(0)).append("\",\"target\":\"")
-					.append(proteinDTO.getProtein2().getGeneNames().get(0)).append("\",\"annotation\":\"").append((graphDbManagedBean.getEdgeAnnotations().size() >= proteinDTOS.size()) ? graphDbManagedBean.getEdgeAnnotations().get(i) : "")
-					.append("\",\"width\":\"").append(proteinDTO.getAssociate().get(0).getJaccSimScore()*10).append("\",\"faveColor\":\"black\",\"faveStyle\":\"solid\"}}*");
-				}else{
-					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getGeneNames().get(0)).append("\",\"target\":\"")
-					.append(proteinDTO.getProtein2().getGeneNames().get(0)).append("\",\"annotation\":\"").append((graphDbManagedBean.getEdgeAnnotations().size() >= proteinDTOS.size()) ? graphDbManagedBean.getEdgeAnnotations().get(i) : "")
-					.append("\",\"width\":\"").append(proteinDTO.getAssociate().get(0).getJaccSimScore()*10).append("\",\"faveColor\":\"gray\",\"faveStyle\":\"solid\"}}*");
-				}
-				
-				if(proteinDTO.getAssociate().get(0).getInteract().equals("yes")){
-					counter++;
-					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getGeneNames().get(0)).append("\",\"target\":\"")
-					.append(proteinDTO.getProtein2().getGeneNames().get(0)).append("\",\"width\":\"2\",\"label\":\"Interact\",\"faveColor\":\"purple\",\"faveStyle\":\"dotted\"}}*");
-				}
-				if(proteinDTO.getAssociate().get(0).getParalog().equals("yes")){
-					counter++;
-					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getGeneNames().get(0)).append("\",\"target\":\"")
-					.append(proteinDTO.getProtein2().getGeneNames().get(0)).append("\",\"width\":\"2\",\"label\":\"Paralog\",\"faveColor\":\"blue\",\"faveStyle\":\"dotted\"}}*");
-				}
-				if(proteinDTO.getPathWays().size()>0){
-					counter++;
-					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getGeneNames().get(0)).append("\",\"target\":\"")
-					.append(proteinDTO.getProtein2().getGeneNames().get(0)).append("\",\"label\":\"").append(proteinDTO.getPathWays().size())
-					.append(" Pathways\",\"width\":\"2\",\"faveColor\":\"green\",\"faveStyle\":\"dotted\"}}*");
-				}
-				if(proteinDTO.getDiseaseCount()>0){
-					counter++;
-					edge.append("{\"group\":\"edges\",\"data\":{\"id\":\"").append(counter).append("\",\"source\":\"").append(proteinDTO.getProtein1().getGeneNames().get(0)).append("\",\"target\":\"")
-					.append(proteinDTO.getProtein2().getGeneNames().get(0)).append("\",\"label\":\"").append(proteinDTO.getDiseaseCount())
-					.append(" Pathways\",\"width\":\"2\",\"faveColor\":\"orange\",\"faveStyle\":\"dotted\"}}*");
-				}
-				counter++;
-				i++;
-			}
-			
-		}
-		
-		if(edge.length()>0){
-			edge.setLength(edge.length() - 1);
-			edge.append("]");
-		}
-		
-		jsonString = edge.toString();
-	}
-	
-	
-	public void onNodeSelect(){
-		selectedProtein = new Protein();
-
-		for (ProteinDTO proteinDTO : graphDbManagedBean.getProteinDTOS()) {
-			if (proteinDTO.getProtein1().getUniprotAccession().equals(selectedNode.trim())) {
-				selectedProtein = proteinDTO.getProtein1();
-			} else if (proteinDTO.getProtein2().getUniprotAccession().equals(selectedNode)) {
-				selectedProtein = proteinDTO.getProtein2();
-			} else if (proteinDTO.getProtein1().getGeneNames().size()>0 && proteinDTO.getProtein1().getGeneNames().get(0).equals(selectedNode)){
-				selectedProtein = proteinDTO.getProtein1();
-			} else if (proteinDTO.getProtein2().getGeneNames().size()>0 && proteinDTO.getProtein2().getGeneNames().get(0).equals(selectedNode)){
-				selectedProtein = proteinDTO.getProtein2();
-			}
-		}
-
-	}
-	
-	public void getNode(){
+	/**
+	 * Get selected node and threshold from graph.xhtml
+	 */
+	public void getNodeExpand(){
 		selectedNode =  FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("selectedNode").trim(); 
-		if(selectedNode != null) {onNodeSelect();}
-	}
-
-	public void onEdgeSelect(){
-
-		clearRelations();
-		for(int i=0; i<graphDbManagedBean.getProteinDTOS().size(); i++){
-			if(graphDbManagedBean.getProteinDTOS().get(i).getProtein2().getUniprotAccession().equals(selectedEdge) || (buttonVisible && graphDbManagedBean.getProteinDTOS().get(i).getProtein2().getGeneNames().get(0).equals(selectedEdge))){
-				projects.addAll(graphDbManagedBean.getProteinDTOS().get(i).getProjects());
-				association.addAll(graphDbManagedBean.getProteinDTOS().get(i).getAssociate());
-				pathWays.addAll(graphDbManagedBean.getProteinDTOS().get(i).getPathWays());
-				complexs.addAll(graphDbManagedBean.getProteinDTOS().get(i).getComplexes());
-				mf.addAll(graphDbManagedBean.getProteinDTOS().get(i).getMf());
-				bp.addAll(graphDbManagedBean.getProteinDTOS().get(i).getBp());
-				cc.addAll(graphDbManagedBean.getProteinDTOS().get(i).getCc());
-				diseases.addAll(graphDbManagedBean.getProteinDTOS().get(i).getDiseases());
-				protein1 = graphDbManagedBean.getProteinDTOS().get(i).getProtein1();
-				protein2 = graphDbManagedBean.getProteinDTOS().get(i).getProtein2();
-				visible = true;
-				
-				if(graphType.equals("geneView")){
-					title = "Association between " + protein1.getGeneNames().get(0) +" and "+ protein2.getGeneNames().get(0);
-				}else if(graphType.equals("proteinView")){
-					title = "Association between " + protein1.getUniprotAccession() +" and "+ protein2.getUniprotAccession();
-				}
-			}
+		int groupNo = Integer.valueOf(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("groupNo")) ;
+		double jacc = Double.valueOf(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("jacc").trim()); 
+		if(selectedNode != null) {	
+			addNodesLinksInJSON(selectedNode, groupNo, jacc);
 		}
 	}
 	
-	public void getEdge(){
-		selectedEdge = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("selectedEdge").trim();  
-		onEdgeSelect();
+	
+	/**
+	 * Add new nodes and relations of the selected protein for given threshold to expand
+	 * @param accession
+	 * @param jacc
+	 */
+	public void addNodesLinksInJSON(String accession, int groupNo, double jacc){
+		GraphDTO newGraphDTO = new GraphDTO();
+		Service dbService = new Service();
+		dbService.startSession();
+		try{
+			List<ProteinDTO> proteinDTOs = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY, accession, null, jacc);
+			dbService.closeSession();
+			if(!proteinDTOs.isEmpty()){
+				
+				List<Protein> proteins = new ArrayList<>();
+				List<LinkDTO> links = new ArrayList<>();
+				for(ProteinDTO proteinDTO : proteinDTOs){
+					// add nodes if they are not in the list
+					
+					boolean nodeExist = false;
+					for(Protein pr: allAddedElements.getProteins()){
+						if(pr.getUniprotAccession().equals(proteinDTO.getProtein2().getUniprotAccession())){
+							nodeExist=true;
+							break;
+						}
+					}
+					for(Protein pr: graphElements.getProteins()){
+						if(pr.getUniprotAccession().equals(proteinDTO.getProtein2().getUniprotAccession())){
+							nodeExist=true;
+							break;
+						}
+					}
+					
+					if(!nodeExist){
+						proteinDTO.getProtein2().setGroup(groupNo+1);
+						proteins.add(proteinDTO.getProtein2());
+						accessions.add(proteinDTO.getProtein2().getUniprotAccession());
+					}
+					
+					boolean linkExist = false;
+					for(LinkDTO link: allAddedElements.getLinks()){
+						if(link.getSource().equals(proteinDTO.getProtein2().getUniprotAccession()) && 
+								link.getTarget().equals(proteinDTO.getProtein1().getUniprotAccession())){
+							linkExist=true;
+						}
+					}
+					for(LinkDTO link: graphElements.getLinks()){
+						if(link.getSource().equals(proteinDTO.getProtein2().getUniprotAccession()) && 
+								link.getTarget().equals(proteinDTO.getProtein1().getUniprotAccession())){
+							linkExist=true;
+						}
+					}
+					
+					// add links between nodes
+					if(!linkExist){
+						LinkDTO linkDTO = new LinkDTO();
+						linkDTO.setSource(proteinDTO.getProtein1().getUniprotAccession());
+						linkDTO.setTarget(proteinDTO.getProtein2().getUniprotAccession());
+						linkDTO.setAssociate(proteinDTO.getAssociate());
+						linkDTO.setBp(proteinDTO.getBp());
+						linkDTO.setCc(proteinDTO.getCc());
+						linkDTO.setMf(proteinDTO.getMf());
+						linkDTO.setComplexes(proteinDTO.getComplexes());
+						linkDTO.setDiseases(proteinDTO.getDiseases());
+						linkDTO.setPathWays(proteinDTO.getPathWays());
+						linkDTO.setProjects(proteinDTO.getProjects());
+						linkDTO.setEdgeAnnotation("");
+						links.add(linkDTO);
+					}
+					
+				}
+				allAddedElements.getProteins().addAll(proteins);
+				allAddedElements.getLinks().addAll(links);
+				newGraphDTO.setProteins(proteins);
+				newGraphDTO.setLinks(links);
+
+			}
+			
+		}catch(NumberFormatException e){
+			e.printStackTrace();
+		}
+		Gson gson = new GsonBuilder().serializeNulls().create();
+		graphJsonNewNodes = gson.toJson(newGraphDTO);
+
 	}
 	
-	public void clearRelations(){
-		projects.clear();
-		association.clear();
-		pathWays.clear();
-		complexs.clear();
-		mf.clear();
-		bp.clear();
-		cc.clear();
-		diseases.clear();
-		protein1 = new Protein();
-		protein2 = new Protein();
+	/**
+	 * Get selected node from graph.xhtml to collapse
+	 */
+	public void getNodeCollapse(){
+		selectedNode =  FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("selectedNode").trim(); 
+		
+		if(selectedNode != null) {
+			removeNodesLinksInJSON(selectedNode);	
+		}
+	}
+	
+	public void removeNodesLinksInJSON(String accession){
+		//proteins that will be removed
+		List<Protein> removedProteins = new ArrayList<>();
+		List<String> removedAccessions = new ArrayList<>();
+		// all the links which have selected protein as a source.
+		List<LinkDTO> removedLinksFirstLevel = allAddedElements.getLinks().stream().filter(link -> link.getSource().equals(accession)).collect(Collectors.toList());		
+		//remove the links from allAddedElements
+		
+		List<LinkDTO> removedLinks = addNewLinksToRemove(removedLinksFirstLevel);
+		
+		allAddedElements.getLinks().removeIf(x -> removedLinks.contains(x));
+		
+		
+		for(LinkDTO link : removedLinks) {
+			boolean keep = false;
+			for(LinkDTO l : allAddedElements.getLinks()) {
+				if(l.getSource().equals(link.getTarget()) || l.getTarget().equals(link.getTarget())){
+					keep = true;
+					break;
+				}
+			}
+			if(!keep){
+				if(allAddedElements.getProteins().stream().filter(p -> p.getUniprotAccession().equals(link.getTarget())).findFirst().isPresent()){
+					removedProteins.add(allAddedElements.getProteins().stream().filter(p -> p.getUniprotAccession().equals(link.getTarget())).findFirst().get());
+				}
+				removedAccessions.add(link.getTarget());
+			}
+		}
+		
+		//remove the proteins from graphElements
+		allAddedElements.getProteins().removeIf(p -> removedAccessions.contains(p.getUniprotAccession()));
+		accessions.removeIf(p -> removedAccessions.contains(p));
+		
+		GraphDTO removedGraphDTO = new GraphDTO();
+		removedGraphDTO.setLinks(removedLinks);
+		removedGraphDTO.setProteins(removedProteins);
+		Gson gson = new GsonBuilder().serializeNulls().create();
+		removedNodes = gson.toJson(removedGraphDTO);
+	}
+	
+	private List<LinkDTO> addNewLinksToRemove(List<LinkDTO> removedLinks){
+		List<LinkDTO> newLinksToRemove = new ArrayList<>();
+		for(LinkDTO removedLink: removedLinks){
+			newLinksToRemove.addAll(allAddedElements.getLinks().stream().filter(link -> link.getSource().equals(removedLink.getTarget())).collect(Collectors.toList()));
+		}
+		if(!newLinksToRemove.isEmpty()){
+			removedLinks.addAll(newLinksToRemove);
+			allAddedElements.getLinks().removeIf(x -> newLinksToRemove.contains(x));
+			addNewLinksToRemove(removedLinks);
+		}
+		return removedLinks;
 	}
 }

@@ -32,6 +32,7 @@ public class GraphDbManagedBean implements Serializable{
     private List<String> accessions = new ArrayList<>();
     private double jaccScore =-1;
     private String selectionType;
+    private boolean multipleSearch = false;
     private String control;
     private List<String> edgeAnnotations = new ArrayList<>();
     private String multiSearchMessage ="";
@@ -91,6 +92,14 @@ public class GraphDbManagedBean implements Serializable{
 
 	public void setSelectionType(String selectionType) {
 		this.selectionType = selectionType;
+	}
+
+	public boolean isMultipleSearch() {
+		return multipleSearch;
+	}
+
+	public void setMultipleSearch(boolean multipleSearch) {
+		this.multipleSearch = multipleSearch;
 	}
 
 	public Service getDbService() {
@@ -198,7 +207,7 @@ public class GraphDbManagedBean implements Serializable{
 		array2 = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("array2"); 
 		array3 = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("array3"); 
 		jaccScore = Double.valueOf(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("jacc")); 
-		
+		setMultipleSearch(true);
 		proteinDTOS = dbService.getProteinDTOListForMultipleProteins(Arrays.asList(array1.split("\\s*,\\s*")), Arrays.asList(array2.split("\\s*,\\s*")), jaccScore);
 		
 		if(Arrays.asList(array1.split("\\s*,\\s*")).size() - proteinDTOS.size() > 0){
@@ -269,8 +278,10 @@ public class GraphDbManagedBean implements Serializable{
 	private void clearFields(){
 		accession1 ="";
 		accession2 ="";
+		selectionType = "";
 		jaccScore =-1;
 		multiSearchMessage = "";
+		multipleSearch = false;
 		pairsNotFound.clear();
 	}
 	
@@ -288,10 +299,6 @@ public class GraphDbManagedBean implements Serializable{
     public void getDoubleProteinDTOs(){
 
         proteinDTOS = dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, accession1, accession2, jaccScore);
-    }
-    
-    public void setSelectionType(){
-    	selectionType = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("selectionType");
     }
     
     public void tsvExport(){
