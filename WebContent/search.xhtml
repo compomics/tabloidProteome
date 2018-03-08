@@ -81,13 +81,17 @@ body {
 			      return false;
 			   }
 			});
-
+	$(function(){
+		$('#multipleProteinSearch-tab').click(function() {
+			$('#myTab a[href="#oneToOne"]').tab('show');
+		});
+		
+	});
 	
 </script>
 </h:head>
 
 <body>
-
 
 	<div id="wrapper">
 		<!-- Navigation -->
@@ -147,7 +151,7 @@ body {
 									Single Protein Search</a><br /> <br /> <a
 									href="#doubleProteinSearch" data-toggle="tab">> Two Protein
 									Search</a><br /> <br />
-                                    <a href="#multipleProteinSearch" data-toggle="tab">> Multiple Protein Pair
+                                    <a id="multipleProteinSearch-tab" href="#multipleProteinSearch" data-toggle="tab">> Multiple Protein Pair
                                       Search</a><br /> <br />
 							</div></li>
 						<li><a>Gene Search</a>
@@ -250,27 +254,81 @@ body {
 						
                         <div class="tab-pane" id="multipleProteinSearch">
                           <div class="panel panel-default" id="multipleSearch">
-                            <div class="panel-heading text-center">ONE TO ONE MULTIPLE PROTEIN PAIR SEARCH</div>
+                            <div class="panel-heading text-center">MULTIPLE PROTEIN PAIR SEARCH</div>
                             <div class="panel-body"> 
-                              <button id="addRow"  onClick="insertRow()" class="btn btn-primary" style="display: none">add new row</button>
-                              <br/>
-                              <div class="wrap" id="oneToOneRegion" style="display: none;">
-                                <table class="head" id="oneToOneHeader">
-                                  <tr>
-                                    <th>1st Uniprot Accession</th>
-                                    <th>2nd Uniprot Accession</th>
-                                    <th>Edge Annotation</th>
-                                  </tr>
-                                </table>
+                              <ul class="nav nav-tabs" id="myTab" role="tablist">
+                                <li class="nav-item">
+                                  <a class="nav-link active" id="oneToOne-tab" data-toggle="tab" href="#oneToOne" role="tab" aria-controls="oneToOne" aria-selected="true">one to one</a>
+                                </li>
+                                <li class="nav-item">
+                                  <a class="nav-link" id="manyToMany-tab" data-toggle="tab" href="#manyToMany" role="tab" aria-controls="manyToMany" aria-selected="false">many to many</a>
+                                </li>
+                              </ul>
+                              
+                              <div class="tab-content" id="myTabContent">
+                                <div class="tab-pane fade active in" id="oneToOne" role="tabpanel" aria-labelledby="oneToOne-tab">
+                                  <br/>
+                                  <div class="wrap" id="oneToOneRegion" style="display: none;">
+                                    <table class="head" id="oneToOneHeader">
+                                      <tr>
+                                        <th>1st Uniprot Accession</th>
+                                        <th>2nd Uniprot Accession</th>
+                                        <th>Edge Annotation</th>
+                                      </tr>
+                                    </table>
+                                    <div class="inner_table">
+                                      <table id="oneToOneTable" class="table table-hover table-striped" style="font-size: 11px; max-height: 35px;">
+                                        <tr>
+                                          <td><input type="text" style="border:none;" placeholder="Uniprot Accession" disabled="disabled"/></td>
+                                          <td><input type="text" style="border:none;" placeholder="Uniprot Accession" disabled="disabled"/></td>
+                                          <td><input type="text" style="border:none;" placeholder="Edge Annotation" disabled="disabled"/></td>
+                                        </tr>
+                                      </table>  
+                                    </div>
+                                    <div class="input-group col-sm-9 ">
+                                      <label class="col-sm-9" style="float: left;">Jaccard
+                                        Similarity Threshold <span
+                                        class="glyphicon glyphicon-question-sign"
+                                        data-toggle="tooltip" data-placement="top"
+                                        title="Jaccard Similarity Threshold should be between 0 and 1. You will get associations which have this Jaccard Similarity Threshold and above." />
+                                      </label> 
+                                      <input type="text" value="0.4" class="col-sm-3" id="jaccardOneToOne" />
+                                    </div>
+                                  </div>
+                                  <p id="informationOneToOne">Please upload a file that contains <a style="font-weight: bold; color: black;">protein pairs</a> and edge annotaion (if available) in the following file formats: xls, xlsx, csv.
+                                  The first two columns should be Uniprot accessions of the proteins. If you have edge annotation, you can add it to the 3rd column.
+                                  The file should not include any title.</p>
+                                  <br/>
+                                  <p>Select file to upload:</p>    
+                                  <input id="readfile" type="file" onchange="loadFile(event)" />
+                                  <div class="checkbox">
+                                    <label>
+                                      <input type="checkbox" id="edgeAnnotationCheckBox"/> Include edge annotation
+                                    </label>
+                                  </div> 
+                                  <br />
+                                  <div align="center">
+                                    <button class="btn btn-primary" onclick="searchMultipleProtein()"
+                                    style="width: 104px;" >Search</button>
+                                    <button class="btn btn-default" onclick="$('#oneToOneRegion').hide(); $('#oneToOneTable tr').remove(); $('#informationOneToOne').show();"
+                                    style="width: 104px;" >Clean</button>
+                                  </div>
+                              </div>
+                                
+                                
+                              <div class="tab-pane fade" id="manyToMany" role="tabpanel" aria-labelledby="manyToMany-tab">
+                                  <br/>
+                                  <div class="wrap" id="manyToManyRegion" style="display: none;">
+                                    <table class="head" id="manyToManyHeader">
+                                      <tr>
+                                        <th>Uniprot Accessions</th>
+                                      </tr>
+                                    </table>
                                 <div class="inner_table">
-                                  <table id="oneToOneTable" class="table table-hover table-striped" style="font-size: 11px; max-height: 35px;">
-                                
+                                  <table id="manyToManyTable" class="table table-hover table-striped" style="font-size: 11px; max-height: 35px;">
                                   <tr>
                                     <td><input type="text" style="border:none;" placeholder="Uniprot Accession" disabled="disabled"/></td>
-                                    <td><input type="text" style="border:none;" placeholder="Uniprot Accession" disabled="disabled"/></td>
-                                    <td><input type="text" style="border:none;" placeholder="Edge Annotation" disabled="disabled"/></td>
                                   </tr>
-                                
                                   </table>  
                                 </div>
                                 <div class="input-group col-sm-9 ">
@@ -280,31 +338,24 @@ body {
                                     data-toggle="tooltip" data-placement="top"
                                     title="Jaccard Similarity Threshold should be between 0 and 1. You will get associations which have this Jaccard Similarity Threshold and above." />
                                   </label> 
-                                  <input type="text" value="0.4" class="col-sm-3" id="jaccardOneToOne" />
+                                  <input type="text" value="0.4" class="col-sm-3" id="jaccardManyToMany" />
                                 </div>
                               </div>
-                              <p id="informationOneToOne">Please upload a file that contains <a style="font-weight: bold; color: black;">protein pairs</a> and edge annotaion (if available) in the following file formats: xls, xlsx, csv.
-                              The first two columns should be Uniprot accessions of the proteins. If you have edge annotation, you can add it to the 3rd column.
+                              <p id="informationManyToMany">Please upload a file that contains <a style="font-weight: bold; color: black;">protein UniProt accessions</a> (if available) in the following file formats: xls, xlsx, csv.
+                                When you click on the search button, you will have all possible 2 protein combinations from the list you provide by considering Jaccard Similarity Threshold.
                               The file should not include any title.</p>
                               <br/>
                               <p>Select file to upload:</p>    
-                              <input id="readfile" type="file" onchange="loadFile(event)" />
-                              <div class="checkbox">
-                                <label>
-                                  <input type="checkbox" id="edgeAnnotationCheckBox"/> Include edge annotation
-                                </label>
-                              </div>
-                           
-                              
+                              <input id="readfile2" type="file" onchange="loadFile2(event)" />
                               <br />
                               <div align="center">
-                                <button class="btn btn-primary" onclick="searchMultipleProtein()"
+                                <button class="btn btn-primary" onclick="searchMultipleProtein2()"
                                   style="width: 104px;" >Search</button>
-                                  <button class="btn btn-default" onclick="$('#oneToOneRegion').hide(); $('#oneToOneTable tr').remove(); $('#informationOneToOne').show();"
+                                  <button class="btn btn-default" onclick="$('#manyToManyRegion').hide(); $('#manyToManyTable tr').remove(); $('#informationManyToMany').show();"
                                   style="width: 104px;" >Clean</button>
                               </div>
-                              
-                              
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>

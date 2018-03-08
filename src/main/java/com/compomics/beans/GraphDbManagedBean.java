@@ -200,6 +200,27 @@ public class GraphDbManagedBean implements Serializable{
 
 	}
 	
+	/**
+	 * Find combinations of given array 
+	 * @param arr
+	 * @param len
+	 * @param startPosition
+	 * @param result
+	 * @return array
+	 */
+	private void combinations(String[] arr, int len, int startPosition, String[] result, List<String> firstProtein, List<String> secondProtein){
+		if(len == 0){
+			firstProtein.add(result[0]);
+			secondProtein.add(result[1]);
+            return;
+		}
+		for (int i = startPosition; i <= arr.length-len; i++){
+			result[result.length - len] = arr[i];
+            combinations(arr, len-1, i+1, result, firstProtein, secondProtein);
+        }
+              
+    }      
+	
 	public void searchListOfProteins(){
 		clearFields();
 		dbService.startSession();
@@ -208,19 +229,26 @@ public class GraphDbManagedBean implements Serializable{
 		array3 = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("array3"); 
 		jaccScore = Double.valueOf(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("jacc")); 
 		setMultipleSearch(true);
-		proteinDTOS = dbService.getProteinDTOListForMultipleProteins(Arrays.asList(array1.split("\\s*,\\s*")), Arrays.asList(array2.split("\\s*,\\s*")), jaccScore);
+		if(array2 == null || array2.equals("")){
+			List<String> arr1 = new ArrayList<>();
+			List<String> arr2 = new ArrayList<>();
+			combinations(array1.split("\\s*,\\s*"), 2, 0, new String[2], arr1,arr2);
+			proteinDTOS = dbService.getProteinDTOListForMultipleProteins(arr1, arr2, jaccScore);
+		}else{
+			proteinDTOS = dbService.getProteinDTOListForMultipleProteins(Arrays.asList(array1.split("\\s*,\\s*")), Arrays.asList(array2.split("\\s*,\\s*")), jaccScore);
 		
-		if(Arrays.asList(array1.split("\\s*,\\s*")).size() - proteinDTOS.size() > 0){
-			List<String> accessions1 = new ArrayList<>();
-			List<String> accessions2 = new ArrayList<>();
-			proteinDTOS.forEach(p->{
-				accessions1.add(p.getProtein1().getUniprotAccession());
-				accessions2.add(p.getProtein2().getUniprotAccession());
-			});
-			multiSearchMessage = Arrays.asList(array1.split("\\s*,\\s*")).size() - proteinDTOS.size() + " protein pair(s) cannot be found.";
-			for(int i=0; i<array1.split("\\s*,\\s*").length; i++){
-				if(!accessions1.contains(array1.split("\\s*,\\s*")[i]) || !accessions2.contains(array2.split("\\s*,\\s*")[i])){
-					pairsNotFound.add(array1.split("\\s*,\\s*")[i] + ", "+ array2.split("\\s*,\\s*")[i]);
+			if(Arrays.asList(array1.split("\\s*,\\s*")).size() - proteinDTOS.size() > 0){
+				List<String> accessions1 = new ArrayList<>();
+				List<String> accessions2 = new ArrayList<>();
+				proteinDTOS.forEach(p->{
+					accessions1.add(p.getProtein1().getUniprotAccession());
+					accessions2.add(p.getProtein2().getUniprotAccession());
+				});
+				multiSearchMessage = Arrays.asList(array1.split("\\s*,\\s*")).size() - proteinDTOS.size() + " protein pair(s) cannot be found.";
+				for(int i=0; i<array1.split("\\s*,\\s*").length; i++){
+					if(!accessions1.contains(array1.split("\\s*,\\s*")[i]) || !accessions2.contains(array2.split("\\s*,\\s*")[i])){
+						pairsNotFound.add(array1.split("\\s*,\\s*")[i] + ", "+ array2.split("\\s*,\\s*")[i]);
+					}
 				}
 			}
 		}

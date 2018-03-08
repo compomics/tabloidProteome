@@ -142,7 +142,11 @@ public class VisualisationBean implements Serializable{
 			for (ProteinDTO proteinDTO : proteinDTOS) {
 				// add nodes if they are not in the list
 				if (!accessions.contains(proteinDTO.getProtein1().getUniprotAccession())) {
-					proteinDTO.getProtein1().setGroup(0);
+					if(graphDbManagedBean.getSelectionType().equals("single")){
+						proteinDTO.getProtein1().setGroup(0);
+					}else{
+						proteinDTO.getProtein1().setGroup(1);
+					}
 					proteins.add(proteinDTO.getProtein1());
 					accessions.add(proteinDTO.getProtein1().getUniprotAccession());
 
@@ -210,15 +214,20 @@ public class VisualisationBean implements Serializable{
 					for(ProteinDTO proteinDTO : proteinDTOs){
 						// add nodes if they are not in the list
 						if (!accessions.contains(proteinDTO.getProtein1().getUniprotAccession())) {
-							proteinDTO.getProtein1().setGroup(0);
+							if(graphDbManagedBean.getSelectionType().equals("single")){
+								proteinDTO.getProtein1().setGroup(0);
+							}else{
+								proteinDTO.getProtein1().setGroup(1);
+							}
 							proteins.add(proteinDTO.getProtein1());
 							accessions.add(proteinDTO.getProtein1().getUniprotAccession());
-
+						}
+						if (!accessions.contains(proteinDTO.getProtein2().getUniprotAccession())) {
+							proteinDTO.getProtein2().setGroup(1);
+							proteins.add(proteinDTO.getProtein2());
+							accessions.add(proteinDTO.getProtein2().getUniprotAccession());
 						}
 						
-						proteinDTO.getProtein2().setGroup(1);
-						proteins.add(proteinDTO.getProtein2());
-						accessions.add(proteinDTO.getProtein2().getUniprotAccession());
 
 						// add links between nodes
 						LinkDTO linkDTO = new LinkDTO();

@@ -158,6 +158,56 @@ function searchSingle(){
 		}
 	}
 	
+	function searchMultipleProtein2(){
+		var array1 = [];
+		//gets table
+		var oTable = document.getElementById('manyToManyTable');
+
+		//gets rows of table
+		var rowLength = oTable.rows.length;
+
+		//loops through rows    
+		for (i = 0; i < rowLength; i++){
+		   //gets cells of current row
+		   var oCells = oTable.rows.item(i).cells;
+
+		   //gets amount of cells of current row
+		   var cellLength = oCells.length;
+
+		   //loops through each cell in current row
+		   for(var j = 0; j < cellLength; j ++){
+			   array1.push(oCells.item(j).innerHTML);
+		   }
+		   
+		}
+
+		if(array1.length != 0){
+			passProteinsJSONToJSFManagedBean ([ {
+                name : 'array1',
+                value :  isSafe(array1)
+            },
+            {
+                name : 'array2',
+                value :  ""
+             },
+             {
+                name : 'array3',
+                value :  ""
+             },
+             {
+                name : 'jacc',
+                value :  isSafe(document.getElementById("jaccardManyToMany").value)
+             }
+             ]);
+		}else{
+			var dialogInstance = new BootstrapDialog();
+            dialogInstance.setTitle('INPUT ERROR');
+            dialogInstance.setMessage('Please upload CSV file that contains protein accessions!');
+            dialogInstance.setType(BootstrapDialog.TYPE_DANGER);
+            dialogInstance.open();
+		}
+	}
+	
     function searchGene(selection){
     	if(selection == "single"){
     		if($('#geneId').val() != ""){
@@ -412,27 +462,32 @@ function searchSingle(){
 		$("#readfile").val("");
 		}
 	
-	function insertRow(){
-    	
-		var table=document.getElementById("oneToOneTable");
-        var row=table.insertRow(table.rows.length);
-        var cell1=row.insertCell(0);
-        var t1=document.createElement("input");
-        t1.style.border = 'none';
-        t1.placeholder = 'Uniprot Accession';
-        cell1.appendChild(t1);
-        var cell2=row.insertCell(1);
-        var t2=document.createElement("input");
-        t2.style.border = 'none';
-        t2.placeholder = 'Uniprot Accession';
-        cell2.appendChild(t2);
-        var cell3=row.insertCell(2);
-        var t3=document.createElement("input");
-        t3.style.border = 'none';
-        t3.placeholder = 'Edge Annotation';
-        cell3.appendChild(t3);
+	
+	function loadFile2(event) {
+		var table=document.getElementById("manyToManyTable");
+		$("#manyToManyTable tr").remove(); 
+		var maxColumn = 1;
 
-	}
+		alasql('SELECT * FROM FILE(?,{headers:false})',[event],function(data){
+			for(var obj in data){
+			  if(data.hasOwnProperty(obj)){
+			      var headerIndex = 0;
+			      var row=table.insertRow(table.rows.length);		
+				  for(var prop in data[obj]){
+			        if(data[obj].hasOwnProperty(prop)  && headerIndex < maxColumn ){
+					   var cell=row.insertCell(headerIndex);
+					   cell.innerHTML=data[obj][prop];
+					   headerIndex++;
+			        }
+			      }
+			  }   
+			}
+			$("#manyToManyRegion").show();
+			  	$("#informationManyToMany").hide();
+		});
+		
+		$("#readfile2").val("");
+		}
 	
 	function isSafe(text){
 		if(text.includes("<script>")){
