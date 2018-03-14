@@ -340,7 +340,7 @@ function searchSingle(){
     }
     function clickButton5() {
     	try {    
-			var surl = '/tabloidproteome/dataTable.xhtml';
+			var surl = '/tabloidproteome/dataTable.xhtml?multipleSearch';
             if (validateURL(surl))  
                 window.location = surl; 
             else {  

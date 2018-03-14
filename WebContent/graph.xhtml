@@ -74,7 +74,7 @@
             background: #e2e0e0;
         }
     #threshold {
-            color: #1ABC9C;
+            color: black;
             text-align:center;
             font-style: italic;
             font-size: 14px;
@@ -84,6 +84,12 @@
       /* text-align:right; */
       text-align:left;
     }
+    .modal {
+      top:5%;
+      right:30%;
+      outline: none;
+      overflow:hidden;
+   }
   </style>
   <script src="https://d3js.org/d3.v3.min.js"></script>
   <script src ="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.9.0/bootstrap-slider.js"></script>
@@ -97,11 +103,13 @@
   		var svg = "";
   		var force= "";
   		var width = "", height = "";
-  		var proteinOpacity = 0;
+  		var proteinOpacity = 1;
   		var geneOpacity = 0;
       $(function(){
     	  $("#ex8").attr('data-slider-value', jQuery('#graphForm\\:thresholdValue').val());
-    	  $("#ex8").slider();
+    	  $("#ex8").slider({
+    			tooltip: 'always'
+    	  });
     	  $("#tooltip1").width($("#cy").width()) ;
     	
     	  width = $("#cy").width(),
@@ -162,18 +170,20 @@
         allButtons
 		.append("svg:text")
         .attr("x", 10)
-        .attr("y", 10)
+        .attr("y", 50)
         .attr("dy", ".25em")
-        .style("fill", "black")   
-        .text("click below for labels");
+        .style("fill", "black")
+        .style("font-style", "italic")
+        .text("click above for labels");
         
         allButtons.selectAll("g.button")
         .data(buttonLabels)
         .enter().append("svg:rect")
     	.attr("x",  function(d,i){return (10 + 55*i);})             
-    	.attr("y", 20)  
+    	.attr("y", 15)  
     	.attr("width", 50).attr("height", 20)
     	.attr("class", "legend")
+    	.attr("rx", 4)
     	.style("fill", "steelblue")         
     	.on("click", function(d){
     		if(d == "protein"){
@@ -202,7 +212,7 @@
         .data(buttonLabels)
         .enter().append("svg:text")
     	.attr("x", function(d,i){return (12 + 55*i);})
-        .attr("y", 28)
+        .attr("y", 23)
         .attr("dy", ".35em")
         .style("fill", "white")    
         .text(function(d){return d})
@@ -254,17 +264,17 @@
                       .select("#value")
                       .html(function(x) {
                     	  if(d.edgeAnnotation != ""){
-                    		  return "<strong>Jaccard Similarity:</strong>" + d.associate[0].jaccSimScore + " | "
-    						+"<strong>Interaction:</strong>" + d.associate[0].interact + " | "
-    						+"<strong>Paralog:</strong>" + d.associate[0].paralog + " | "
-    						+"<strong>Pathways:</strong>" + d.pathWays.length + " | "
-    						+"<strong>Diseases:</strong>" + d.diseases.length + " | "
+                    		  return "<strong>Jaccard Similarity:</strong>" + d.associate[0].jaccSimScore + " || "
+    						+"<strong>Interaction:</strong>" + d.associate[0].interact + " || "
+    						+"<strong>Paralog:</strong>" + d.associate[0].paralog + " || "
+    						+"<strong>Pathways:</strong>" + d.pathWays.length + " || "
+    						+"<strong>Diseases:</strong>" + d.diseases.length + " || "
     						+"<strong>Edge Annotation:</strong>" + d.edgeAnnotation;
                     	  }else{
-                    		  return "<strong>Jaccard Similarity:</strong>" + d.associate[0].jaccSimScore + " | "
-      						+"<strong>Interaction:</strong>" + d.associate[0].interact + " | "
-      						+"<strong>Paralog:</strong>" + d.associate[0].paralog + " | "
-      						+"<strong>Pathways:</strong>" + d.pathWays.length + " | "
+                    		  return "<strong>Jaccard Similarity:</strong>" + d.associate[0].jaccSimScore + " || "
+      						+"<strong>Interaction:</strong>" + d.associate[0].interact + " || "
+      						+"<strong>Paralog:</strong>" + d.associate[0].paralog + " || "
+      						+"<strong>Pathways:</strong>" + d.pathWays.length + " || "
       						+"<strong>Diseases:</strong>" + d.diseases.length;
                     	  }
     					
@@ -301,7 +311,7 @@
               })
               .style("stroke", function(d){
             	  if(d.group == 0){
-            		  return "#C0C0C0";
+            		  return "#0d443d";
             	  }
               })
               .style("visibility", function (d) {
@@ -317,7 +327,7 @@
                   //Update the tooltip position and value
                   d3.select("#tooltip1")
                       .select("#value")
-                      .text(d.uniprotAccession +" | " + d.geneNames)
+                      .text(d.uniprotAccession +" || " + d.geneNames)
                       .style("font-size", "13px");
                   
                   
@@ -352,7 +362,7 @@
                  "font-size": "11px",
                  "stroke-width" : "0.6px"})
           .style("opacity", geneOpacity)
-          .text(function(d){return d.geneNames;})
+          .text(function(d){return d.geneNames[0];})
           .call(drag);
           
           
@@ -489,8 +499,7 @@
                       //Update the tooltip position and value
                       d3.select("#tooltip1")
                           .select("#value")
-                          .text(d.data.message);
-                      
+                          .html("<strong>" + d.data.message + "</strong>");
                       d3.select(this).style("cursor", "pointer"); 
                   })
                   .on("mouseout", function() {
@@ -538,7 +547,7 @@
       	$('#rel_bioGrid').html(link.associate[0].bioGrid);
       	for(var i in link.associate){
       		var newtr = $('<tr></tr>').append(
-      				$('<td></td>').html($("<a></a>").attr("href", 'https://www.ebi.ac.uk/intact/query/#' +link.associate[i].intactId )
+      				$('<td></td>').html($("<a></a>").attr("href", 'https://www.ebi.ac.uk/intact/interaction/' +link.associate[i].intactId )
                 			  .attr("target", "_blank").text(link.associate[i].intactId)).width('12%'),
      	            $('<td></td>').text(link.associate[i].intactConfidence).width('12%'),
      	            $('<td></td>').text(link.associate[i].intactDetection).width('19%'),
@@ -716,7 +725,7 @@
                         <a href="/tabloidproteome/search.xhtml">Search</a>
                     </li>
                     <li>
-                        <a href="/tabloidproteome/dataTable.xhtml">Data Table</a>
+                        <a href="/tabloidproteome/dataTable.xhtml?session">Data Table</a>
                     </li>
                     <li>
                         <a href="/tabloidproteome/help.xhtml">Help</a>
@@ -751,14 +760,18 @@
           <div class="col-md-6">
             <div class="alert alert-info alert-dismissible" role="alert" >
               <div style="margin-bottom:15px;"><button type="button" class="close" data-dismiss="alert" aria-label="Close" ><span aria-hidden="true">&#215;</span></button></div>
-              Click on the node/edge for more information. You can expand/collapse the links and add/remove labels on the nodes.
+              Click on the node/edge for more information. You can expand/collapse the links and add/remove labels on the nodes. 
+              Orange nodes are the first degree new nodes after clicking expand button of the original nodes of the graph. 
+              Purple nodes are the 2nd or higher degree new nodes.
             </div>
           </div>
             <div class="col-md-5">
-            <h4 id="threshold" style="float: left;"> Link threshold:
-                  <input id="ex8" data-slider-id='ex1Slider' type="text" data-slider-min="0.1" data-slider-max="0.8" data-slider-step="0.05"
-                    onchange="threshold(this.value);"/>
-                </h4>
+            <h4 id="threshold" style="float: left;"> Change threshold:
+              <b>0.1</b>
+              <input id="ex8" data-slider-id='ex1Slider' type="text" data-slider-min="0.1" data-slider-max="0.8" data-slider-step="0.05"
+                onchange="threshold(this.value);"/>
+              <b>0.8</b>
+            </h4>
             </div>
         </div>
         
