@@ -156,6 +156,7 @@ public class ControlBean implements Serializable{
 			}
 			pathwayDTOs = dbService.findPathwayDTOs(".*"+pathway+".*");
 		}
+		System.out.println("pathway : " + pathwayDTOs.size());
 		dbService.closeSession();
 		
 		Collections.sort(pathwayDTOs, new Comparator<PathwayDTO>() {
@@ -177,6 +178,7 @@ public class ControlBean implements Serializable{
 			}
 			diseaseDTOs = dbService.findDiseaseDTOs(".*"+disease+".*");
 		}
+		System.out.println("disease : " + diseaseDTOs.size());
 		dbService.closeSession();
 		
 		

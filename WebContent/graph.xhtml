@@ -105,6 +105,7 @@
   		var width = "", height = "";
   		var proteinOpacity = 1;
   		var geneOpacity = 0;
+  		var defs = "";
       $(function(){
     	  $("#ex8").attr('data-slider-value', jQuery('#graphForm\\:thresholdValue').val());
     	  $("#ex8").slider({
@@ -121,13 +122,13 @@
           
           data.links.forEach(function(e) { 
         	  
-        	var sourceNode = data.proteins.filter(function(n) { return n.uniprotAccession === e.source; })[0],
-          	      targetNode = data.proteins.filter(function(n) { return n.uniprotAccession === e.target; })[0];   	
-        	dataLinks.push({source: sourceNode, target: targetNode, edgeAnnotation: e.edgeAnnotation, associate: e.associate, projects: e.projects,
-        			  pathWays: e.pathWays, complexes: e.complexes, mf: e.mf, bp: e.bp, cc: e.cc, diseases: e.diseases});
-        		   
-        	  
-           });
+          	var sourceNode = data.proteins.filter(function(n) { return n.uniprotAccession === e.source; })[0],
+            	      targetNode = data.proteins.filter(function(n) { return n.uniprotAccession === e.target; })[0];   	
+          	dataLinks.push({source: sourceNode, target: targetNode, edgeAnnotation: e.edgeAnnotation, associate: e.associate, projects: e.projects,
+          			  pathWays: e.pathWays, complexes: e.complexes, mf: e.mf, bp: e.bp, cc: e.cc, diseases: e.diseases});
+          		   
+          	  
+          });
           
           createForce();
           createSVG();
@@ -159,6 +160,9 @@
     	  svg.append("rect")
         .attr("width", width)
         .attr("height", height);
+
+    	  
+    	  defs = svg.append('defs');
         node = svg.selectAll(".node"),
         link = svg.selectAll(".link");
    
@@ -249,7 +253,7 @@
           node = node.data(dataNodes);
           link.enter().insert("line", ".node")
               .attr("class", "link")
-              .style("stroke", function(d){
+               .style("stroke", function(d){
             	  if(d.associate[0].jaccSimScore &lt; 0.4){
             		  return "#999";
             	  }else{
