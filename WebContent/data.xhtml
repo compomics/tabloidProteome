@@ -112,6 +112,7 @@ $(document).ready(function()
           <ul class="nav nav-pills brand-pills nav-stacked">
             <li class="active"><a href="#statistics" data-toggle="tab">Statistics</a></li>
             <li><a href="#resources" data-toggle="tab">Data Source</a></li>
+            <li><a href="#download" data-toggle="tab">Download</a></li>
           </ul>
         </div>
         <div class="col-sm-9">
@@ -173,6 +174,33 @@ $(document).ready(function()
 								width="79px" height="57px" /></a>
               </div>
             </div>
+            <div class="tab-pane" id="download">
+              <h3>DATA in tab separated files (Tabloid Proteome version 2.0)</h3>
+              <div class="row">
+                <div class="col-sm-6">
+                  <h4>File Name</h4>
+                  <p><a target="_blank" href="http://genesis.ugent.be/uvpublicdata/Tabloid_Proteome/TPSignificantPairInfoHuman.txt">1. TPSignificantPairInfoHuman.txt</a></p>
+                  <p><a target="_blank" href="http://genesis.ugent.be/uvpublicdata/Tabloid_Proteome/TPSignificantPairInfoMouse.txt">2. TPSignificantPairInfoMouse.txt</a></p>
+                </div>
+                <div class="col-sm-6">
+                  <h4>Description</h4>
+                  <p>Human associated protein pairs for Jaccard coefficient >= 0.4</p>
+                  <p>Mouse associated protein pairs for Jaccard coefficient >= 0.4</p>
+                </div>
+              </div>
+              <p style="font-style: italic;">For protein association pair with Jaccard coefficient smaller than 0.4, contact us.</p>
+              <br/>
+            
+              <h3>Access via API:</h3>
+              <p>Tabloid Proteome provides REST (Representational State Transfer) API which enables you to get the data without using the graphical user interface of the web page. 
+              This can be used to programmatically access some information without downloading entire dataset. </p>
+              <br/>
+              <p>Please click 
+              <a target="_blank" href="https://iomics.ugent.be/tabloidproteome/tabloidApi.html">here </a>
+              for api information.</p>
+              <p><a target="_blank" href="https://github.com/compomics/tabloidProteome/blob/master/access_for_API.pdf">Here </a> you can see an example of using RESTful web services for
+               Python and Java.</p>         
+            </div>
             
           </div>
         </div>
@@ -182,7 +210,7 @@ $(document).ready(function()
 
         <div id="footer">
           <div class="container">
-            <div class="row">
+            <div class="row" style="margin-top: 0;">
               <div class="col-sm-9">
                 <p class="text-muted credit">SUPPORTED BY</p>
                 <p class="text-muted credit">
@@ -212,10 +240,11 @@ $(document).ready(function()
               <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/information.xhtml#version" class="text-sub">Version</a></p>
               <p class="credit"><a href="/tabloidproteome/information.xhtml#reference" class="text-sub">Reference</a></p>
             </div>
-            <div class="col-sm-1">
+            <div class="col-sm-1" >
               <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml" class="text-muted">Data</a></p>
               <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml#statistics" class="text-sub">Statistics</a></p>
               <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml#resources" class="text-sub">Credits &#38; Resources</a></p>
+              <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml#download" class="text-sub">Download</a></p>
             </div>
             <div class="col-sm-1">
               <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml" class="text-muted">Help</a></p>

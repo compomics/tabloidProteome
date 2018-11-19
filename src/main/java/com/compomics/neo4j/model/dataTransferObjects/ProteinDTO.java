@@ -22,7 +22,7 @@ public class ProteinDTO implements Serializable{
 
     private Protein protein2;
 
-    private List<Associate> associate;
+    private Associate associate;
 
     private List<Project> projects;
     
@@ -59,7 +59,7 @@ public class ProteinDTO implements Serializable{
 		return protein2;
 	}
 
-	public List<Associate> getAssociate() {
+	public Associate getAssociate() {
 		return associate;
 	}
 
@@ -107,7 +107,7 @@ public class ProteinDTO implements Serializable{
 		this.protein2 = protein2;
 	}
 
-	public void setAssociate(List<Associate> associate) {
+	public void setAssociate(Associate associate) {
 		this.associate = associate;
 	}
 

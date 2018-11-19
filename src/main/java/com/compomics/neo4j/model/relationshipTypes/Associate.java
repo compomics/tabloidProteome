@@ -1,6 +1,11 @@
 package com.compomics.neo4j.model.relationshipTypes;
 
 import java.io.Serializable;
+import java.util.List;
+
+import com.compomics.neo4j.model.nodes.BioGrid;
+import com.compomics.neo4j.model.nodes.Intact;
+
 
 /**
  * Created by demet on 12/19/2016.
@@ -16,22 +21,14 @@ public class Associate implements Serializable{
 
     private String interact;
     
-    private String intact;
+    private List<Intact> intact;
     
-    private String bioGrid;
+    private List<BioGrid> bioGrid;
 
     private String commonAssayCount;
 
     private String commonProject;
     
-    private String intactId;
-    
-    private String intactConfidence;
-    
-    private String intactDetection;
-    
-    private String intactInteractionType;
-
     public Associate() {
     }
 
@@ -75,51 +72,21 @@ public class Associate implements Serializable{
         this.commonProject = commonProject;
     }
 
-	public String getIntactId() {
-		return intactId;
-	}
-
-	public void setIntactId(String intactId) {
-		this.intactId = intactId;
-	}
-
-	public String getIntactConfidence() {
-		return intactConfidence;
-	}
-
-	public String getIntactDetection() {
-		return intactDetection;
-	}
-
-	public String getIntactInteractionType() {
-		return intactInteractionType;
-	}
-
-	public void setIntactConfidence(String intactConfidence) {
-		this.intactConfidence = intactConfidence;
-	}
-
-	public void setIntactDetection(String interactionDetection) {
-		this.intactDetection = interactionDetection;
-	}
-
-	public void setIntactInteractionType(String interactionType) {
-		this.intactInteractionType = interactionType;
-	}
-
-	public String getIntact() {
+	public List<Intact> getIntact() {
 		return intact;
 	}
 
-	public String getBioGrid() {
+	public List<BioGrid> getBioGrid() {
 		return bioGrid;
 	}
 
-	public void setIntact(String intact) {
+	public void setIntact(List<Intact> intact) {
 		this.intact = intact;
 	}
 
-	public void setBioGrid(String bioGrid) {
+	public void setBioGrid(List<BioGrid> bioGrid) {
 		this.bioGrid = bioGrid;
-	} 
+	}
+
+	
 }

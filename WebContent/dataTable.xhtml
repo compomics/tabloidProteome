@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:f="http://xmlns.jcp.org/jsf/core" 
-xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:p="http://primefaces.org/ui">
+xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:p="http://primefaces.org/ui"  xmlns:c="http://java.sun.com/jsp/jstl/core">
 <f:metadata>
   <f:event listener="#{graphDbManagedBean.load}" type="preRenderView" />
 </f:metadata>
@@ -32,14 +32,13 @@ xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:p="http://primefaces.org/ui">
 <link href="/tabloidproteome/resources/css/custom.css" rel="stylesheet" />
 <link href="/tabloidproteome/resources/css/sticky-footer.css" rel="stylesheet" />
 <link href="/tabloidproteome/resources/css/bootstrap-table-expandable.css" rel="stylesheet" />
-<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.7/css/bootstrap-dialog.min.css" rel="stylesheet" />
+<link href="/tabloidproteome/resources/css/bootstrap-dialog.css" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
 
 <!-- Bootstrap Core JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" 
-      integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="/tabloidproteome/resources/js/bootstrap.min.js"></script>
 <script async="async" src="/tabloidproteome/resources/js/bootstrap-table-expandable.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.7/js/bootstrap-dialog.min.js" type="text/javascript"></script>
+<script src="/tabloidproteome/resources/js/bootstrap-dialog.js" type="text/javascript"></script>  
 <style>
 body {
 	padding-top: 70px;
@@ -78,20 +77,24 @@ function modifySearch(){
 	var acc1 = document.getElementById('acc1').value;
 	var acc2 = document.getElementById('acc2').value;
 	var array1 = document.getElementById('array1').value;
-	
+	var species = document.getElementById('species').value;
+	var urlParams = new URLSearchParams(window.location.search);
 	if(acc2 != null &amp;&amp; acc2 != ""){
 		window.location = '/tabloidproteome/dataTable.xhtml?accession1=' + acc1
-    	+ '&amp;accession2=' + acc2 + '&amp;jaccard=' + jacc;
+    	+ '&amp;accession2=' + acc2 + '&amp;jaccard=' + jacc + '&amp;species=' + species;
 	}else if(array1 != null &amp;&amp; array1 != ""){
 		passProteinsJSONToJSFManagedBean ([ {
             name : 'jacc',
             value :  jacc
         }
          ]);
-		
+	}else if(urlParams.has('path')){
+		window.location = '/tabloidproteome/dataTable.xhtml?path='+ urlParams.get('path')
+		+ '&amp;jaccard=' + jacc + '&amp;species=' + species;	
+			
 	}else{
 		window.location = '/tabloidproteome/dataTable.xhtml?accession='+ acc1
-		+ '&amp;jaccard=' + jacc;
+		+ '&amp;jaccard=' + jacc + '&amp;species=' + species;
 	}
 	
 }
@@ -136,6 +139,7 @@ function clickButton(){
       <input type="hidden" id="acc1" value="#{graphDbManagedBean.accession1}" />
       <input type="hidden" id="acc2" value="#{graphDbManagedBean.accession2}" />
       <input type="hidden" id="jacc" value="#{graphDbManagedBean.jaccScore}" />
+      <input type="hidden" id="species" value="#{graphDbManagedBean.species}" />
       <input type="hidden" id="array1" value="#{graphDbManagedBean.array1}" />
       <h1></h1>
       <a href="/tabloidproteome/graph.xhtml?graph=proteinView" style="float: right;">
@@ -219,9 +223,9 @@ function clickButton(){
                 	<a target="_blank" href="http://www.genecards.org/cgi-bin/carddisp.pl?gene=#{geneName}">#{geneName}</a>
               	</ui:repeat>
               </td>
-              <td>#{proteinDTO.associate[0].jaccSimScore}</td>
-              <td>#{proteinDTO.associate[0].interact}</td>
-              <td>#{proteinDTO.associate[0].paralog}</td>
+              <td>#{proteinDTO.associate.jaccSimScore}</td>
+              <td>#{proteinDTO.associate.interact}</td>
+              <td>#{proteinDTO.associate.paralog}</td>
               <td>#{proteinDTO.distinctComplexCount}</td>
               <td>#{proteinDTO.distinctPathCount}</td>
               <td>#{proteinDTO.commonProjectSize}</td>
@@ -242,12 +246,14 @@ function clickButton(){
                   <div class="panel-body panel-collapse collapse ">
                     <div class="row" style="margin-top: 3px;">
                       <div class="col-sm-2">
-                        <label>IntAct : </label> #{proteinDTO.associate[0].intact}
+                        <label>IntAct : </label> #{proteinDTO.associate.intact.size()}
                       </div>
                       <div class="col-sm-2">
-                        <label>BioGRID : </label> #{proteinDTO.associate[0].bioGrid}
+                        <label>BioGRID : </label> #{proteinDTO.associate.bioGrid.size()}
                       </div>
                     </div>
+                   
+                    <h:panelGroup rendered="#{proteinDTO.associate.intact.size() gt 0}">
                     <div class="wrap">
                       <table class="head">
                         <tr>
@@ -259,17 +265,47 @@ function clickButton(){
                       </table>
                       <div class="inner_table">
                         <table>
-                          <ui:repeat var="associate" value="#{proteinDTO.associate}">
+                          <ui:repeat var="intact" value="#{proteinDTO.associate.intact}">
                           <tr>
-                            <td style="width: 12%;"><a target="_blank" href="https://www.ebi.ac.uk/intact/interaction/#{associate.intactId}">#{associate.intactId}</a></td>
-                            <td style="width: 12%;">#{associate.intactConfidence}</td>
-                            <td style="width: 19%;">#{associate.intactDetection}</td>
-                            <td style="width: 19%;">#{associate.intactInteractionType}</td>
+                            <td style="width: 12%;"><a target="_blank" href="https://www.ebi.ac.uk/intact/interaction/#{intact.intactId}">#{intact.intactId}</a></td>
+                            <td style="width: 12%;">#{intact.confidenceValue}</td>
+                            <td style="width: 19%;">#{intact.detection}</td>
+                            <td style="width: 19%;">#{intact.interactionType}</td>
                           </tr>
                         </ui:repeat>
                         </table>
                       </div>
                     </div>
+                    </h:panelGroup>
+                 
+                    <h:panelGroup rendered="#{proteinDTO.associate.bioGrid.size() gt 0}">
+                    <div class="wrap">
+                      <table class="head">
+                        <tr>
+                          <th style="width: 15%;">BioGrid Id</th>
+                          <th style="width: 17%;">Experiment Name</th>
+                          <th style="width: 17%;">Experiment Type</th>
+                          <th style="width: 17%;">Modification</th>
+                          <th style="width: 17%;">Score</th>
+                          <th style="width: 17%;">Throughput</th>
+                        </tr>
+                      </table>
+                      <div class="inner_table">
+                        <table>
+                          <ui:repeat var="bioGrid" value="#{proteinDTO.associate.bioGrid}">
+                          <tr>
+                            <td style="width: 15%;">#{bioGrid.biogridId}</td>
+                            <td style="width: 17%;">#{bioGrid.experimentName}</td>
+                            <td style="width: 17%;">#{bioGrid.experimentType}</td>
+                            <td style="width: 17%;">#{bioGrid.modification}</td>
+                            <td style="width: 17%;">#{bioGrid.score}</td>
+                            <td style="width: 17%;">#{bioGrid.throughput}</td>
+                          </tr>
+                        </ui:repeat>
+                        </table>
+                      </div>
+                    </div>
+                    </h:panelGroup>
                   </div>
                 </div>
                 <div class="panel panel-default ">
@@ -284,24 +320,26 @@ function clickButton(){
                     <div class="wrap">
                       <table class="head ">
                         <tr>
-                          <th style="width: 5%;">No</th>
+                          <th style="width: 3%;">No</th>
                           <th style="width: 12%;">Project Accession</th>
-                          <th style="width: 25%;">Keywords</th>
-                          <th style="width: 20%;">Tissue</th>
+                          <th style="width: 19%;">Keywords</th>
+                          <th style="width: 17%;">Tissue</th>
                           <th style="width: 15%;">Tags</th>
-                          <th style="width: 23%;">Instruments</th>
+                          <th style="width: 17%;">Instruments</th>
+                          <th style="width: 17%;">Experiment Type</th>
                         </tr>
                       </table>
                       <div class="inner_table">
                         <table>
                           <ui:repeat var="project" value="#{proteinDTO.projects}" varStatus="status">
                           <tr>
-                            <td style="width: 5%;">#{status.index+1}</td>
+                            <td style="width: 3%;">#{status.index+1}</td>
                             <td style="width: 12%;"><a target="_blank" href="https://www.ebi.ac.uk/pride/archive/projects/#{project.projectAccession}">#{project.projectAccession}</a></td>
-                            <td style="width: 25%;">#{project.keywords}</td>
-                            <td style="width: 20%;">#{project.tissue}</td>
+                            <td style="width: 19%;">#{project.keywords}</td>
+                            <td style="width: 17%;">#{project.tissue}</td>
                             <td style="width: 15%;">#{project.tags}</td>
-                            <td style="width: 23%;">#{project.instruments}</td>
+                            <td style="width: 17%;">#{project.instruments}</td>
+                            <td style="width: 17%;">#{project.experimentType}</td>
                           </tr>
                         </ui:repeat>
                         </table>
@@ -526,7 +564,7 @@ function clickButton(){
                 $('#control').val("do not show dialog again!");
 	  		}else if($('#control').val().indexOf("[") != -1){
 	  			var control = $('#control').val().replace("[", "").replace("]", "");
-	  			if(control == ""){
+	  			if(control.split(',').length == 2 &amp;&amp; #{graphDbManagedBean.proteinDTOS.size()} ==0){
 	  				var dialogInstance = new BootstrapDialog();
 	                dialogInstance.setTitle('INFORMATION');
 	                dialogInstance.setMessage('There is no link between two proteins. You can modify Jaccard Threshold and search again');
@@ -549,8 +587,10 @@ function clickButton(){
 	                			 var location = '/tabloidproteome/dataTable.xhtml?path=';
 	                			 for(i=0; i &lt; proteins.length; i++){
 	                				 location +=  proteins[i].trim()+ '*';
-	         	                 }		 
-	                			 window.location = location.slice(0, -1);
+	         	                 }
+	                			 location = location.slice(0, -1);
+	                			 location += "&amp;jaccard=" +document.getElementById('jacc').value + '&amp;species=' + document.getElementById('species').value;
+	                			 window.location = location;
 	                         }
 	                    }, {
 	                        label: 'close',
@@ -581,8 +621,8 @@ function clickButton(){
 
     <div id="footer">
           <div class="container">
-            <div class="row">
-              <div class="col-sm-9">
+            <div class="row" style="margin-top: 0;">
+              <div class="col-sm-9" >
                 <p class="text-muted credit">SUPPORTED BY</p>
                 <p class="text-muted credit">
                   <a target="_blank" href="https://compomics.com" > 
@@ -615,6 +655,7 @@ function clickButton(){
               <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml" class="text-muted">Data</a></p>
               <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml#statistics" class="text-sub">Statistics</a></p>
               <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml#resources" class="text-sub">Credits &#38; Resources</a></p>
+              <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml#download" class="text-sub">Download</a></p>
             </div>
             <div class="col-sm-1">
               <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml" class="text-muted">Help</a></p>

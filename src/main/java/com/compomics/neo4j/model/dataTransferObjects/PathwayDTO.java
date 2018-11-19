@@ -11,6 +11,7 @@ public class PathwayDTO implements Serializable{
 	private static final long serialVersionUID = 4683311680811942209L;
 	private PathWay pathWay;
 	private List<ProteinDTO> proteinDTOs;
+	private List<PathwayDTO> pathwayDTOs;
 	
 	public PathwayDTO() {
 	}
@@ -29,6 +30,14 @@ public class PathwayDTO implements Serializable{
 	
 	public void setProteinDTOs(List<ProteinDTO> proteinDTOs) {
 		this.proteinDTOs = proteinDTOs;
+	}
+
+	public List<PathwayDTO> getPathwayDTOs() {
+		return pathwayDTOs;
+	}
+
+	public void setPathwayDTOs(List<PathwayDTO> pathwayDTOs) {
+		this.pathwayDTOs = pathwayDTOs;
 	}
 	
 }

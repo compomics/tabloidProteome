@@ -18,6 +18,8 @@ public class PathWay implements Serializable{
     private String evidenceCode;
 
     private String reactomelink;
+    
+    private String label;
 
     public PathWay() {
     }
@@ -61,5 +63,13 @@ public class PathWay implements Serializable{
     public void setReactomelink(String reactomelink) {
         this.reactomelink = reactomelink;
     }
+
+	public String getLabel() {
+		return label;
+	}
+
+	public void setLabel(String label) {
+		this.label = label;
+	}
 
 }

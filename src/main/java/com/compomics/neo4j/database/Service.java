@@ -4,13 +4,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
+import org.neo4j.driver.internal.value.NullValue;
 import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.StatementResult;
@@ -18,9 +23,11 @@ import org.neo4j.driver.v1.StatementResult;
 import com.compomics.neo4j.model.dataTransferObjects.DiseaseDTO;
 import com.compomics.neo4j.model.dataTransferObjects.PathwayDTO;
 import com.compomics.neo4j.model.dataTransferObjects.ProteinDTO;
+import com.compomics.neo4j.model.nodes.BioGrid;
 import com.compomics.neo4j.model.nodes.Complex;
 import com.compomics.neo4j.model.nodes.Disease;
 import com.compomics.neo4j.model.nodes.Go;
+import com.compomics.neo4j.model.nodes.Intact;
 import com.compomics.neo4j.model.nodes.PathWay;
 import com.compomics.neo4j.model.nodes.Project;
 import com.compomics.neo4j.model.nodes.Protein;
@@ -42,24 +49,25 @@ public class Service implements Serializable{
 
 	// queries
 	private static final String PROJECT_QUERY = "projectSearch";
-	private static final String ASSOCIATE_QUERY = "associationSearch";
+	private static final String INTACT_QUERY = "IntActSearch";
+	private static final String BIOGRID_QUERY = "BiogridSearch";
 	private static final String PATHWAY_QUERY = "pathwaySearch";
 	private static final String COMPLEX_QUERY = "complexSearch";
-	private static final String COMMONMF_QUERY = "commonMFSearch";
-	private static final String COMMONBP_QUERY = "commonBPSearch";
-	private static final String COMMONCC_QUERY = "commonCCSearch";
+	private static final String COMMONGO_QUERY = "GOSearch";
 	private static final String DISEASE_QUERY = "diseaseSearch";
 	private static final String CONTROL_QUERY = "associationControl";
 	private static final String GENE_QUERY_SINGLE = "searchByGeneSingle";
 	private static final String GENE_QUERY_DOUBLE = "searchByGeneDouble";
+	private static final String GENE_QUERY_MULTIPLE = "searchByGeneMultiple";
 	private static final String PATHWAY_SEARCH_QUERY = "searchByPathway";
+	private static final String HIERARCHY_SEARCH = "hierarchySearch";
 	private static final String PATHWAY_FIND_PROTEIN = "findProteinsByPathway";
 	private static final String DISEASE_SEARCH_QUERY = "searchByDisease";
-	private static final String DISEASE_FIND_PROTEIN = "findProteinsByDisease";
 	private static final String PROTEIN_FIND_BY_NAME_SINGLE = "searchByProteinNameSingle";
 	private static final String PROTEIN_FIND_BY_NAME_DOUBLE = "searchByProteinNameDouble";
 	private static final String PROTEIN_FIND_BY_TISSUE = "findProteinsByTissue";
 	private static final String ONE_TO_ONE_SEARCH = "oneToOneSearch";
+	private static final String ONE_TO_ONE_SEARCH_MOUSE = "oneToOneSearchMouse";
 
 	public Service() {
 		connection = new Connection();
@@ -99,15 +107,15 @@ public class Service implements Serializable{
 		return result;
 	}
 	
-	public List<ProteinDTO> findProteinsByName(String proteinName1, String proteinName2, double jaccScore){
+	public List<ProteinDTO> findProteinsByName(String proteinName1, String proteinName2, double jaccScore, String species){
 		List<ProteinDTO> proteins = new ArrayList<>();
 		try {
 			input = getClass().getClassLoader().getResourceAsStream("query.properties");
 			prop.load(input);
 			if(proteinName2.equals("")){
-				proteins = searchProteinByName(PROTEIN_FIND_BY_NAME_SINGLE, proteinName1, proteinName2, jaccScore);
+				proteins = searchProteinByName(PROTEIN_FIND_BY_NAME_SINGLE, proteinName1, proteinName2, jaccScore, species);
 			}else{
-				proteins = searchProteinByName(PROTEIN_FIND_BY_NAME_DOUBLE, proteinName1, proteinName2, jaccScore);
+				proteins = searchProteinByName(PROTEIN_FIND_BY_NAME_DOUBLE, proteinName1, proteinName2, jaccScore, species);
 				for(int i=0; i<proteins.size(); i++){
 				      for(int j=i; j<proteins.size(); j++){
 				      	if(proteins.get(i).getProtein1().getUniprotAccession().equals(proteins.get(j).getProtein2().getUniprotAccession()) 
@@ -135,7 +143,7 @@ public class Service implements Serializable{
 		return proteins;
 	}
 	
-	private List<ProteinDTO> searchProteinByName( String queryName, String proteinName1, String proteinName2, double jaccScore){
+	private List<ProteinDTO> searchProteinByName( String queryName, String proteinName1, String proteinName2, double jaccScore, String species){
 		
 		List<ProteinDTO> proteins = new ArrayList<>();
 		parameters = new HashMap<String, Object>();
@@ -146,23 +154,33 @@ public class Service implements Serializable{
 		StatementResult result = session.run(prop.getProperty(queryName), parameters);
 		while (result.hasNext()) {
 			Record record = result.next();
+			if(!record.get("species1").asString().equals(species)){
+				continue;
+			}
 			ProteinDTO proteinDTO = new ProteinDTO();
 			Protein protein1 = new Protein();
 			protein1.setUniprotAccession(record.get("uniprot_accession1").asString());
 			protein1.setProteinName(record.get("protein_name1").asString());
-			protein1.setGeneNames(record.get("gene_name1").asList());
+			if(!NullValue.NULL.equals(record.get("gene_name1"))){
+				protein1.setGeneNames(record.get("gene_name1").asList());
+			}
+			protein1.setSpecies(record.get("species1").asString());
 			proteinDTO.setProtein1(protein1);
 			if(queryName.equals(PROTEIN_FIND_BY_NAME_DOUBLE)){
+				if(!record.get("species2").asString().equals(species)){
+					continue;
+				}
 				Protein protein2 = new Protein();
 				protein2.setUniprotAccession(record.get("uniprot_accession2").asString());
 				protein2.setProteinName(record.get("protein_name2").asString());
-				protein2.setGeneNames(record.get("gene_name2").asList());
+				if(!NullValue.NULL.equals(record.get("gene_name2"))){
+					protein1.setGeneNames(record.get("gene_name2").asList());
+				}
+				protein2.setSpecies(record.get("species2").asString());
 				proteinDTO.setProtein2(protein2);
 				Associate associate = new Associate();
 				associate.setJaccSimScore(record.get("jacc_sim_score").asDouble());
-				List<Associate> associates = new ArrayList<>();
-				associates.add(associate);
-				proteinDTO.setAssociate(associates);
+				proteinDTO.setAssociate(associate);
 			}
 			
 			proteins.add(proteinDTO);	
@@ -176,16 +194,65 @@ public class Service implements Serializable{
 	 * @param gene
 	 * @return
 	 */
-	public List<ProteinDTO> findProteinsByGene(String gene1, String gene2){
+	public List<ProteinDTO> findProteinsByGene(String gene1, String gene2, String species){
 		List<ProteinDTO> proteins = new ArrayList<>();
 		try {
 			input = getClass().getClassLoader().getResourceAsStream("query.properties");
 			prop.load(input);
 			if(gene2.equals("")){
-				proteins = findProteinsByGeneIdOrName(GENE_QUERY_SINGLE, gene1, gene2);
+				proteins = findProteinsByGeneIdOrName(GENE_QUERY_SINGLE, gene1, gene2, species);
 			}else{
-				proteins = findProteinsByGeneIdOrName(GENE_QUERY_DOUBLE, gene1, gene2);
+				proteins = findProteinsByGeneIdOrName(GENE_QUERY_DOUBLE, gene1, gene2, species);
 			}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (input != null) {
+				try {
+					input.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return proteins;
+	}
+	
+	/**
+	 * find protein accession by gene name list
+	 * @param gene
+	 * @return
+	 */
+	public List<ProteinDTO> findProteinsByGenes(List<String> genes, String species){
+		List<ProteinDTO> proteins = new ArrayList<>();
+		try {
+			input = getClass().getClassLoader().getResourceAsStream("query.properties");
+			prop.load(input);
+			parameters = new HashMap<String, Object>();
+			parameters.put("genes", genes);
+			parameters.put("species", species);
+
+			StatementResult result = session.run(prop.getProperty(GENE_QUERY_MULTIPLE), parameters);
+			while (result.hasNext()) {
+				Record record = result.next();
+				ProteinDTO proteinDTO = new ProteinDTO();
+				Protein protein1 = new Protein();
+				protein1.setUniprotAccession(record.get("uniprot_accession1").asString());
+				protein1.setProteinName(record.get("protein_name1").asString());
+				if(!NullValue.NULL.equals(record.get("gene_name1"))){
+					protein1.setGeneNames(record.get("gene_name1").asList());
+				}
+				if(!NullValue.NULL.equals(record.get("gene_id1"))){
+					protein1.setGeneIds(record.get("gene_id1").asList());
+				}
+				protein1.setSpecies(record.get("species1").asString());
+				proteinDTO.setProtein1(protein1);
+
+				proteins.add(proteinDTO);
+				
+			}
+			return proteins;
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -214,10 +281,54 @@ public class Service implements Serializable{
 				PathWay pthwy = new PathWay();
 				pthwy.setPathwayName(record.get("pathway_name").asString());
 				pthwy.setReactomeAccession(record.get("reactome_accession").asString());
+				pthwy.setLabel((String) record.get("label").asList().get(0));
 				PathwayDTO pathwayDTO = new PathwayDTO();
 				pathwayDTO.setPathWay(pthwy);
-				pathwayDTO.setProteinDTOs(findProteinDTOsByPathway(pthwy.getReactomeAccession()));
+				pathwayDTO.setPathwayDTOs(findLeafPathwaysandProteins(pthwy.getReactomeAccession(), pthwy.getLabel()));
 				pathwayDTOs.add(pathwayDTO);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (input != null) {
+				try {
+					input.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return pathwayDTOs;
+	}
+	
+	public List<PathwayDTO> findLeafPathwaysandProteins(String reactomeAccession, String label){
+		List<PathwayDTO> pathwayDTOs = new ArrayList<>();
+		try {
+			input = getClass().getClassLoader().getResourceAsStream("query.properties");
+			prop.load(input);
+			parameters = new HashMap<String, Object>();
+			parameters.put("reactomeAccession", reactomeAccession);
+			if(label.equals("Leaf_node")){
+				PathWay pthwy = new PathWay();
+				pthwy.setReactomeAccession(reactomeAccession);
+				PathwayDTO pathwayDTO = new PathwayDTO();
+				pathwayDTO.setPathWay(pthwy);
+				pathwayDTO.setProteinDTOs(findProteinDTOsByPathway(reactomeAccession));
+				pathwayDTOs.add(pathwayDTO);
+			}else{
+				StatementResult result = session.run(prop.getProperty(HIERARCHY_SEARCH), parameters);
+				while (result.hasNext()){
+					Record record = result.next();
+					String leafPathway = (String) record.get("leaf_pathway").asList().get(record.get("leaf_pathway").asList().size()-1);
+					PathWay pthwy = new PathWay();
+					pthwy.setReactomeAccession(leafPathway);
+					PathwayDTO pathwayDTO = new PathwayDTO();
+					pathwayDTO.setPathWay(pthwy);
+					pathwayDTO.setProteinDTOs(findProteinDTOsByPathway(leafPathway));
+					if(pathwayDTO.getProteinDTOs().size() >0){
+						pathwayDTOs.add(pathwayDTO);
+					}
+				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -235,11 +346,19 @@ public class Service implements Serializable{
 	
 	private List<ProteinDTO> findProteinDTOsByPathway(String reactomeAccession){
 		List<ProteinDTO> proteinDTOS = new ArrayList<>();
+		Set<String> uniprotAccessions1 = new HashSet<>();
+		Set<String> uniprotAccessions2 = new HashSet<>();
 		parameters = new HashMap<String, Object>();
 		parameters.put("reactomeAccession", reactomeAccession);
 		StatementResult result = session.run(prop.getProperty(PATHWAY_FIND_PROTEIN), parameters);
 		while (result.hasNext()) {
 			Record record = result.next();
+			
+			if(uniprotAccessions1.contains(record.get("uniprot_accession2").asString()) && uniprotAccessions2.contains(record.get("uniprot_accession1").asString())){
+				continue;
+			}
+			
+			
 			ProteinDTO proteinDTO = new ProteinDTO();
 			Protein protein1 = new Protein();
 			protein1.setUniprotAccession(record.get("uniprot_accession1").asString());
@@ -251,40 +370,81 @@ public class Service implements Serializable{
 			proteinDTO.setProtein2(protein2);
 			Associate associate = new Associate();
 			associate.setJaccSimScore(record.get("jacc_sim_score").asDouble());
-			List<Associate> associates = new ArrayList<>();
-			associates.add(associate);
-			proteinDTO.setAssociate(associates);
-			
+			proteinDTO.setAssociate(associate);
+			uniprotAccessions1.add(record.get("uniprot_accession1").asString());
+			uniprotAccessions2.add(record.get("uniprot_accession2").asString());
 			proteinDTOS.add(proteinDTO);		
 		}
+		
+		
 		
 		Collections.sort(proteinDTOS, new Comparator<ProteinDTO>() {
 			@Override
 			public int compare(ProteinDTO o1, ProteinDTO o2) {
-				return o2.getAssociate().get(0).getJaccSimScore().compareTo(o1.getAssociate().get(0).getJaccSimScore());
+				return o2.getAssociate().getJaccSimScore().compareTo(o1.getAssociate().getJaccSimScore());
 			}
 		});
 		
 		return proteinDTOS;
 	}
 	
-	public List<DiseaseDTO> findDiseaseDTOs(String disease){
+	public List<DiseaseDTO> findDiseaseDTOs(String disease, Double jacc){
 		List<DiseaseDTO> diseaseDTOs = new ArrayList<>();
+		Map<String, List<String>> uniprotAccessions1 = new HashMap<>();
+		Map<String, List<String>> uniprotAccessions2 = new HashMap<>();
 		try {
 			input = getClass().getClassLoader().getResourceAsStream("query.properties");
 			prop.load(input);
 			parameters = new HashMap<String, Object>();
 			parameters.put("disease", disease);
+			parameters.put("jacc", jacc);
 			StatementResult result = session.run(prop.getProperty(DISEASE_SEARCH_QUERY), parameters);
 			while (result.hasNext()) {
 				Record record = result.next();
+				
+				if(uniprotAccessions1.get(record.get("disgenet_id").asString()) != null && uniprotAccessions2.get(record.get("disgenet_id").asString()) != null &&
+						uniprotAccessions1.get(record.get("disgenet_id").asString()).contains(record.get("uniprot_accession2").asString()) && 
+						uniprotAccessions2.get(record.get("disgenet_id").asString()).contains(record.get("uniprot_accession1").asString())){
+					continue;
+				}
+			
 				Disease dss = new Disease();
 				dss.setDiseaseName(record.get("disease_name").asString());
 				dss.setDisgenetId(record.get("disgenet_id").asString());
 				DiseaseDTO diseaseDTO = new DiseaseDTO();
 				diseaseDTO.setDisease(dss);
-				diseaseDTO.setProteinDTOs(findProteinDTOsByDisease(dss.getDisgenetId()));
-				diseaseDTOs.add(diseaseDTO);
+				ProteinDTO proteinDTO = new ProteinDTO();
+				Protein protein1 = new Protein();
+				protein1.setUniprotAccession(record.get("uniprot_accession1").asString());
+				protein1.setProteinName(record.get("protein_name1").asString());
+				proteinDTO.setProtein1(protein1);
+				Protein protein2 = new Protein();
+				protein2.setUniprotAccession(record.get("uniprot_accession2").asString());
+				protein2.setProteinName(record.get("protein_name2").asString());
+				proteinDTO.setProtein2(protein2);
+				Associate associate = new Associate();
+				associate.setJaccSimScore(record.get("jacc_sim_score").asDouble());
+				proteinDTO.setAssociate(associate);
+				
+				boolean includedDisease = false;
+				for(DiseaseDTO dDTO : diseaseDTOs){
+					if(dDTO.getDisease().getDisgenetId().equals(record.get("disgenet_id").asString())){
+						dDTO.getProteinDTOs().add(proteinDTO);
+						uniprotAccessions1.get(record.get("disgenet_id").asString()).add(record.get("uniprot_accession1").asString());
+						uniprotAccessions2.get(record.get("disgenet_id").asString()).add(record.get("uniprot_accession2").asString());
+						includedDisease = true;
+					}
+				}
+				
+				if(!includedDisease){
+					diseaseDTO.setProteinDTOs(new ArrayList<>());
+					diseaseDTO.getProteinDTOs().add(proteinDTO);
+					uniprotAccessions1.put(record.get("disgenet_id").asString(), new ArrayList<>(Arrays.asList(record.get("uniprot_accession1").asString())));
+					uniprotAccessions2.put(record.get("disgenet_id").asString(), new ArrayList<>(Arrays.asList(record.get("uniprot_accession2").asString())));
+					diseaseDTOs.add(diseaseDTO);
+				}
+				
+				
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -297,42 +457,16 @@ public class Service implements Serializable{
 				}
 			}
 		}
-		return diseaseDTOs;
-	}
-	
-	private List<ProteinDTO> findProteinDTOsByDisease(String disgenetId){
-		List<ProteinDTO> proteinDTOS = new ArrayList<>();
-		parameters = new HashMap<String, Object>();
-		parameters.put("disgenetId", disgenetId);
-		StatementResult result = session.run(prop.getProperty(DISEASE_FIND_PROTEIN), parameters);
-		while (result.hasNext()) {
-			Record record = result.next();
-			ProteinDTO proteinDTO = new ProteinDTO();
-			Protein protein1 = new Protein();
-			protein1.setUniprotAccession(record.get("uniprot_accession1").asString());
-			protein1.setProteinName(record.get("protein_name1").asString());
-			proteinDTO.setProtein1(protein1);
-			Protein protein2 = new Protein();
-			protein2.setUniprotAccession(record.get("uniprot_accession2").asString());
-			protein2.setProteinName(record.get("protein_name2").asString());
-			proteinDTO.setProtein2(protein2);
-			Associate associate = new Associate();
-			associate.setJaccSimScore(record.get("jacc_sim_score").asDouble());
-			List<Associate> associates = new ArrayList<>();
-			associates.add(associate);
-			proteinDTO.setAssociate(associates);
-		
-			proteinDTOS.add(proteinDTO);		
-		}
-		
-		Collections.sort(proteinDTOS, new Comparator<ProteinDTO>() {
-			@Override
-			public int compare(ProteinDTO o1, ProteinDTO o2) {
-				return o2.getAssociate().get(0).getJaccSimScore().compareTo(o1.getAssociate().get(0).getJaccSimScore());
-			}
+		diseaseDTOs.forEach(d -> {
+			Collections.sort(d.getProteinDTOs(), new Comparator<ProteinDTO>() {
+				@Override
+				public int compare(ProteinDTO o1, ProteinDTO o2) {
+					return o2.getAssociate().getJaccSimScore().compareTo(o1.getAssociate().getJaccSimScore());
+				}
+			});
 		});
 		
-		return proteinDTOS;
+		return diseaseDTOs;
 	}
 	
 	/**
@@ -340,13 +474,14 @@ public class Service implements Serializable{
 	 * @param tissue : tissue name
 	 * @return List of proteinDTO
 	 */
-	public List<ProteinDTO> getProteinDTOsByTissue(String tissue){
+	public List<ProteinDTO> getProteinDTOsByTissue(String tissue, Double jacc){
 		List<ProteinDTO> proteinDTOS = new ArrayList<>();
 		try{
 			input = getClass().getClassLoader().getResourceAsStream("query.properties");
 			prop.load(input);
 			parameters = new HashMap<String, Object>();
 			parameters.put("tissueName", tissue);
+			parameters.put("jacc", jacc);
 			StatementResult result = session.run(prop.getProperty(PROTEIN_FIND_BY_TISSUE), parameters);
 			while (result.hasNext()) {
 				Record record = result.next();
@@ -361,9 +496,7 @@ public class Service implements Serializable{
 				proteinDTO.setProtein2(protein2);
 				Associate associate = new Associate();
 				associate.setJaccSimScore(record.get("jacc_sim_score").asDouble());
-				List<Associate> associates = new ArrayList<>();
-				associates.add(associate);
-				proteinDTO.setAssociate(associates);
+				proteinDTO.setAssociate(associate);
 				proteinDTO.setTissueName(record.get("tissue_name").asString());
 				proteinDTOS.add(proteinDTO);		
 			}
@@ -383,7 +516,7 @@ public class Service implements Serializable{
 		Collections.sort(proteinDTOS, new Comparator<ProteinDTO>() {
 			@Override
 			public int compare(ProteinDTO o1, ProteinDTO o2) {
-				return o2.getAssociate().get(0).getJaccSimScore().compareTo(o1.getAssociate().get(0).getJaccSimScore());
+				return o2.getAssociate().getJaccSimScore().compareTo(o1.getAssociate().getJaccSimScore());
 			}
 		});
 		
@@ -397,17 +530,24 @@ public class Service implements Serializable{
 	 * @param jaccScore
 	 * @return
 	 */
-	public List<ProteinDTO> getProteinDTOListForMultipleProteins(List<String> accessions1, List<String> accessions2, double jaccScore){
+	public List<ProteinDTO> getProteinDTOListForMultipleProteins(List<String> accessions1, List<String> accessions2, double jaccScore, String species){
 		List<ProteinDTO> proteinDTOS = new ArrayList<>();
 
 			parameters = new HashMap<String, Object>();
 			parameters.put("array1", accessions1);
 			parameters.put("array2", accessions2);
 			parameters.put("jacc", jaccScore);
+			String query ="";
+			if(species.equals("9606")){
+	    		query = ONE_TO_ONE_SEARCH;
+	    	}else if(species.equals("10090")){
+	    		query = ONE_TO_ONE_SEARCH_MOUSE;
+	    	}
 			try {
 				input = getClass().getClassLoader().getResourceAsStream("query.properties");
 				prop.load(input);
-				StatementResult result = session.run(prop.getProperty(ONE_TO_ONE_SEARCH), parameters);
+				
+				StatementResult result = session.run(prop.getProperty(query), parameters);
 				proteinDTOS = createProteinDTOList(result, proteinDTOS);
 				
 			} catch (IOException e) {
@@ -462,7 +602,7 @@ public class Service implements Serializable{
 		Collections.sort(proteinDTOS, new Comparator<ProteinDTO>() {
 			@Override
 			public int compare(ProteinDTO o1, ProteinDTO o2) {
-				return o2.getAssociate().get(0).getJaccSimScore().compareTo(o1.getAssociate().get(0).getJaccSimScore());
+				return o2.getAssociate().getJaccSimScore().compareTo(o1.getAssociate().getJaccSimScore());
 			}
 		});
 
@@ -485,49 +625,74 @@ public class Service implements Serializable{
 			Protein protein1 = new Protein();
 			protein1.setUniprotAccession(record.get("p1_acc").asString());
 			protein1.setProteinName(record.get("p1_name").asString());
-			protein1.setGeneNames(record.get("p1_gene_name").asList());
-			protein1.setGeneIds(record.get("p1_gene_id").asList());
 			protein1.setSpecies(record.get("p1_species").asString());
 			protein1.setUniprotEntryName(record.get("p1_uniprot_entry_name").asString());
 			protein1.setLength(record.get("p1_length").asString());
 			protein1.setUniprotStatus(record.get("p1_uniport_status").asString());
+			protein1.setAssociationId(record.get("associationId").asString());
+			if(!NullValue.NULL.equals(record.get("p1_gene_name"))){
+				protein1.setGeneNames(record.get("p1_gene_name").asList());
+			}
+			if(!NullValue.NULL.equals(record.get("p1_gene_id"))){
+				protein1.setGeneIds(record.get("p1_gene_id").asList());
+			}
+			
 			proteinDTO.setProtein1(protein1);
 			// set protein 2
 			Protein protein2 = new Protein();
 			protein2.setUniprotAccession(record.get("p2_acc").asString());
 			protein2.setProteinName(record.get("p2_name").asString());
-			protein2.setGeneNames(record.get("p2_gene_name").asList());
-			protein2.setGeneIds(record.get("p2_gene_id").asList());
 			protein2.setSpecies(record.get("p2_species").asString());
 			protein2.setUniprotEntryName(record.get("p2_uniprot_entry_name").asString());
 			protein2.setLength(record.get("p2_length").asString());
 			protein2.setUniprotStatus(record.get("p2_uniport_status").asString());
+			if(!NullValue.NULL.equals(record.get("p2_gene_name"))){
+				protein2.setGeneNames(record.get("p2_gene_name").asList());
+			}
+			if(!NullValue.NULL.equals(record.get("p2_gene_id"))){
+				protein2.setGeneIds(record.get("p2_gene_id").asList());
+			}
 			proteinDTO.setProtein2(protein2);
 			String accession1 = proteinDTO.getProtein1().getUniprotAccession();
 			String accession2 = proteinDTO.getProtein2().getUniprotAccession();
 			// set associate relationship
-			proteinDTO.setAssociate(getAssociate(ASSOCIATE_QUERY, accession1, accession2));
+			Associate associate = new Associate();
+			associate.setJaccSimScore(record.get("jacc_sim_score").asDouble());
+			associate.setInteract(!NullValue.NULL.equals(record.get("interact")) ? "yes" : "no");
+			associate.setParalog(!NullValue.NULL.equals(record.get("paralog")) ? "yes" : "no");
+			associate.setCommonAssayCount(record.get("common_assay_count").asString());
+			associate.setIntact(getIntactList(proteinDTO.getProtein1().getAssociationId()));
+			associate.setBioGrid(getBioGridList(proteinDTO.getProtein1().getAssociationId()));
+			proteinDTO.setAssociate(associate);
 			// set projects
-			proteinDTO.setProjects(getCommonProjectList(PROJECT_QUERY, accession1, accession2));
+			proteinDTO.setProjects(getCommonProjectList(PROJECT_QUERY, accession1, accession2, associate.getJaccSimScore()));
 			// set pathways
-			proteinDTO.setPathWays(getPathwayList(PATHWAY_QUERY, accession1, accession2));
+			proteinDTO.setPathWays(getPathwayList(PATHWAY_QUERY, accession1, accession2, associate.getJaccSimScore()));
 			// set complexes
-			proteinDTO.setComplexes(getComplexList(COMPLEX_QUERY, accession1, accession2));
-			// set common MF
-			proteinDTO.setMf(getCommonGOList(COMMONMF_QUERY, accession1, accession2));
-			// set common BP
-			proteinDTO.setBp(getCommonGOList(COMMONBP_QUERY, accession1, accession2));
-			// set common CC
-			proteinDTO.setCc(getCommonGOList(COMMONCC_QUERY, accession1, accession2));
+			proteinDTO.setComplexes(getComplexList(COMPLEX_QUERY, accession1, accession2, associate.getJaccSimScore()));
+			// set common GO
+			List<Go> commonGoList = getCommonGOList(COMMONGO_QUERY, accession1, accession2);
+			proteinDTO.setMf(new ArrayList<>());
+			proteinDTO.setCc(new ArrayList<>());
+			proteinDTO.setBp(new ArrayList<>());
+			commonGoList.forEach(go -> {
+				if(go.getLabel().equals("MF")){
+					proteinDTO.getMf().add(go);
+				}else if(go.getLabel().equals("CC")){
+					proteinDTO.getCc().add(go);
+				}else if(go.getLabel().equals("BP")){
+					proteinDTO.getBp().add(go);
+				}
+			});
 			// set diseases
-			List<Disease> diseases = getDiseases(DISEASE_QUERY, accession1, accession2);
+			List<Disease> diseases = getDiseases(DISEASE_QUERY, accession1, accession2, associate.getJaccSimScore());
 			proteinDTO.setDiseases(diseases);
 			// set number of distinct complex
-			proteinDTO.setDistinctComplexCount(record.get("distinct_comp").asInt());
+			proteinDTO.setDistinctComplexCount(proteinDTO.getComplexes().size());
 			// set number of distinct path
-			proteinDTO.setDistinctPathCount(record.get("distinct_path2").asInt());
+			proteinDTO.setDistinctPathCount(proteinDTO.getPathWays().size());
 			// set size of common project
-			proteinDTO.setCommonProjectSize(record.get("common_project_size").asInt());
+			proteinDTO.setCommonProjectSize(proteinDTO.getProjects().size());
 			// set disease size
 			proteinDTO.setDiseaseCount(diseases.size());
 			for(ProteinDTO p : proteinDTOs){
@@ -540,6 +705,7 @@ public class Service implements Serializable{
 		return proteinDTOs;
 	}
 
+	
 	/**
 	 * Get common projects between two given proteins.
 	 * @param queryName query for common projects
@@ -547,25 +713,27 @@ public class Service implements Serializable{
 	 * @param accession2 the second protein accession.
 	 * @return list of common projects.
 	 */
-	private List<Project> getCommonProjectList(String queryName, String accession1, String accession2) {
+	private List<Project> getCommonProjectList(String queryName, String accession1, String accession2, double jacc) {
 		List<Project> projects = new ArrayList<>();
 
 		parameters = new HashMap<String, Object>();
 		parameters.put("acc1", accession1);
 		parameters.put("acc2", accession2);
+		parameters.put("jacc", jacc);
 		
 		StatementResult result = session.run(prop.getProperty(queryName), parameters);
 		while (result.hasNext()) {
 			Record record = result.next();
 			// set Project
 			if(!record.get("project_accession").asString().equals("null")){
+				
 				Project project = new Project();
 				project.setProjectAccession(record.get("project_accession").asString());
 				project.setKeywords(record.get("keywords").asList().toString().replace("[", "").replace("]", ""));
 				project.setTissue(record.get("tissue").asList().toString().replace("[", "").replace("]", ""));
 				project.setTags(record.get("tags").asList().toString().replace("[", "").replace("]", ""));
 				project.setInstruments(record.get("instruments").asList().toString().replace("[", "").replace("]", ""));
-
+				project.setExperimentType(record.get("experiment_type").asList().toString());
 				projects.add(project);
 			}			
 		}
@@ -573,74 +741,56 @@ public class Service implements Serializable{
 		return projects;
 
 	}
-
-	/**
-	 * Get associate relation for the given proteins.
-	 * @param queryName query for associate.
-	 * @param accession1 the first protein accession.
-	 * @param accession2 the second protein accession.
-	 * @return associate object.
-	 */
-	private List<Associate> getAssociate(String queryName, String accession1, String accession2) {
-		List<Associate> associates = new ArrayList<>();
-		
-
+	
+	
+	private List<Intact> getIntactList(String associationId){
+		List<Intact> intacts = new ArrayList<>();
 		parameters = new HashMap<String, Object>();
-		parameters.put("acc1", accession1);
-		parameters.put("acc2", accession2);
+		parameters.put("associationId", associationId);
 		
-		StatementResult result = session.run(prop.getProperty(queryName), parameters);
+		StatementResult result = session.run(prop.getProperty(INTACT_QUERY), parameters);
 		if (result.hasNext()) {
 			Record record = result.next();
-			if(record.get("intact").asString().equals("yes")){
-				for(int i=0; i<record.get("intact_confidence").asList().size(); i++){
-					Associate associate = new Associate();
-					associate.setJaccSimScore(record.get("jacc_sim_score").asDouble());
-					associate.setInteract(record.get("interact").asString());
-					associate.setParalog(record.get("paralog").asString());
-					associate.setCommonAssayCount(record.get("common_assay_count").asString());
-					associate.setIntactId(record.get("intact_id").asList().get(i).toString());
-					associate.setIntactConfidence(record.get("intact_confidence").asList().get(i).toString());
-					associate.setIntactDetection(record.get("intact_detection").asList().get(i).toString());
-					associate.setIntactInteractionType(record.get("intact_interaction_type").asList().get(i).toString());
-					if(record.get("intact").asString().equals("yes")){
-						associate.setIntact(record.get("intact").asString());
-					}else{
-						associate.setIntact("no");
-					}
-					if(record.get("biogrid").asString().equals("yes")){
-						associate.setBioGrid(record.get("biogrid").asString());
-					}else{
-						associate.setBioGrid("no");
-					}
-					
-					associates.add(associate);
-				}
-			}else{
-				Associate associate = new Associate();
-				associate.setJaccSimScore(record.get("jacc_sim_score").asDouble());
-				associate.setInteract(record.get("interact").asString());
-				associate.setParalog(record.get("paralog").asString());
-				associate.setCommonAssayCount(record.get("common_assay_count").asString());
-				associate.setIntactConfidence(record.get("intact_confidence").asList().toString().replace("[", "").replace("]", ""));
-				associate.setIntactDetection(record.get("intact_detection").asList().toString().replace("[", "").replace("]", ""));
-				associate.setIntactInteractionType(record.get("intact_interaction_type").asList().toString().replace("[", "").replace("]", ""));
-				if(record.get("intact").asString().equals("yes")){
-					associate.setIntact(record.get("intact").asString());
-				}else{
-					associate.setIntact("no");
-				}
-				if(record.get("biogrid").asString().equals("yes")){
-					associate.setBioGrid(record.get("biogrid").asString());
-				}else{
-					associate.setBioGrid("no");
-				}
-				
-				associates.add(associate);
-			}			
+			
+			if(!NullValue.NULL.equals(record.get("intact_id"))){
+				Intact intact = new Intact();
+				intact.setIntactId(record.get("intact_id").asString());
+				intact.setConfidenceValue(record.get("confidenceValue").asString());
+				intact.setDetection(record.get("intact_detection").asString());
+				intact.setInteractionType(record.get("intact_interaction_type").asString());
+				intacts.add(intact);
+			}
+			
 		}
-		return associates;
+		return intacts;
 	}
+	
+	private List<BioGrid> getBioGridList(String associationId){
+		List<BioGrid> bioGrids = new ArrayList<>();
+		parameters = new HashMap<String, Object>();
+		parameters.put("associationId", associationId);
+		
+		StatementResult result = session.run(prop.getProperty(BIOGRID_QUERY), parameters);
+		if (result.hasNext()) {
+			Record record = result.next();
+			if(!NullValue.NULL.equals(record.get("biogridId"))){
+				BioGrid bioGrid = new BioGrid();
+				bioGrid.setBiogridId(record.get("biogridId").asString());
+				bioGrid.setExperimentName(record.get("experiment_name").asString());
+				bioGrid.setExperimentType(record.get("experiment_type").asString());
+				bioGrid.setModification(record.get("modification").asString());
+				if(!NullValue.NULL.equals(record.get("score"))){
+					bioGrid.setScore(record.get("score").asDouble());
+				}
+			
+				bioGrid.setThroughput(record.get("throughput").asString());
+				bioGrids.add(bioGrid);
+			}
+			
+		}
+		return bioGrids;
+	}
+
 	
 	/**
 	 * Get pathways between two given proteins.
@@ -649,12 +799,13 @@ public class Service implements Serializable{
 	 * @param accession2 the second protein accession.
 	 * @return list of pathways
 	 */
-	private List<PathWay> getPathwayList(String queryName, String accession1, String accession2){
+	private List<PathWay> getPathwayList(String queryName, String accession1, String accession2, Double jacc){
 		List<PathWay> pathWays = new ArrayList<>();
 		
 		parameters = new HashMap<String, Object>();
 		parameters.put("acc1", accession1);
 		parameters.put("acc2", accession2);
+		parameters.put("jacc", jacc);
 		
 		StatementResult result = session.run(prop.getProperty(queryName), parameters);
 		while (result.hasNext()) {
@@ -680,12 +831,13 @@ public class Service implements Serializable{
 	 * @param accession2 the second protein accession.
 	 * @return list of complexes
 	 */
-	private List<Complex> getComplexList(String queryName, String accession1, String accession2){
+	private List<Complex> getComplexList(String queryName, String accession1, String accession2, Double jacc){
 		List<Complex> complexs = new ArrayList<>();
 		
 		parameters = new HashMap<String, Object>();
 		parameters.put("acc1", accession1);
 		parameters.put("acc2", accession2);
+		parameters.put("jacc", jacc);
 		
 		StatementResult result = session.run(prop.getProperty(queryName), parameters);
 		while (result.hasNext()) {
@@ -733,7 +885,7 @@ public class Service implements Serializable{
 				Go go = new Go();
 				go.setId(record.get("go_id").asString());
 				go.setName(record.get("go_name").asString());
-				
+				go.setLabel(String.valueOf(record.get("label").asList().get(1)));
 				commonGos.add(go);
 			}
 		}
@@ -748,12 +900,13 @@ public class Service implements Serializable{
 	 * @param accession2 the second protein accession.
 	 * @return list of common diseases
 	 */
-	private List<Disease> getDiseases(String queryName, String accession1, String accession2){
+	private List<Disease> getDiseases(String queryName, String accession1, String accession2, Double jacc){
 		List<Disease> diseases = new ArrayList<>();
 		
 		parameters = new HashMap<String, Object>();
 		parameters.put("acc1", accession1);
 		parameters.put("acc2", accession2);
+		parameters.put("jacc", jacc);
 		
 		StatementResult result = session.run(prop.getProperty(queryName), parameters);
 		while (result.hasNext()) {
@@ -788,7 +941,15 @@ public class Service implements Serializable{
 		StatementResult result = session.run(prop.getProperty(queryName), parameters);
 		if (result.hasNext()) {
 			Record record = result.next();
-			return record.get("path").asList().toString();
+			List<Object> paths = new ArrayList<Object>();
+			paths.addAll(record.get("path").asList());
+			for (Iterator<Object> iter = paths.listIterator(); iter.hasNext(); ) {
+			    Object a = iter.next();
+			    if (a == null) {
+			        iter.remove();
+			    }
+			}
+			return paths.toString();
 		}else{
 			return "*";
 		}
@@ -799,11 +960,12 @@ public class Service implements Serializable{
 	 * @param queryName
 	 * @return
 	 */
-	private List<ProteinDTO> findProteinsByGeneIdOrName( String queryName, String gene1, String gene2){
+	private List<ProteinDTO> findProteinsByGeneIdOrName( String queryName, String gene1, String gene2, String species){
 		List<ProteinDTO> proteins = new ArrayList<>();
 		parameters = new HashMap<String, Object>();
 		parameters.put("gene1", gene1);
 		parameters.put("gene2", gene2);
+		parameters.put("species", species);
 
 		StatementResult result = session.run(prop.getProperty(queryName), parameters);
 		while (result.hasNext()) {
@@ -812,21 +974,32 @@ public class Service implements Serializable{
 			Protein protein1 = new Protein();
 			protein1.setUniprotAccession(record.get("uniprot_accession1").asString());
 			protein1.setProteinName(record.get("protein_name1").asString());
-			protein1.setGeneNames(record.get("gene_name1").asList());
+			if(!NullValue.NULL.equals(record.get("gene_name1"))){
+				protein1.setGeneNames(record.get("gene_name1").asList());
+			}
+			if(!NullValue.NULL.equals(record.get("gene_id1"))){
+				protein1.setGeneIds(record.get("gene_id1").asList());
+			}
+			protein1.setSpecies(record.get("species1").asString());
 			proteinDTO.setProtein1(protein1);
+			Protein protein2 = new Protein();
 			if(queryName.equals(GENE_QUERY_DOUBLE)){
-				Protein protein2 = new Protein();
 				protein2.setUniprotAccession(record.get("uniprot_accession2").asString());
 				protein2.setProteinName(record.get("protein_name2").asString());
-				protein2.setGeneNames(record.get("gene_name2").asList());
+				if(!NullValue.NULL.equals(record.get("gene_name2"))){
+					protein2.setGeneNames(record.get("gene_name2").asList());
+				}
+				if(!NullValue.NULL.equals(record.get("gene_id2"))){
+					protein2.setGeneIds(record.get("gene_id2").asList());
+				}
+				protein2.setSpecies(record.get("species2").asString());
 				proteinDTO.setProtein2(protein2);
 				Associate associate = new Associate();
 				associate.setJaccSimScore(record.get("jacc_sim_score").asDouble());
-				List<Associate> associates = new ArrayList<>();
-				associates.add(associate);
-				proteinDTO.setAssociate(associates);
+				proteinDTO.setAssociate(associate);
 			}
-			proteins.add(proteinDTO);	
+			proteins.add(proteinDTO);
+			
 		}
 		return proteins;
 	}

@@ -27,6 +27,8 @@ public class VisualisationBean implements Serializable{
 	
 	private static final String SINGLE_PROTEIN_QUERY = "singleProteinSearch";
 	private static final String DOUBLE_PROTEIN_QUERY = "doubleProteinSearch";
+	private static final String SINGLE_PROTEIN_QUERY_MOUSE = "singleProteinSearchMouse";
+    private static final String DOUBLE_PROTEIN_QUERY_MOUSE = "doubleProteinSearchMouse";
 		
 	private GraphDTO graphElements;
 	private GraphDTO allAddedElements;
@@ -48,6 +50,7 @@ public class VisualisationBean implements Serializable{
 	private String jsonString;
 	private String graphJsonNewNodes;
 	private String removedNodes;
+	private double jacc;
 
 	public List<String> getNodes() {
 		return nodes;
@@ -101,7 +104,20 @@ public class VisualisationBean implements Serializable{
 	public String getRemovedNodes() {
 		return removedNodes;
 	}
+	
+	public double getJacc() {
+		return jacc;
+	}
 
+	public void load2(){
+		FacesContext context = FacesContext.getCurrentInstance();
+		Map<String, String> requestParams = context.getExternalContext().getRequestParameterMap();
+		if(requestParams.containsKey("view") && requestParams.get("view").equals("graph")){
+			allAddedElements = new GraphDTO();
+			allAddedElements.setProteins(new ArrayList<Protein>());
+			allAddedElements.setLinks(new ArrayList<LinkDTO>());
+		}
+	}
 	
 	public void load(GraphDbManagedBean bean) {
 		proteinDTOS = new ArrayList<>();
@@ -112,6 +128,7 @@ public class VisualisationBean implements Serializable{
 		allAddedElements = new GraphDTO();
 		allAddedElements.setProteins(new ArrayList<Protein>());
 		allAddedElements.setLinks(new ArrayList<LinkDTO>());
+		jacc = graphDbManagedBean.getJaccScore();
 		controlGeneNames();
 		getNodesLinksInJSONSingle();
 	}
@@ -128,7 +145,6 @@ public class VisualisationBean implements Serializable{
 	/**
 	 * Get all the nodes and links having default threshold (coming from data table search)
 	 * Clean everything when the page is refreshed
-	 * @param accession
 	 */
 	public void getNodesLinksInJSONSingle(){
 
@@ -190,7 +206,7 @@ public class VisualisationBean implements Serializable{
 		allAddedElements.setProteins(new ArrayList<Protein>());
 		allAddedElements.setLinks(new ArrayList<LinkDTO>());
 		
-		double jacc = Double.valueOf(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("jaccThreshold").trim()); 
+		jacc = Double.valueOf(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("jaccThreshold").trim()); 
 		Service dbService = new Service();
 		dbService.startSession();	
 
@@ -198,12 +214,32 @@ public class VisualisationBean implements Serializable{
 				List<ProteinDTO> proteinDTOs = new ArrayList<>();
 				if(graphDbManagedBean.getSelectionType() != null && !graphDbManagedBean.getSelectionType().equals("")){
 					if(graphDbManagedBean.getSelectionType().equals("single")){
-						proteinDTOs = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY, proteinDTOS.get(0).getProtein1().getUniprotAccession(), null, jacc);
+						if(graphDbManagedBean.getSpecies().equals("9606")){
+							proteinDTOs = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY, proteinDTOS.get(0).getProtein1().getUniprotAccession(), null, jacc);
+				    	}else if(graphDbManagedBean.getSpecies().equals("10090")){
+				    		proteinDTOs = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY_MOUSE, proteinDTOS.get(0).getProtein1().getUniprotAccession(), null, jacc);
+				    	}
+						
 					}else if(graphDbManagedBean.getSelectionType().equals("double")){
-						proteinDTOs = dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, proteinDTOS.get(0).getProtein1().getUniprotAccession(), proteinDTOS.get(0).getProtein2().getUniprotAccession(), jacc);
+						if(graphDbManagedBean.getSpecies().equals("9606")){
+							proteinDTOs = dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, proteinDTOS.get(0).getProtein1().getUniprotAccession(), proteinDTOS.get(0).getProtein2().getUniprotAccession(), jacc);
+				    	}else if(graphDbManagedBean.getSpecies().equals("10090")){
+				    		proteinDTOs = dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY_MOUSE, proteinDTOS.get(0).getProtein1().getUniprotAccession(), proteinDTOS.get(0).getProtein2().getUniprotAccession(), jacc);
+				    	}
+						
+					}else if(graphDbManagedBean.getSelectionType().equals("path")){
+						proteinDTOs = graphDbManagedBean.getProteinDTOS();
 					}
 				}else if(graphDbManagedBean.isMultipleSearch()){
-					proteinDTOs = dbService.getProteinDTOListForMultipleProteins(Arrays.asList(graphDbManagedBean.getArray1().split("\\s*,\\s*")), Arrays.asList(graphDbManagedBean.getArray2().split("\\s*,\\s*")), jacc);
+					if(graphDbManagedBean.getArray2() == null || graphDbManagedBean.getArray2().equals("")){
+						List<String> arr1 = new ArrayList<>();
+						List<String> arr2 = new ArrayList<>();
+						graphDbManagedBean.combinations(graphDbManagedBean.getArray1().split("\\s*,\\s*"), 2, 0, new String[2], arr1,arr2);
+						proteinDTOs = dbService.getProteinDTOListForMultipleProteins(arr1, arr2, jacc, graphDbManagedBean.getSpecies());
+					}else{
+						proteinDTOs = dbService.getProteinDTOListForMultipleProteins(Arrays.asList(graphDbManagedBean.getArray1().split("\\s*,\\s*")), Arrays.asList(graphDbManagedBean.getArray2().split("\\s*,\\s*")), jacc,graphDbManagedBean.getSpecies());
+					}
+					
 				}
 				
 				dbService.closeSession();
@@ -279,7 +315,12 @@ public class VisualisationBean implements Serializable{
 		Service dbService = new Service();
 		dbService.startSession();
 		try{
-			List<ProteinDTO> proteinDTOs = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY, accession, null, jacc);
+			List<ProteinDTO> proteinDTOs = new ArrayList<>();
+			if(graphDbManagedBean.getSpecies().equals("9606")){
+				proteinDTOs = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY, accession, null, jacc);
+	    	}else if(graphDbManagedBean.getSpecies().equals("10090")){
+	    		proteinDTOs = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY_MOUSE, accession, null, jacc);
+	    	}
 			dbService.closeSession();
 			if(!proteinDTOs.isEmpty()){
 				

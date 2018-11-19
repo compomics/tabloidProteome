@@ -40,12 +40,15 @@ public class JSONService implements Serializable{
     // queries
     private static final String SINGLE_PROTEIN_QUERY = "singleProteinSearch";
     private static final String DOUBLE_PROTEIN_QUERY = "doubleProteinSearch";
+    private static final String SINGLE_PROTEIN_QUERY_MOUSE = "singleProteinSearchMouse";
+    private static final String DOUBLE_PROTEIN_QUERY_MOUSE = "doubleProteinSearchMouse";
+
 	
     private List<ProteinDTO> proteinDTOs;
     
 
 	@GET
-	@Path("/{accession}&{jaccard}/")
+	@Path("/{accession}&{jaccard}&{species}/")
 	@ApiOperation(value = "Finds protein and related paths by Uniprot accessions and Jaccard Similarity Score",
 	    response = ProteinDTO.class,
 	    responseContainer = "List")
@@ -55,11 +58,15 @@ public class JSONService implements Serializable{
 		      @ApiResponse(code = 404, message = "Protein not found") })
 	@Produces(MediaType.APPLICATION_JSON)
 	@JacksonFeatures(serializationEnable =  { SerializationFeature.INDENT_OUTPUT })
-	public Response getProteinDTOsInJSON(@PathParam("accession") String accession, @PathParam("jaccard") String jaccard){
+	public Response getProteinDTOsInJSON(@PathParam("accession") String accession, @PathParam("jaccard") String jaccard, @PathParam("species") String species){
 		Service dbService = new Service();
 		dbService.startSession();
 		try{
-			proteinDTOs = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY, accession, null, Double.valueOf(jaccard));
+			if(species.equals("9606")){
+				proteinDTOs = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY, accession, null, Double.valueOf(jaccard));
+	    	}else if(species.equals("10090")){
+	    		proteinDTOs = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY_MOUSE, accession, null, Double.valueOf(jaccard));
+	    	}
 			dbService.closeSession();
 			if(proteinDTOs.isEmpty()){
 				return Response.status(Response.Status.NOT_FOUND).entity("Resource not found for accession: " +  accession).build();
@@ -78,7 +85,7 @@ public class JSONService implements Serializable{
 	
 	
 	@GET
-	@Path("/{accession1}&{accession2}&{jaccard}/")
+	@Path("/{accession1}&{accession2}&{jaccard}&{species}/")
 	@ApiOperation(value = "Finds provided proteins and relations between them filtering by Jaccard Similarity Score",
     response = ProteinDTO.class,
     responseContainer = "List")
@@ -88,11 +95,16 @@ public class JSONService implements Serializable{
 		      @ApiResponse(code = 404, message = "Protein not found") })
 	@Produces(MediaType.APPLICATION_JSON)
 	@JacksonFeatures(serializationEnable =  { SerializationFeature.INDENT_OUTPUT })
-	public Response getProteinDTOsInJSON(@PathParam("accession1") String accession1, @PathParam("accession2") String accession2, @PathParam("jaccard") String jaccard){
+	public Response getProteinDTOsInJSON(@PathParam("accession1") String accession1, @PathParam("accession2") String accession2, @PathParam("jaccard") String jaccard , @PathParam("species") String species){
 		Service dbService = new Service();
 		dbService.startSession();
 		try{
-			proteinDTOs = dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, accession1, accession2, Double.valueOf(jaccard));
+			if(species.equals("9606")){
+				proteinDTOs = dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, accession1, accession2, Double.valueOf(jaccard));
+	    	}else if(species.equals("10090")){
+	    		proteinDTOs = dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY_MOUSE, accession1, accession2, Double.valueOf(jaccard));
+	    	}
+			
 			dbService.closeSession();
 			if(proteinDTOs.isEmpty()){
 				return Response.status(Response.Status.NOT_FOUND).entity("Resource not found for accessions: " +  accession1 + " and " + accession2).build();
@@ -107,7 +119,7 @@ public class JSONService implements Serializable{
 	}
 	
 	@GET
-	@Path("/gene/{gene}&{jaccard}/")
+	@Path("/gene/{gene}&{jaccard}&{species}/")
 	@ApiOperation(value = "Finds protein and related paths by given entrez gene id or gene name and Jaccard Similarity Score",
 	    response = ProteinDTO.class,
 	    responseContainer = "List")
@@ -117,13 +129,13 @@ public class JSONService implements Serializable{
 		      @ApiResponse(code = 404, message = "Protein not found") })
 	@Produces(MediaType.APPLICATION_JSON)
 	@JacksonFeatures(serializationEnable =  { SerializationFeature.INDENT_OUTPUT })
-	public Response getProteinDTOsInJSONbyGene(@PathParam("gene") String gene, @PathParam("jaccard") String jaccard){
+	public Response getProteinDTOsInJSONbyGene(@PathParam("gene") String gene, @PathParam("jaccard") String jaccard, @PathParam("species") String species){
 		Service dbService = new Service();
 		dbService.startSession();
 		try{
 			gene = gene.toUpperCase();
 			proteinDTOs = new ArrayList<>();
-			dbService.findProteinsByGene(gene, "").forEach(proteinDTO -> {
+			dbService.findProteinsByGene(gene, "", species).forEach(proteinDTO -> {
 				proteinDTOs.addAll(dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY, proteinDTO.getProtein1().getUniprotAccession(), null, Double.valueOf(jaccard)));
 			});
 			
@@ -142,7 +154,7 @@ public class JSONService implements Serializable{
 	}
 	
 	@GET
-	@Path("/gene/{gene1}&{gene2}&{jaccard}/")
+	@Path("/gene/{gene1}&{gene2}&{jaccard}&{species}/")
 	@ApiOperation(value = "Finds proteins and relations between provided genes (entrez gene id or name) and filtering by Jaccard Similarity Score",
     response = ProteinDTO.class,
     responseContainer = "List")
@@ -152,14 +164,14 @@ public class JSONService implements Serializable{
 		      @ApiResponse(code = 404, message = "Protein not found") })
 	@Produces(MediaType.APPLICATION_JSON)
 	@JacksonFeatures(serializationEnable =  { SerializationFeature.INDENT_OUTPUT })
-	public Response getProteinDTOsInJSONbyGene(@PathParam("gene1") String gene1, @PathParam("gene2") String gene2, @PathParam("jaccard") String jaccard){
+	public Response getProteinDTOsInJSONbyGene(@PathParam("gene1") String gene1, @PathParam("gene2") String gene2, @PathParam("jaccard") String jaccard, @PathParam("species") String species){
 		Service dbService = new Service();
 		dbService.startSession();
 		try{
 			gene1 = gene1.toUpperCase();
 			gene2 = gene2.toUpperCase();
 			proteinDTOs = new ArrayList<>();
-			dbService.findProteinsByGene(gene1, gene2).forEach(proteinDTO -> {
+			dbService.findProteinsByGene(gene1, gene2, species).forEach(proteinDTO -> {
 				proteinDTOs.addAll(dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, proteinDTO.getProtein1().getUniprotAccession(), proteinDTO.getProtein2().getUniprotAccession(), Double.valueOf(jaccard)));
 			});
 			
@@ -248,7 +260,7 @@ public class JSONService implements Serializable{
 			}
 			
 			proteinDTOs = new ArrayList<>();
-			dbService.findDiseaseDTOs(disease).forEach(diseaseDTO -> {
+			dbService.findDiseaseDTOs(disease, Double.valueOf(jaccard)).forEach(diseaseDTO -> {
 				diseaseDTO.getProteinDTOs().forEach(proteinDTO -> {
 					proteinDTOs.addAll(dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, proteinDTO.getProtein1().getUniprotAccession(), proteinDTO.getProtein2().getUniprotAccession(), Double.valueOf(jaccard)));
 				});

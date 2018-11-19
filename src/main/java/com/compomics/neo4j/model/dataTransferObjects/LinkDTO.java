@@ -21,7 +21,7 @@ public class LinkDTO implements Serializable{
 
     private String target;
 
-    private List<Associate> associate;
+    private Associate associate;
 
     private List<Project> projects;
     
@@ -50,7 +50,7 @@ public class LinkDTO implements Serializable{
 		return target;
 	}
 
-	public List<Associate> getAssociate() {
+	public Associate getAssociate() {
 		return associate;
 	}
 
@@ -90,7 +90,7 @@ public class LinkDTO implements Serializable{
 		this.target = target;
 	}
 
-	public void setAssociate(List<Associate> associate) {
+	public void setAssociate(Associate associate) {
 		this.associate = associate;
 	}
 

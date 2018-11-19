@@ -34,6 +34,7 @@ public class ControlBean implements Serializable{
 	private List<DiseaseDTO> diseaseDTOs = new ArrayList<>();
     private String gene1;
     private String gene2;
+    private String species;
     
     public Service getDbService() {
 		return dbService;
@@ -83,6 +84,14 @@ public class ControlBean implements Serializable{
 		this.gene2 = gene2;
 	}
 
+	public String getSpecies() {
+		return species;
+	}
+
+	public void setSpecies(String species) {
+		this.species = species;
+	}
+
 	@PostConstruct
     private void init(){
 		dbService = new Service();
@@ -90,6 +99,7 @@ public class ControlBean implements Serializable{
 
 	public void findProteinsByGene(){
 		dbService.startSession();
+		species = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("species"); 
 		gene1 =  FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("gene").trim().split(",")[0].toUpperCase(); 
 		proteinDTOs.clear();
 		if(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("gene").trim().split(",").length == 2){
@@ -97,12 +107,22 @@ public class ControlBean implements Serializable{
 		}else{
 			gene2 = "";
 		}
-    	proteinDTOs = dbService.findProteinsByGene(gene1, gene2);
-    	for(int i=0; i<proteinDTOs.size(); i++){
-    		if(proteinDTOs.get(i).getProtein1().getGeneNames().get(0).equals(gene1)){
-    			java.util.Collections.swap(proteinDTOs, 0, i);
-    		}
-    	}
+    	proteinDTOs = dbService.findProteinsByGene(gene1, gene2, species);
+   // 	for(int i=0; i<proteinDTOs.size(); i++){
+    //		if(proteinDTOs.get(i).getProtein1().getGeneNames().get(0).equals(gene1)){
+    //			java.util.Collections.swap(proteinDTOs, 0, i);
+   // 		}
+    //	}
+    	dbService.closeSession();
+    }
+	
+	public void findProteinsByGenes(){
+		dbService.startSession();
+		species = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("species"); 
+		String geneArray =  FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("array1"); 
+		proteinDTOs.clear();
+		
+    	proteinDTOs = dbService.findProteinsByGenes(Arrays.asList(geneArray.split("\\s*,\\s*")), species);
     	dbService.closeSession();
     }
 	
@@ -140,7 +160,9 @@ public class ControlBean implements Serializable{
 		if(!FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("jacc").equals("")){
 			jaccScore = Double.valueOf(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("jacc")); 
 		}
-    	proteinDTOs = dbService.findProteinsByName(proteinName1, proteinName2, jaccScore);
+		
+		species = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("species"); 
+    	proteinDTOs = dbService.findProteinsByName(proteinName1, proteinName2, jaccScore, species);
     	
     	dbService.closeSession();
 	}
@@ -154,29 +176,25 @@ public class ControlBean implements Serializable{
 			if(pathway.split(" ")[pathway.split(" ").length-1].equals("PATHWAY")){
 				pathway = StringUtils.join(Arrays.copyOf(pathway.split(" "), pathway.split(" ").length-1), " ");
 			}
-			pathwayDTOs = dbService.findPathwayDTOs(".*"+pathway+".*");
+			pathwayDTOs = dbService.findPathwayDTOs("(?i).*"+pathway+".*");
 		}
-		System.out.println("pathway : " + pathwayDTOs.size());
 		dbService.closeSession();
-		
-		Collections.sort(pathwayDTOs, new Comparator<PathwayDTO>() {
-			@Override
-			public int compare(PathwayDTO o1, PathwayDTO o2) {
-				return new Integer(o2.getProteinDTOs().size()).compareTo(o1.getProteinDTOs().size());
-			}
-		});
 	}
-	
+
 	public void findDiseaseDTOs(){
 		dbService.startSession();
 		String disease = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("disease").trim().toUpperCase(); 
+		Double jaccScore = 0.0;
+		if(!FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("jacc").equals("")){
+			jaccScore = Double.valueOf(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("jacc")); 
+		}
 		if(disease.startsWith("C") && disease.length()==8){
-			diseaseDTOs = dbService.findDiseaseDTOs(disease);
+			diseaseDTOs = dbService.findDiseaseDTOs(disease, jaccScore);
 		}else{
 			if(disease.split(" ")[disease.split(" ").length-1].equals("DISEASE")){
 				disease = StringUtils.join(Arrays.copyOf(disease.split(" "), disease.split(" ").length-1), " ");
 			}
-			diseaseDTOs = dbService.findDiseaseDTOs(".*"+disease+".*");
+			diseaseDTOs = dbService.findDiseaseDTOs(".*"+disease+".*", jaccScore);
 		}
 		System.out.println("disease : " + diseaseDTOs.size());
 		dbService.closeSession();
@@ -193,8 +211,11 @@ public class ControlBean implements Serializable{
 	public void findProteinDTOsByTissue(){
 		dbService.startSession();
 		String tissue = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("tissue"); 
-		
-		proteinDTOs = dbService.getProteinDTOsByTissue("(?i).*"+tissue+".*");
+		Double jaccScore = 0.0;
+		if(!FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("jacc").equals("")){
+			jaccScore = Double.valueOf(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("jacc")); 
+		}
+		proteinDTOs = dbService.getProteinDTOsByTissue(tissue, jaccScore);
 		
 		dbService.closeSession();
 		

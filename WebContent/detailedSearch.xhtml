@@ -69,7 +69,7 @@ body {
 					document.getElementById("diseaseRegion").style.display = 'none';
 					document.getElementById("tissueRegion").style.display = 'block';
 				}
-			});
+			});		
 		</script>
 
 </h:head>
@@ -106,17 +106,17 @@ body {
       <!-- /.container -->
     </nav>
     <!-- Page Content -->
+    
     <div class="container" id="content">
     <div id="pathwayRegion">
       <h1></h1>
       <p style="font-weight: bold;">Total number of pathways found: #{controlBean.pathwayDTOs.size()}</p>
-      <p style="color:grey; font-style: italic;">Please click on the pathway of interest to find relevant protein pairs.</p>
+      <p style="color:grey; font-style: italic;">Please click on the pathway of interest to find relevant protein pairs. If the pathway is not a leaf pathway, you will see the related leaf pathway Reactome accession before the protein pairs table.</p>
       <table class="table table-hover table-expandable table-sticky-header table-custom">
         <thead>
           <tr>
             <th>Pathway Name</th>
             <th>Reactome Accession</th>
-            <th>Associated pair count</th>
             <th></th>
           </tr>
         </thead>
@@ -126,13 +126,13 @@ body {
 
               <td>#{pathway.pathWay.pathwayName}</td>
               <td>#{pathway.pathWay.reactomeAccession}</td>
-              <td>#{pathway.proteinDTOs.size()}</td>
               <td><span class="pull-right clickable"><i class="glyphicon glyphicon-chevron-down"></i></span></td>
             </tr>
             <tr id="#{pathway.pathWay.reactomeAccession}" class="collapse">
               <td colspan="3">
-
-                <div class="wrap">
+                <ui:repeat var="leafPathway" value="#{pathway.pathwayDTOs}">
+                  <div class="wrap">
+                  <p>#{leafPathway.pathWay.reactomeAccession}</p>
                   <table class="head">
                     <tr>
                       <th style="width: 3%"></th>
@@ -145,22 +145,24 @@ body {
                   </table>
                   <div class="inner_table_large">
                     <table>
-                      <ui:repeat var="proteinDTO" value="#{pathway.proteinDTOs}">
+                      <ui:repeat var="proteinDTO" value="#{leafPathway.proteinDTOs}">
                         <tr >
                           <td style="text-align: center; width: 3%"><a
-                            href="/tabloidproteome/dataTable.xhtml?accession1=#{proteinDTO.protein1.uniprotAccession}&amp;accession2=#{proteinDTO.protein2.uniprotAccession}&amp;jaccard=#{proteinDTO.associate[0].jaccSimScore}">
+                            href="/tabloidproteome/dataTable.xhtml?accession1=#{proteinDTO.protein1.uniprotAccession}&amp;accession2=#{proteinDTO.protein2.uniprotAccession}&amp;jaccard=#{proteinDTO.associate.jaccSimScore}&amp;species=9606">
                               <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                           </a></td>
                           <td style="width: 6%;">#{proteinDTO.protein1.uniprotAccession}</td>
                           <td style="width: 40%;">#{proteinDTO.protein1.proteinName}</td>
                           <td style="width: 6%">#{proteinDTO.protein2.uniprotAccession}</td>
                           <td style="width: 40%">#{proteinDTO.protein2.proteinName}</td>
-                          <td style="width: 5%">#{proteinDTO.associate[0].jaccSimScore}</td>
+                          <td style="width: 5%">#{proteinDTO.associate.jaccSimScore}</td>
                         </tr>
                       </ui:repeat>
                     </table>
                   </div>
                 </div>
+                </ui:repeat>
+                
               </td>
             </tr>
           </ui:repeat>
@@ -168,10 +170,10 @@ body {
       </table>
 
     </div>
-
+    
+    
     <div id="diseaseRegion" style="display: none;">
     <h1></h1>
-      <p>Jaccard similarity threshold is set as 0.4 for this search. If you want to see more results with lower threshold, please contact us.</p>
       <p style="font-weight: bold;">Total number of diseases found: #{controlBean.diseaseDTOs.size()}</p>
       <p style="color:grey; font-style: italic;">Please click on the disease of interest to find relevant protein pairs.</p>
       <table class="table table-hover table-expandable table-sticky-header table-custom">
@@ -194,7 +196,7 @@ body {
             </tr>
             <tr id="#{disease.disease.disgenetId}">
               <td colspan="4">
-
+                
                 <div class="wrap">
                   <table class="head">
                     <tr>
@@ -211,19 +213,20 @@ body {
                       <ui:repeat var="proteinDTO" value="#{disease.proteinDTOs}">
                         <tr>
                           <td style="text-align: center; width: 3%"><a
-                            href="/tabloidproteome/dataTable.xhtml?accession1=#{proteinDTO.protein1.uniprotAccession}&amp;accession2=#{proteinDTO.protein2.uniprotAccession}&amp;jaccard=#{proteinDTO.associate[0].jaccSimScore}">
+                            href="/tabloidproteome/dataTable.xhtml?accession1=#{proteinDTO.protein1.uniprotAccession}&amp;accession2=#{proteinDTO.protein2.uniprotAccession}&amp;jaccard=#{proteinDTO.associate.jaccSimScore}&amp;species=9606">
                               <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                           </a></td>
                           <td style="width: 6%">#{proteinDTO.protein1.uniprotAccession}</td>
                           <td style="width: 40%">#{proteinDTO.protein1.proteinName}</td>
                           <td style="width: 6%">#{proteinDTO.protein2.uniprotAccession}</td>
                           <td style="width: 40%">#{proteinDTO.protein2.proteinName}</td>
-                          <td style="width: 5%">#{proteinDTO.associate[0].jaccSimScore}</td>
+                          <td style="width: 5%">#{proteinDTO.associate.jaccSimScore}</td>
                         </tr>
                       </ui:repeat>
                     </table>
                   </div>
                 </div>
+                
               </td>
             </tr>
           </ui:repeat>
@@ -233,7 +236,6 @@ body {
     
     <div id="tissueRegion" style="display: none;">
     <h1></h1>
-      <p>Jaccard similarity threshold is set as 0.4 for this search. If you want to see more results with lower threshold, please contact us.</p>
       <p style="font-weight: bold;">Total number of protein pairs found: #{controlBean.proteinDTOs.size()}</p>
 
       <table class="table table-hover table-sticky-header table-custom">
@@ -252,14 +254,14 @@ body {
         <tbody>
           <ui:repeat var="proteinDTO" value="#{controlBean.proteinDTOs}">
             <tr>
-              <td><a href="/tabloidproteome/dataTable.xhtml?accession1=#{proteinDTO.protein1.uniprotAccession}&amp;accession2=#{proteinDTO.protein2.uniprotAccession}&amp;jaccard=#{proteinDTO.associate[0].jaccSimScore}">
+              <td><a href="/tabloidproteome/dataTable.xhtml?accession1=#{proteinDTO.protein1.uniprotAccession}&amp;accession2=#{proteinDTO.protein2.uniprotAccession}&amp;jaccard=#{proteinDTO.associate.jaccSimScore}&amp;species=9606">
                <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                </a></td>
               <td>#{proteinDTO.protein1.uniprotAccession}</td>
               <td>#{proteinDTO.protein1.proteinName}</td>
               <td>#{proteinDTO.protein2.uniprotAccession}</td>
               <td>#{proteinDTO.protein2.proteinName}</td>
-              <td>#{proteinDTO.associate[0].jaccSimScore}</td>
+              <td>#{proteinDTO.associate.jaccSimScore}</td>
               <td>#{proteinDTO.tissueName}</td>
             </tr>
           </ui:repeat>
@@ -269,9 +271,11 @@ body {
     
     
     </div>
+    
+    
     <div id="footer">
           <div class="container">
-            <div class="row">
+            <div class="row" style="margin-top: 0;">
               <div class="col-sm-9">
                 <p class="text-muted credit">SUPPORTED BY</p>
                 <p class="text-muted credit">
@@ -305,6 +309,7 @@ body {
               <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml" class="text-muted">Data</a></p>
               <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml#statistics" class="text-sub">Statistics</a></p>
               <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml#resources" class="text-sub">Credits &#38; Resources</a></p>
+              <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml#download" class="text-sub">Download</a></p>
             </div>
             <div class="col-sm-1">
               <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml" class="text-muted">Help</a></p>
@@ -316,5 +321,8 @@ body {
         </div>
       </div>
   </div>
+  
+  
+  
 </body>
 </html>

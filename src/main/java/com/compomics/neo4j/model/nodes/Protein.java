@@ -2,6 +2,7 @@ package com.compomics.neo4j.model.nodes;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by demet on 12/19/2016.
@@ -25,6 +26,8 @@ public class Protein implements Serializable {
     private String uniprotAccession;
 
     private String uniprotStatus;
+    
+    private String associationId;
     
     private int group;
     
@@ -96,12 +99,45 @@ public class Protein implements Serializable {
 		this.geneIds = geneIds;
 	}
 
+	public String getAssociationId() {
+		return associationId;
+	}
+
+	public void setAssociationId(String associationId) {
+		this.associationId = associationId;
+	}
+
 	public int getGroup() {
 		return group;
 	}
 
 	public void setGroup(int group) {
 		this.group = group;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((uniprotAccession == null) ? 0 : uniprotAccession.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Protein other = (Protein) obj;
+		if (uniprotAccession == null) {
+			if (other.uniprotAccession != null)
+				return false;
+		} else if (!uniprotAccession.equals(other.uniprotAccession))
+			return false;
+		return true;
 	}
 
 }

@@ -5,7 +5,7 @@ function searchSingle(){
 								
 				try {    
 					var surl = '/tabloidproteome/dataTable.xhtml?accession='+ $('#singleAccession').val()
-		    		+ '&jaccard=' + $('#jaccardSingle').val();
+		    		+ '&jaccard=' + $('#jaccardSingle').val() + '&species=' + $('#selSpeciesProteinSingle').val();
 	                if (validateURL(surl))  
 	                    window.location = surl; 
 	                else {  
@@ -29,7 +29,11 @@ function searchSingle(){
                    {
                       name : 'protein2',
                       value :  ''
-                   }
+                   },
+                   {
+                     	name : "species",
+                     	value : isSafe(document.getElementById("selSpeciesProteinSingle").value)
+                  }
                  ]);
 				
 			}
@@ -50,7 +54,8 @@ function searchSingle(){
 			if(isValidUniprotAcc($('#doubleAccession1').val()) && isValidUniprotAcc($('#doubleAccession2').val())){
 				try {    
 					var surl = '/tabloidproteome/dataTable.xhtml?accession1=' + $('#doubleAccession1').val()
-		        	+ '&accession2=' + $('#doubleAccession2').val() + '&jaccard=' + $('#jaccardDouble').val();
+		        	+ '&accession2=' + $('#doubleAccession2').val() + '&jaccard=' + $('#jaccardDouble').val()
+		        	+ '&species=' + $('#selSpeciesProteinDouble').val();
 	                if (validateURL(surl))  
 	                    window.location = surl; 
 	                else {  
@@ -73,7 +78,11 @@ function searchSingle(){
                    {
                       name : 'protein2',
                       value : isSafe(document.getElementById("doubleAccession2").value)
-                   }
+                   },
+                   {
+                    	name : "species",
+                    	value : isSafe(document.getElementById("selSpeciesProteinDouble").value)
+                 }
                  ]);
 				
 			}
@@ -147,7 +156,11 @@ function searchSingle(){
              {
                 name : 'jacc',
                 value :  isSafe(document.getElementById("jaccardOneToOne").value)
-             }
+             },
+             {
+                 name : 'species',
+                 value :  isSafe(document.getElementById("selSpeciesProteinOneToOne").value)
+              }
              ]);
 		}else{
 			var dialogInstance = new BootstrapDialog();
@@ -176,7 +189,7 @@ function searchSingle(){
 
 		   //loops through each cell in current row
 		   for(var j = 0; j < cellLength; j ++){
-			   array1.push(oCells.item(j).innerHTML);
+			   if(!array1.includes(oCells.item(j).innerHTML)) {array1.push(oCells.item(j).innerHTML);}
 		   }
 		   
 		}
@@ -197,7 +210,11 @@ function searchSingle(){
              {
                 name : 'jacc',
                 value :  isSafe(document.getElementById("jaccardManyToMany").value)
-             }
+             },
+             {
+                 name : 'species',
+                 value :  isSafe(document.getElementById("selSpeciesProteinManyToMany").value)
+              }
              ]);
 		}else{
 			var dialogInstance = new BootstrapDialog();
@@ -208,12 +225,57 @@ function searchSingle(){
 		}
 	}
 	
+	function searchMultipleGene(){
+		var array1 = [];
+		//gets table
+		var oTable = document.getElementById('manyToManyTableGene');
+
+		//gets rows of table
+		var rowLength = oTable.rows.length;
+
+		//loops through rows    
+		for (i = 0; i < rowLength; i++){
+		   //gets cells of current row
+		   var oCells = oTable.rows.item(i).cells;
+
+		   //gets amount of cells of current row
+		   var cellLength = oCells.length;
+
+		   //loops through each cell in current row
+		   for(var j = 0; j < cellLength; j ++){
+			   if(!array1.includes(oCells.item(j).innerHTML)) {array1.push(oCells.item(j).innerHTML);}
+		   }
+		   
+		}
+		if(array1.length != 0){
+			passGenesJSONToJSFManagedBean ([ {
+                name : 'array1',
+                value :  isSafe(array1)
+            },
+             {
+                 name : 'species',
+                 value :  isSafe(document.getElementById("selSpeciesGeneManyToMany").value)
+              }
+             ]);
+		}else{
+			var dialogInstance = new BootstrapDialog();
+            dialogInstance.setTitle('INPUT ERROR');
+            dialogInstance.setMessage('Please upload CSV file that contains gene names!');
+            dialogInstance.setType(BootstrapDialog.TYPE_DANGER);
+            dialogInstance.open();
+		}
+	}
+
     function searchGene(selection){
     	if(selection == "single"){
     		if($('#geneId').val() != ""){
     			passGeneToJSFManagedBean ([ {
                     name : 'gene',
                     value :  isSafe(document.getElementById("geneId").value)
+                   },
+                   {
+                      	name : "species",
+                      	value : isSafe(document.getElementById("selSpeciesGeneSingle").value)
                    }
                  ]);
     		}else{
@@ -229,7 +291,11 @@ function searchSingle(){
     			passGeneDoubleToJSFManagedBean ([ {
                     name : 'gene',
                     value :  isSafe(document.getElementById("geneId1").value) + "," + isSafe(document.getElementById("geneId2").value)
-                   }
+                   },
+                   {
+                     	name : "species",
+                     	value : isSafe(document.getElementById("selSpeciesGeneDouble").value)
+                  }
                  ]);
     		}else{
     			var dialogInstance = new BootstrapDialog();
@@ -266,6 +332,10 @@ function searchSingle(){
     		passDiseaseNameToJSFManagedBean ([ {
                 name : 'disease',
                 value :  isSafe(document.getElementById("diseaseId").value)
+               },
+               {
+            	name : "jacc",
+            	value : isSafe(document.getElementById("jaccardDisease").value)
                }
              ]);
 		}else{
@@ -284,7 +354,11 @@ function searchSingle(){
     		passTissueNameToJSFManagedBean ([ {
                 name : 'tissue',
                 value :  e.options[e.selectedIndex].value
-               }
+               },
+               {
+               	name : "jacc",
+               	value : isSafe(document.getElementById("jaccardTissue").value)
+                  }
              ]);
 		}else{
 			var dialogInstance = new BootstrapDialog();
@@ -421,12 +495,12 @@ function searchSingle(){
 	}
 	
 	function setExampleDisease1() {
-		document.getElementById('diseaseId').value = 'Invasive Breast Carcinoma';
+		document.getElementById('diseaseId').value = 'Luminal A Breast Carcinoma';
 		return false;
 	}
 	
 	function setExampleDisease2() {
-		document.getElementById('diseaseId').value = 'C0018802';
+		document.getElementById('diseaseId').value = 'C3642345';
 		return false;
 	}
 	
@@ -489,6 +563,35 @@ function searchSingle(){
 		$("#readfile2").val("");
 		}
 	
+	
+	function loadFileGene(event) {
+		var table=document.getElementById("manyToManyTableGene");
+		$("#manyToManyTableGene tr").remove(); 
+		var maxColumn = 1;
+		
+		alasql('SELECT * FROM FILE(?,{headers:false})',[event],function(data){
+			for(var obj in data){
+			  if(data.hasOwnProperty(obj)){
+			      var headerIndex = 0;
+			      var row=table.insertRow(table.rows.length);		
+				  for(var prop in data[obj]){
+			        if(data[obj].hasOwnProperty(prop)  && headerIndex < maxColumn ){
+					   var cell=row.insertCell(headerIndex);
+					   cell.innerHTML=data[obj][prop];
+					   headerIndex++;
+			        }
+			      }
+				  if(headerIndex != 3){
+					  row.insertCell(headerIndex);
+				  }
+			  }   
+			}
+			$("#manyToManyRegionGene").show();
+			  	$("#informationGeneManyToMany").hide();
+		});
+		
+		$("#readfile").val("");
+		}
 	function isSafe(text){
 		if(text.includes("<script>")){
 			safe = text.replace("<script>", "safe");
