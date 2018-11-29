@@ -69,7 +69,14 @@ body {
 					document.getElementById("diseaseRegion").style.display = 'none';
 					document.getElementById("tissueRegion").style.display = 'block';
 				}
-			});		
+				
+				
+			});	
+			
+			$(document).ready(function(){
+				console.log("fdf");
+			    $("[data-toggle=tooltip]").tooltip({ placement: 'right'});
+			});
 		</script>
 
 </h:head>
@@ -115,8 +122,8 @@ body {
       <table class="table table-hover table-expandable table-sticky-header table-custom">
         <thead>
           <tr>
-            <th>Pathway Name</th>
-            <th>Reactome Accession</th>
+            <th style="width: 60%;">Pathway Name</th>
+            <th style="width: 35%;">Reactome Accession</th>
             <th></th>
           </tr>
         </thead>
@@ -124,15 +131,23 @@ body {
           <ui:repeat var="pathway" value="#{controlBean.pathwayDTOs}">
             <tr data-target="'#' + #{pathway.pathWay.reactomeAccession}"  style="color:purple;">
 
-              <td>#{pathway.pathWay.pathwayName}</td>
-              <td>#{pathway.pathWay.reactomeAccession}</td>
+              <td style="width: 60%;">#{pathway.pathWay.pathwayName}</td>
+              <td style="width: 35%;">#{pathway.pathWay.reactomeAccession}</td>
               <td><span class="pull-right clickable"><i class="glyphicon glyphicon-chevron-down"></i></span></td>
             </tr>
             <tr id="#{pathway.pathWay.reactomeAccession}" class="collapse">
               <td colspan="3">
                 <ui:repeat var="leafPathway" value="#{pathway.pathwayDTOs}">
                   <div class="wrap">
-                  <p>#{leafPathway.pathWay.reactomeAccession}</p>
+                  <table class="table table-hover table-custom">
+                    <tbody>
+                      <tr>
+                        <td style="width: 61%;">#{leafPathway.pathWay.pathwayName} <i class="glyphicon glyphicon-info-sign" data-toggle="tooltip" title="It is classified as sub pathway for the pathway (above). These classifications are derived from Reactome database" id="infoLeafPathway"></i></td>
+                        <td style="width: 39%;">#{leafPathway.pathWay.reactomeAccession}</td>
+                      </tr>  
+                    </tbody>
+                  </table>
+               
                   <table class="head">
                     <tr>
                       <th style="width: 3%"></th>
@@ -174,6 +189,7 @@ body {
     
     <div id="diseaseRegion" style="display: none;">
     <h1></h1>
+      <p>Jaccard similarity threshold is set as 0.4 for this search. If you want to see more results with lower threshold, please contact us.</p>
       <p style="font-weight: bold;">Total number of diseases found: #{controlBean.diseaseDTOs.size()}</p>
       <p style="color:grey; font-style: italic;">Please click on the disease of interest to find relevant protein pairs.</p>
       <table class="table table-hover table-expandable table-sticky-header table-custom">

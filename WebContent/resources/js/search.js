@@ -332,10 +332,6 @@ function searchSingle(){
     		passDiseaseNameToJSFManagedBean ([ {
                 name : 'disease',
                 value :  isSafe(document.getElementById("diseaseId").value)
-               },
-               {
-            	name : "jacc",
-            	value : isSafe(document.getElementById("jaccardDisease").value)
                }
              ]);
 		}else{
@@ -495,12 +491,12 @@ function searchSingle(){
 	}
 	
 	function setExampleDisease1() {
-		document.getElementById('diseaseId').value = 'Luminal A Breast Carcinoma';
+		document.getElementById('diseaseId').value = 'Liver carcinoma';
 		return false;
 	}
 	
 	function setExampleDisease2() {
-		document.getElementById('diseaseId').value = 'C3642345';
+		document.getElementById('diseaseId').value = 'C2239176';
 		return false;
 	}
 	

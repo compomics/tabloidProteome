@@ -184,17 +184,14 @@ public class ControlBean implements Serializable{
 	public void findDiseaseDTOs(){
 		dbService.startSession();
 		String disease = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("disease").trim().toUpperCase(); 
-		Double jaccScore = 0.0;
-		if(!FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("jacc").equals("")){
-			jaccScore = Double.valueOf(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("jacc")); 
-		}
+		
 		if(disease.startsWith("C") && disease.length()==8){
-			diseaseDTOs = dbService.findDiseaseDTOs(disease, jaccScore);
+			diseaseDTOs = dbService.findDiseaseDTOs(disease, 0.4);
 		}else{
 			if(disease.split(" ")[disease.split(" ").length-1].equals("DISEASE")){
 				disease = StringUtils.join(Arrays.copyOf(disease.split(" "), disease.split(" ").length-1), " ");
 			}
-			diseaseDTOs = dbService.findDiseaseDTOs(".*"+disease+".*", jaccScore);
+			diseaseDTOs = dbService.findDiseaseDTOs(".*"+disease+".*", 0.4);
 		}
 		System.out.println("disease : " + diseaseDTOs.size());
 		dbService.closeSession();

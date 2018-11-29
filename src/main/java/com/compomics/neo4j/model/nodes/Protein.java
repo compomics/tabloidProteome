@@ -11,9 +11,9 @@ public class Protein implements Serializable {
 
     private static final long serialVersionUID = -1879461966536472891L;
     
-    private List<Object> geneNames;
+    private List<String> geneNames;
     
-    private List<Object> geneIds;
+    private List<String> geneIds;
 
     private String species;
 
@@ -35,11 +35,11 @@ public class Protein implements Serializable {
     public Protein() {
     }
 
-    public List<Object> getGeneNames() {
+    public List<String> getGeneNames() {
         return geneNames;
     }
 
-    public void setGeneNames(List<Object> geneName) {
+    public void setGeneNames(List<String> geneName) {
         this.geneNames = geneName;
     }
 
@@ -91,11 +91,11 @@ public class Protein implements Serializable {
         this.uniprotStatus = uniprotStatus;
     }
 
-	public List<Object> getGeneIds() {
+	public List<String> getGeneIds() {
 		return geneIds;
 	}
 
-	public void setGeneIds(List<Object> geneIds) {
+	public void setGeneIds(List<String> geneIds) {
 		this.geneIds = geneIds;
 	}
 

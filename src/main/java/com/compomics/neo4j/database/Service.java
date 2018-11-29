@@ -161,8 +161,11 @@ public class Service implements Serializable{
 			Protein protein1 = new Protein();
 			protein1.setUniprotAccession(record.get("uniprot_accession1").asString());
 			protein1.setProteinName(record.get("protein_name1").asString());
+			protein1.setGeneNames(new ArrayList<>());
 			if(!NullValue.NULL.equals(record.get("gene_name1"))){
-				protein1.setGeneNames(record.get("gene_name1").asList());
+				record.get("gene_name1").asList().forEach(gene -> {
+					protein1.getGeneNames().add(gene.toString().replace("[", "").replace("]", ""));
+				});
 			}
 			protein1.setSpecies(record.get("species1").asString());
 			proteinDTO.setProtein1(protein1);
@@ -173,8 +176,11 @@ public class Service implements Serializable{
 				Protein protein2 = new Protein();
 				protein2.setUniprotAccession(record.get("uniprot_accession2").asString());
 				protein2.setProteinName(record.get("protein_name2").asString());
+				protein2.setGeneNames(new ArrayList<>());
 				if(!NullValue.NULL.equals(record.get("gene_name2"))){
-					protein1.setGeneNames(record.get("gene_name2").asList());
+					record.get("gene_name2").asList().forEach(gene -> {
+						protein2.getGeneNames().add(gene.toString().replace("[", "").replace("]", ""));
+					});
 				}
 				protein2.setSpecies(record.get("species2").asString());
 				proteinDTO.setProtein2(protein2);
@@ -240,12 +246,21 @@ public class Service implements Serializable{
 				Protein protein1 = new Protein();
 				protein1.setUniprotAccession(record.get("uniprot_accession1").asString());
 				protein1.setProteinName(record.get("protein_name1").asString());
+				
+				protein1.setGeneNames(new ArrayList<>());
 				if(!NullValue.NULL.equals(record.get("gene_name1"))){
-					protein1.setGeneNames(record.get("gene_name1").asList());
+					record.get("gene_name1").asList().forEach(gene -> {
+						protein1.getGeneNames().add(gene.toString().replace("[", "").replace("]", ""));
+					});
 				}
+				
+				protein1.setGeneIds(new ArrayList<>());
 				if(!NullValue.NULL.equals(record.get("gene_id1"))){
-					protein1.setGeneIds(record.get("gene_id1").asList());
+					record.get("gene_id1").asList().forEach(gene -> {
+						protein1.getGeneIds().add(gene.toString().replace("[", "").replace("]", ""));
+					});
 				}
+				
 				protein1.setSpecies(record.get("species1").asString());
 				proteinDTO.setProtein1(protein1);
 
@@ -284,7 +299,7 @@ public class Service implements Serializable{
 				pthwy.setLabel((String) record.get("label").asList().get(0));
 				PathwayDTO pathwayDTO = new PathwayDTO();
 				pathwayDTO.setPathWay(pthwy);
-				pathwayDTO.setPathwayDTOs(findLeafPathwaysandProteins(pthwy.getReactomeAccession(), pthwy.getLabel()));
+				pathwayDTO.setPathwayDTOs(findLeafPathwaysandProteins(pthwy));
 				pathwayDTOs.add(pathwayDTO);
 			}
 		} catch (IOException e) {
@@ -301,30 +316,33 @@ public class Service implements Serializable{
 		return pathwayDTOs;
 	}
 	
-	public List<PathwayDTO> findLeafPathwaysandProteins(String reactomeAccession, String label){
+	public List<PathwayDTO> findLeafPathwaysandProteins(PathWay pathway){
 		List<PathwayDTO> pathwayDTOs = new ArrayList<>();
 		try {
 			input = getClass().getClassLoader().getResourceAsStream("query.properties");
 			prop.load(input);
 			parameters = new HashMap<String, Object>();
-			parameters.put("reactomeAccession", reactomeAccession);
-			if(label.equals("Leaf_node")){
+			parameters.put("reactomeAccession", pathway.getReactomeAccession());
+			if(pathway.getLabel().equals("Leaf_node")){
 				PathWay pthwy = new PathWay();
-				pthwy.setReactomeAccession(reactomeAccession);
+				pthwy.setReactomeAccession(pathway.getReactomeAccession());
+				pthwy.setPathwayName(pathway.getPathwayName());
 				PathwayDTO pathwayDTO = new PathwayDTO();
 				pathwayDTO.setPathWay(pthwy);
-				pathwayDTO.setProteinDTOs(findProteinDTOsByPathway(reactomeAccession));
+				pathwayDTO.setProteinDTOs(findProteinDTOsByPathway(pathway.getReactomeAccession()));
 				pathwayDTOs.add(pathwayDTO);
 			}else{
 				StatementResult result = session.run(prop.getProperty(HIERARCHY_SEARCH), parameters);
 				while (result.hasNext()){
 					Record record = result.next();
-					String leafPathway = (String) record.get("leaf_pathway").asList().get(record.get("leaf_pathway").asList().size()-1);
+					String leafPathwayReactomeAcc = (String) record.get("leaf_pathway_reactome_acc").asList().get(record.get("leaf_pathway_reactome_acc").asList().size()-1);
+					String leafPathwayName = (String) record.get("leaf_pathway_name").asList().get(record.get("leaf_pathway_name").asList().size()-1);
 					PathWay pthwy = new PathWay();
-					pthwy.setReactomeAccession(leafPathway);
+					pthwy.setReactomeAccession(leafPathwayReactomeAcc);
+					pthwy.setPathwayName(leafPathwayName);
 					PathwayDTO pathwayDTO = new PathwayDTO();
 					pathwayDTO.setPathWay(pthwy);
-					pathwayDTO.setProteinDTOs(findProteinDTOsByPathway(leafPathway));
+					pathwayDTO.setProteinDTOs(findProteinDTOsByPathway(leafPathwayReactomeAcc));
 					if(pathwayDTO.getProteinDTOs().size() >0){
 						pathwayDTOs.add(pathwayDTO);
 					}
@@ -630,11 +648,19 @@ public class Service implements Serializable{
 			protein1.setLength(record.get("p1_length").asString());
 			protein1.setUniprotStatus(record.get("p1_uniport_status").asString());
 			protein1.setAssociationId(record.get("associationId").asString());
+			
+			protein1.setGeneNames(new ArrayList<>());
 			if(!NullValue.NULL.equals(record.get("p1_gene_name"))){
-				protein1.setGeneNames(record.get("p1_gene_name").asList());
+				record.get("p1_gene_name").asList().forEach(gene -> {
+					protein1.getGeneNames().add(gene.toString().replace("[", "").replace("]", ""));
+				});
 			}
+			
+			protein1.setGeneIds(new ArrayList<>());
 			if(!NullValue.NULL.equals(record.get("p1_gene_id"))){
-				protein1.setGeneIds(record.get("p1_gene_id").asList());
+				record.get("p1_gene_id").asList().forEach(gene -> {
+					protein1.getGeneIds().add(gene.toString().replace("[", "").replace("]", ""));
+				});
 			}
 			
 			proteinDTO.setProtein1(protein1);
@@ -646,11 +672,19 @@ public class Service implements Serializable{
 			protein2.setUniprotEntryName(record.get("p2_uniprot_entry_name").asString());
 			protein2.setLength(record.get("p2_length").asString());
 			protein2.setUniprotStatus(record.get("p2_uniport_status").asString());
+			
+			protein2.setGeneNames(new ArrayList<>());
 			if(!NullValue.NULL.equals(record.get("p2_gene_name"))){
-				protein2.setGeneNames(record.get("p2_gene_name").asList());
+				record.get("p2_gene_name").asList().forEach(gene -> {
+					protein2.getGeneNames().add(gene.toString().replace("[", "").replace("]", ""));
+				});
 			}
+			
+			protein2.setGeneIds(new ArrayList<>());
 			if(!NullValue.NULL.equals(record.get("p2_gene_id"))){
-				protein2.setGeneIds(record.get("p2_gene_id").asList());
+				record.get("p2_gene_id").asList().forEach(gene -> {
+					protein2.getGeneIds().add(gene.toString().replace("[", "").replace("]", ""));
+				});
 			}
 			proteinDTO.setProtein2(protein2);
 			String accession1 = proteinDTO.getProtein1().getUniprotAccession();
@@ -974,11 +1008,18 @@ public class Service implements Serializable{
 			Protein protein1 = new Protein();
 			protein1.setUniprotAccession(record.get("uniprot_accession1").asString());
 			protein1.setProteinName(record.get("protein_name1").asString());
+			
+			protein1.setGeneNames(new ArrayList<>());
 			if(!NullValue.NULL.equals(record.get("gene_name1"))){
-				protein1.setGeneNames(record.get("gene_name1").asList());
+				record.get("gene_name1").asList().forEach(gene -> {
+					protein1.getGeneNames().add(gene.toString().replace("[", "").replace("]", ""));
+				});
 			}
+			protein1.setGeneIds(new ArrayList<>());
 			if(!NullValue.NULL.equals(record.get("gene_id1"))){
-				protein1.setGeneIds(record.get("gene_id1").asList());
+				record.get("gene_id1").asList().forEach(gene -> {
+					protein1.getGeneIds().add(gene.toString().replace("[", "").replace("]", ""));
+				});
 			}
 			protein1.setSpecies(record.get("species1").asString());
 			proteinDTO.setProtein1(protein1);
@@ -986,12 +1027,20 @@ public class Service implements Serializable{
 			if(queryName.equals(GENE_QUERY_DOUBLE)){
 				protein2.setUniprotAccession(record.get("uniprot_accession2").asString());
 				protein2.setProteinName(record.get("protein_name2").asString());
+				protein2.setGeneNames(new ArrayList<>());
 				if(!NullValue.NULL.equals(record.get("gene_name2"))){
-					protein2.setGeneNames(record.get("gene_name2").asList());
+					record.get("gene_name2").asList().forEach(gene -> {
+						protein2.getGeneNames().add(gene.toString().replace("[", "").replace("]", ""));
+					});
 				}
+				
+				protein2.setGeneIds(new ArrayList<>());
 				if(!NullValue.NULL.equals(record.get("gene_id2"))){
-					protein2.setGeneIds(record.get("gene_id2").asList());
+					record.get("gene_id2").asList().forEach(gene -> {
+						protein2.getGeneIds().add(gene.toString().replace("[", "").replace("]", ""));
+					});
 				}
+				
 				protein2.setSpecies(record.get("species2").asString());
 				proteinDTO.setProtein2(protein2);
 				Associate associate = new Associate();
