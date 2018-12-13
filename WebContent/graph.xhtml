@@ -729,7 +729,7 @@ path.invis {
         for(var i in link.associate.bioGrid){
         	var newtr = $('<tr></tr>').append(
         		  $('<td></td>').html($("<a></a>").attr("href", 'https://thebiogrid.org/' )
-                            .attr("target", "_blank").text(link.associate.bioGrid[i].biogridId).width('15%'),
+                            .attr("target", "_blank").text(link.associate.bioGrid[i].biogridId)).width('15%'),
                   $('<td></td>').text(link.associate.bioGrid[i].experimentName).width('17%'),
                   $('<td></td>').text(link.associate.bioGrid[i].experimentType).width('17%'),
                   $('<td></td>').text(link.associate.bioGrid[i].modification).width('17%'),
