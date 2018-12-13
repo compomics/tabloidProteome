@@ -294,7 +294,7 @@ function clickButton(){
                         <table>
                           <ui:repeat var="bioGrid" value="#{proteinDTO.associate.bioGrid}">
                           <tr>
-                            <td style="width: 15%;">#{bioGrid.biogridId}</td>
+                            <td style="width: 15%;"><a target="_blank" href="https://thebiogrid.org/">#{bioGrid.biogridId}</a></td>
                             <td style="width: 17%;">#{bioGrid.experimentName}</td>
                             <td style="width: 17%;">#{bioGrid.experimentType}</td>
                             <td style="width: 17%;">#{bioGrid.modification}</td>
