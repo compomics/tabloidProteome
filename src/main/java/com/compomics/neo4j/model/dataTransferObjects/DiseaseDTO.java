@@ -5,32 +5,31 @@ import java.util.List;
 
 import com.compomics.neo4j.model.nodes.Disease;
 
-public class DiseaseDTO implements Serializable{
+public class DiseaseDTO implements Serializable {
 
-	private static final long serialVersionUID = -5034036789505045464L;
+    private static final long serialVersionUID = -5034036789505045464L;
 
-	private Disease disease;
-	
-	private List<ProteinDTO> proteinDTOs;
+    private Disease disease;
 
-	public DiseaseDTO() {
-	}
+    private List<ProteinDTO> proteinDTOs;
 
-	public Disease getDisease() {
-		return disease;
-	}
+    public DiseaseDTO() {
+    }
 
-	public void setDisease(Disease disease) {
-		this.disease = disease;
-	}
+    public Disease getDisease() {
+        return disease;
+    }
 
-	public List<ProteinDTO> getProteinDTOs() {
-		return proteinDTOs;
-	}
+    public void setDisease(Disease disease) {
+        this.disease = disease;
+    }
 
-	public void setProteinDTOs(List<ProteinDTO> proteinDTOs) {
-		this.proteinDTOs = proteinDTOs;
-	}
-	
-	
+    public List<ProteinDTO> getProteinDTOs() {
+        return proteinDTOs;
+    }
+
+    public void setProteinDTOs(List<ProteinDTO> proteinDTOs) {
+        this.proteinDTOs = proteinDTOs;
+    }
+
 }

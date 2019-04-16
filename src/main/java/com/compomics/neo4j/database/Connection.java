@@ -9,25 +9,46 @@ import java.util.Properties;
 import org.neo4j.driver.v1.AuthTokens;
 import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.GraphDatabase;
-import org.neo4j.driver.v1.Session;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by demet on 12/8/2016.
  */
-public class Connection implements Serializable{
+public class Connection implements Serializable, AutoCloseable {
 
-	private static final long serialVersionUID = 1029809887588268675L;
-    private Properties prop = new Properties();
-    private InputStream input = null;
+    private static final long serialVersionUID = 1029809887588268675L;
+    private static final Logger LOGGER = LoggerFactory.getLogger(Connection.class);
+
+    /**
+     * Singleton instance.
+     */
+    private static final Connection instance = new Connection();
+
     private Driver driver;
 
+    private Connection() {
+        openConnection();
+    }
 
-    
-    public void openConnection() {
+    @Override
+    public void close() {
+        LOGGER.info("Closing neo4j driver connection");
+        driver.close();
+    }
+
+    public static Connection getInstance() {
+        return instance;
+    }
+
+    private void openConnection() {
+        InputStream input = null;
         try {
+            LOGGER.info("Opening neo4j driver connection");
             input = getClass().getClassLoader().getResourceAsStream("config.properties");
+            Properties prop = new Properties();
             prop.load(input);
-            driver = GraphDatabase.driver(prop.getProperty("url"), AuthTokens.basic(prop.getProperty("user"), prop.getProperty("password"))); 
+            driver = GraphDatabase.driver(prop.getProperty("url"), AuthTokens.basic(prop.getProperty("user"), prop.getProperty("password")));
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -40,9 +61,9 @@ public class Connection implements Serializable{
             }
         }
     }
-    
-    public Session startSession(){
-    	return driver.session();
+
+    public Driver getDriver() {
+        return driver;
     }
 
 }

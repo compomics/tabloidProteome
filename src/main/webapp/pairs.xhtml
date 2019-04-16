@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="ISO-8859-9" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui" xmlns:ui="http://java.sun.com/jsf/facelets">
+<h:head>
+    <title>Graph Database</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' http://primefaces.org/ui http://xmlns.jcp.org http://java.sun.com http://www.w3.org;
+      script-src 'self' http://code.jquery.com/jquery-2.1.4.min.js https://www.google-analytics.com 
+      https://cdnjs.cloudflare.com http://maxcdn.bootstrapcdn.com;
+      style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; 
+      font-src 'self' https://cdnjs.cloudflare.com;
+      img-src 'self' https://www.google-analytics.com;
+      object-src 'self'"/>
+</h:head>
+<body>
+<p>Protein pairs</p>
+<h:form id="form" style="width:300px;">
+    <p:dataList value="#{graphDbManagedBean.pairsNotFound}" var="pair">
+        #{pair}
+    </p:dataList>
+</h:form>
+
+</body>
+</html>

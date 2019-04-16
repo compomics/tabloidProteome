@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * Created by demet on 12/19/2016.
  */
-public class Reactome implements Serializable{
+public class Reactome implements Serializable {
 
     private static final long serialVersionUID = 2190691658950525996L;
 
@@ -18,9 +18,6 @@ public class Reactome implements Serializable{
     private String evidenceCode;
 
     private String reactomelink;
-
-    public Reactome() {
-    }
 
     public String getPathwayName() {
         return pathwayName;

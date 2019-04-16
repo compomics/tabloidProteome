@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * Created by demet on 12/19/2016.
  */
-public class PrideDataSet implements Serializable{
+public class PrideDataSet implements Serializable {
 
     private static final long serialVersionUID = -8219677570579355408L;
 
@@ -20,9 +20,6 @@ public class PrideDataSet implements Serializable{
     private String experimentType;
 
     private String tags;
-
-    public PrideDataSet() {
-    }
 
     public String getInstruments() {
         return instruments;

@@ -1,8 +1,6 @@
 package com.compomics.neo4j.model.nodes;
 
 import java.io.Serializable;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Created by demet on 12/19/2016.
@@ -74,30 +72,27 @@ public class Project implements Serializable {
         this.tags = tags;
     }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((projectAccession == null) ? 0 : projectAccession.hashCode());
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((projectAccession == null) ? 0 : projectAccession.hashCode());
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Project other = (Project) obj;
-		if (projectAccession == null) {
-			if (other.projectAccession != null)
-				return false;
-		} else if (!projectAccession.equals(other.projectAccession))
-			return false;
-		return true;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Project other = (Project) obj;
+        if (projectAccession == null) {
+            return other.projectAccession == null;
+        } else return projectAccession.equals(other.projectAccession);
+    }
 
-	
+
 }

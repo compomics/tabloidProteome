@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' http://primefaces.org/ui http://xmlns.jcp.org http://java.sun.com http://www.w3.org; 
+      script-src 'self' 'unsafe-inline' https://code.jquery.com/jquery-2.1.4.min.js https://www.google-analytics.com 
+      https://cdnjs.cloudflare.com https://maxcdn.bootstrapcdn.com https://rawgit.com/agershun/alasql/ 'unsafe-eval';
+      style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; 
+      font-src 'self' https://cdnjs.cloudflare.com;
+      img-src 'self' https://www.google-analytics.com;
+      object-src 'self'"/>
+
+    <title>Tabloid Proteome</title>
+
+
+    <!-- Bootstrap Core CSS -->
+    <link href="/tabloidproteome/resources/css/bootstrap.css"
+          rel="stylesheet"/>
+
+    <script src="/tabloidproteome/resources/js/jquery-2-1-4.js"
+            type="text/javascript"></script>
+
+
+    <link href="/tabloidproteome/resources/css/custom.css" rel="stylesheet"/>
+    <link href="/tabloidproteome/resources/css/sticky-footer.css"
+          rel="stylesheet"/>
+    <link
+            href="/tabloidproteome/resources/css/bootstrap-table-expandable.css"
+            rel="stylesheet"/>
+    <link
+            href="/tabloidproteome/resources/css/bootstrap-dialog.css"
+            rel="stylesheet"/>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/tabloidproteome/resources/js/bootstrap.min.js"></script>
+
+    <script
+            src="/tabloidproteome/resources/js/bootstrap-dialog.js"
+            type="text/javascript"></script>
+    <script src="https://rawgit.com/agershun/alasql/develop/dist/alasql.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/xlsx.full.min.js"></script>
+
+    <script async="async" src="/tabloidproteome/resources/js/tissue.js"></script>
+    <script async="async" src="/tabloidproteome/resources/js/search.js"></script>
+    <script async="async" src="/tabloidproteome/resources/js/urlValidate.js"></script>
+    <style>
+
+        body {
+            padding-top: 70px;
+            /* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of navigation changes. */
+        }
+    </style>
+
+    <script>
+        (function (i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r;
+            i[r] = i[r] || function () {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date();
+            a = s.createElement(o),
+                m = s.getElementsByTagName(o)[0];
+            a.async = 1;
+            a.src = g;
+            m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+
+        ga('create', 'UA-96922635-1', 'auto');
+        ga('send', 'pageview');
+
+    </script>
+    <script type="text/javascript">
+
+        $('html').bind('keypress', function (e) {
+            if (e.keyCode == 13) {
+                return false;
+            }
+        });
+        $(function () {
+            $('#multipleProteinSearch-tab').click(function () {
+                $('#myTab a[href="#oneToOne"]').tab('show');
+            });
+
+        });
+
+    </script>
+</h:head>
+
+<body>
+
+<div id="wrapper">
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container" id="header">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse"
+                        data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span> <span
+                        class="icon-bar"></span> <span class="icon-bar"></span> <span
+                        class="icon-bar"></span>
+                </button>
+                <a href="/tabloidproteome/search.xhtml" class="navbar-left"><img
+                        src="/tabloidproteome/resources/images/logo.png"
+                        style="width: 70px; height: 54px;"/></a> <a class="navbar-brand"
+                                                                    href="/tabloidproteome/search.xhtml">Tabloid Proteome</a>
+            </div>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse"
+                 id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav pull-right">
+                    <li><a href="/tabloidproteome/search.xhtml">Search</a></li>
+                    <li><a href="/tabloidproteome/dataTable.xhtml?session">Data
+                        Table</a></li>
+                    <li><a href="/tabloidproteome/help.xhtml">Help</a></li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+
+    <!-- Page Content -->
+    <div class="container" id="content">
+
+        <div class="row">
+            <div class="col-sm-12">
+                <p style="font-size: medium; margin-left: 75px;">
+                    Tabloid Proteome is a database of protein association network
+                    generated using publically available mass spectrometry based
+                    experiments in PRIDE.These associations represent a broad scala
+                    of biological associations between pairs of proteins that goes
+                    well beyond mere binary protein interactions. <a href="/tabloidproteome/information.xhtml">More
+                    info<i class="glyphicon glyphicon-option-horizontal"></i>
+                </a>
+                </p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-3 col-sm-offset-1">
+                <ul class="nav nav-pills  nav-stacked">
+                    <li class="active"><a>Protein Search</a>
+                        <div style="padding-left: 15px;">
+                            <br/> <a href="#singleProteinSearch" data-toggle="tab">>
+                            Single Protein Search</a><br/> <br/> <a
+                                href="#doubleProteinSearch" data-toggle="tab">> Two Protein
+                            Search</a><br/> <br/>
+                            <a id="multipleProteinSearch-tab" href="#multipleProteinSearch"
+                               data-toggle="tab">> Multiple Protein Pair
+                                Search</a><br/> <br/>
+                        </div>
+                    </li>
+                    <li><a>Gene Search</a>
+                        <div style="padding-left: 15px;">
+                            <br/> <a href="#singleGeneSearch" data-toggle="tab">>
+                            Single Gene Search</a><br/> <br/> <a href="#doubleGeneSearch"
+                                                                 data-toggle="tab">> Two Gene Search</a><br/> <br/>
+                            <a href="#multipleGeneSearch"
+                               data-toggle="tab">> Multiple Search</a><br/> <br/>
+                        </div>
+                    </li>
+                    <li><a href="#pathwaySearch" data-toggle="tab">Pathway
+                        Search</a></li>
+                    <li><a href="#diseaseSearch" data-toggle="tab">Disease
+                        Search</a></li>
+                    <li><a href="#tissueSearch" data-toggle="tab">Tissue
+                        Search</a></li>
+                </ul>
+            </div>
+            <div class="col-sm-6">
+                <div class="tab-content" id="tabs">
+                    <div class="tab-pane active" id="singleProteinSearch">
+                        <div class="panel panel-default" id="singleSearch"
+                             style="display: block;">
+                            <div class="panel-heading text-center">PROTEIN SEARCH</div>
+                            <div class="panel-body">
+                                <div>
+										<span style="float: right; font-size: 11px;"> <a
+                                                href="#" style="text-decoration: underline; color: #62605E;"
+                                                onclick="setExampleSingle2()">P08134</a></span> <span
+                                        style="float: right; font-size: 11px;"> <a href="#"
+                                                                                   style="text-decoration: underline; color: #62605E;"
+                                                                                   onclick="setExampleSingle1()">Q13330</a>,&#160;
+										</span>
+                                </div>
+                                <form>
+                                    <div class="input-group col-sm-9 col-sm-offset-1">
+                                        <input type="text" class="form-control"
+                                               placeholder="Uniprot accession or protein name" id="singleAccession"/>
+                                    </div>
+                                    <br/>
+                                    <div class="input-group input-group col-sm-9 col-sm-offset-1">
+                                        <div class="form-group">
+                                            <label for="sel1">Select species:</label>
+                                            <select class="form-control" id="selSpeciesProteinSingle">
+                                                <option value="9606">Homo sapiens (Human)</option>
+                                                <option value="10090">Mus musculus (Mouse)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <br/>
+                                    <div class="input-group col-sm-9 col-sm-offset-1">
+                                        <label class="col-sm-9" style="float: left;">Jaccard
+                                            Similarity Threshold <span
+                                                    class="glyphicon glyphicon-question-sign"
+                                                    data-toggle="tooltip" data-placement="top"
+                                                    title="Jaccard Similarity Threshold should be between 0 and 1. You will get associations which have this Jaccard Similarity Threshold and above."/>
+                                        </label> <input type="text" value="0.4" class="col-sm-3"
+                                                        id="jaccardSingle"/>
+                                    </div>
+                                    <br/>
+                                    <div align="center">
+                                        <button type="button" class="btn btn-primary " id="btnSingle"
+                                                style="width: 104px;" onclick="searchSingle()">Search
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="doubleProteinSearch">
+                        <div class="panel panel-default" id="doubleSearch">
+                            <div class="panel-heading text-center">PROTEIN SEARCH</div>
+                            <div class="panel-body">
+                                <div>
+										<span style="float: right; font-size: 11px;"> <a
+                                                href="#" style="text-decoration: underline; color: #62605E;"
+                                                onclick="setExampleDouble2()">#ex2</a></span> <span
+                                        style="float: right; font-size: 11px;"> <a href="#"
+                                                                                   style="text-decoration: underline; color: #62605E;"
+                                                                                   onclick="setExampleDouble1()">#ex1</a>&#160;&#160;
+										</span>
+                                </div>
+                                <form>
+                                    <div class="input-group input-group col-sm-9 col-sm-offset-1">
+                                        <input type="text" class="form-control"
+                                               placeholder="1st Uniprot accession or protein name"
+                                               id="doubleAccession1"/>
+                                    </div>
+                                    <br/>
+                                    <div class="input-group input-group col-sm-9 col-sm-offset-1">
+                                        <input type="text" class="form-control"
+                                               placeholder="2nd Uniprot accession or protein name"
+                                               id="doubleAccession2"/>
+                                    </div>
+                                    <br/>
+                                    <div class="input-group input-group col-sm-9 col-sm-offset-1">
+                                        <div class="form-group">
+                                            <label for="sel1">Select species:</label>
+                                            <select class="form-control" id="selSpeciesProteinDouble">
+                                                <option value="9606">Homo sapiens (Human)</option>
+                                                <option value="10090">Mus musculus (Mouse)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <br/>
+                                    <div class="input-group col-sm-9 col-sm-offset-1">
+                                        <label class="col-sm-9" style="float: left;">Jaccard
+                                            Similarity Threshold <span
+                                                    class="glyphicon glyphicon-question-sign"
+                                                    data-toggle="tooltip" data-placement="top"
+                                                    title="Jaccard Similarity Threshold should be between 0 and 1. You will get associations which have this Jaccard Similarity Threshold and above."/>
+                                        </label> <input type="text" value="0.4" class="col-sm-3"
+                                                        id="jaccardDouble"/>
+                                    </div>
+                                    <br/>
+                                    <div align="center">
+                                        <button type="button" class="btn btn-primary" id="btnDouble"
+                                                style="width: 104px;" onclick="searchDouble()">Search
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="multipleProteinSearch">
+                        <div class="panel panel-default" id="multipleSearch">
+                            <div class="panel-heading text-center">MULTIPLE PROTEIN PAIR SEARCH</div>
+                            <div class="panel-body">
+                                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                                    <li class="nav-item">
+                                        <a class="nav-link active" id="oneToOne-tab" data-toggle="tab" href="#oneToOne"
+                                           role="tab" aria-controls="oneToOne" aria-selected="true">one to one</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="manyToMany-tab" data-toggle="tab" href="#manyToMany"
+                                           role="tab" aria-controls="manyToMany" aria-selected="false">many to many</a>
+                                    </li>
+                                </ul>
+
+                                <div class="tab-content" id="myTabContent">
+                                    <div class="tab-pane fade active in" id="oneToOne" role="tabpanel"
+                                         aria-labelledby="oneToOne-tab">
+                                        <br/>
+                                        <div class="wrap" id="oneToOneRegion" style="display: none;">
+                                            <table class="head" id="oneToOneHeader">
+                                                <tr>
+                                                    <th>1st Uniprot Accession</th>
+                                                    <th>2nd Uniprot Accession</th>
+                                                    <th>Edge Annotation</th>
+                                                </tr>
+                                            </table>
+                                            <div class="inner_table">
+                                                <table id="oneToOneTable" class="table table-hover table-striped"
+                                                       style="font-size: 11px; max-height: 35px;">
+                                                    <tr>
+                                                        <td><input type="text" style="border:none;"
+                                                                   placeholder="Uniprot Accession" disabled="disabled"/>
+                                                        </td>
+                                                        <td><input type="text" style="border:none;"
+                                                                   placeholder="Uniprot Accession" disabled="disabled"/>
+                                                        </td>
+                                                        <td><input type="text" style="border:none;"
+                                                                   placeholder="Edge Annotation" disabled="disabled"/>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                            <br/>
+                                            <div class="input-group col-sm-9 col-sm-offset-1">
+                                                <div class="form-group">
+                                                    <label for="selSpeciesProteinOneToOne">Select species:</label>
+                                                    <select class="form-control" id="selSpeciesProteinOneToOne">
+                                                        <option value="9606">Homo sapiens (Human)</option>
+                                                        <option value="10090">Mus musculus (Mouse)</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <br/>
+                                            <div class="input-group col-sm-9 col-sm-offset-1">
+                                                <label class="col-sm-9" style="float: left;">Jaccard
+                                                    Similarity Threshold <span
+                                                            class="glyphicon glyphicon-question-sign"
+                                                            data-toggle="tooltip" data-placement="top"
+                                                            title="Jaccard Similarity Threshold should be between 0 and 1. You will get associations which have this Jaccard Similarity Threshold and above."/>
+                                                </label>
+                                                <input type="text" value="0.4" class="col-sm-3" id="jaccardOneToOne"/>
+                                            </div>
+                                        </div>
+                                        <p id="informationOneToOne">Please upload a file that contains <a
+                                                style="font-weight: bold; color: black;">protein pairs</a> and edge annotaion (if available) in the following file formats: xls, xlsx, csv.
+                                            The first two columns should be Uniprot accessions of the proteins. If you have edge annotation, you can add it to the 3rd column.
+                                            The file should not include any title.</p>
+                                        <br/>
+                                        <p>Select file to upload:</p>
+                                        <input id="readfile" type="file" onchange="loadFile(event)"/>
+                                        <div class="checkbox">
+                                            <label>
+                                                <input type="checkbox"
+                                                       id="edgeAnnotationCheckBox"/> Include edge annotation
+                                            </label>
+                                        </div>
+                                        <br/>
+                                        <div align="center">
+                                            <button class="btn btn-primary" onclick="searchMultipleProtein()"
+                                                    style="width: 104px;">Search
+                                            </button>
+                                            <button class="btn btn-default"
+                                                    onclick="$('#oneToOneRegion').hide(); $('#oneToOneTable tr').remove(); $('#informationOneToOne').show();"
+                                                    style="width: 104px;">Clean
+                                            </button>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="tab-pane fade" id="manyToMany" role="tabpanel"
+                                         aria-labelledby="manyToMany-tab">
+                                        <br/>
+                                        <div class="wrap" id="manyToManyRegion" style="display: none;">
+                                            <table class="head" id="manyToManyHeader">
+                                                <tr>
+                                                    <th>Uniprot Accessions</th>
+                                                </tr>
+                                            </table>
+                                            <div class="inner_table">
+                                                <table id="manyToManyTable" class="table table-hover table-striped"
+                                                       style="font-size: 11px; max-height: 35px;">
+                                                    <tr>
+                                                        <td><input type="text" style="border:none;"
+                                                                   placeholder="Uniprot Accession" disabled="disabled"/>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                            <br/>
+                                            <div class="input-group col-sm-9 col-sm-offset-1">
+                                                <div class="form-group">
+                                                    <label for="selSpeciesProteinOneToOne">Select species:</label>
+                                                    <select class="form-control" id="selSpeciesProteinManyToMany">
+                                                        <option value="9606">Homo sapiens (Human)</option>
+                                                        <option value="10090">Mus musculus (Mouse)</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <br/>
+                                            <div class="input-group col-sm-9 col-sm-offset-1">
+                                                <label class="col-sm-9" style="float: left;">Jaccard
+                                                    Similarity Threshold <span
+                                                            class="glyphicon glyphicon-question-sign"
+                                                            data-toggle="tooltip" data-placement="top"
+                                                            title="Jaccard Similarity Threshold should be between 0 and 1. You will get associations which have this Jaccard Similarity Threshold and above."/>
+                                                </label>
+                                                <input type="text" value="0.4" class="col-sm-3" id="jaccardManyToMany"/>
+                                            </div>
+                                        </div>
+                                        <p id="informationManyToMany">Please upload a file that contains <a
+                                                style="font-weight: bold; color: black;">protein UniProt accessions</a> (if available) in the following file formats: xls, xlsx, csv.
+                                            When you click on the search button, you will have all possible 2 protein combinations from the list you provide by considering Jaccard Similarity Threshold.
+                                            The file should not include any title.</p>
+                                        <br/>
+
+                                        <p>Select file to upload:</p>
+                                        <input id="readfile2" type="file" onchange="loadFile2(event)"/>
+                                        <br/>
+                                        <div align="center">
+                                            <button class="btn btn-primary" onclick="searchMultipleProtein2()"
+                                                    style="width: 104px;">Search
+                                            </button>
+                                            <button class="btn btn-default"
+                                                    onclick="$('#manyToManyRegion').hide(); $('#manyToManyTable tr').remove(); $('#informationManyToMany').show();"
+                                                    style="width: 104px;">Clean
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="tab-pane" id="singleGeneSearch">
+                        <div class="panel panel-default" id="geneSingle"
+                             style="display: block;">
+                            <div class="panel-heading text-center">GENE SEARCH</div>
+                            <div class="panel-body">
+                                <div>
+                                    <span
+                                            style="float: right; font-size: 11px;"> <a href="#"
+                                                                                       style="text-decoration: underline; color: #62605E;"
+                                                                                       onclick="setExampleGeneSingle1()">MTA1</a>
+                                    </span>
+                                    <span style="float: right; font-size: 11px; color: #62605E;"> Gene Name: &#160; </span>
+                                    <br/>
+                                    <span style="float: right; font-size: 11px;"> <a
+                                            href="#" style="text-decoration: underline; color: #62605E;"
+                                            onclick="setExampleGeneSingle2()">1107</a></span>
+                                    <span style="float: right; font-size: 11px; color: #62605E;">Entrez Gene Id: &#160; </span>
+                                </div>
+                                <form>
+                                    <div class="input-group input-group col-sm-9 col-sm-offset-1">
+                                        <input type="text" class="form-control"
+                                               placeholder="Gene Name or Entrez Gene Id" id="geneId"/>
+                                    </div>
+                                    <br/>
+                                    <div class="input-group input-group col-sm-9 col-sm-offset-1">
+                                        <div class="form-group">
+                                            <label for="sel1">Select species:</label>
+                                            <select class="form-control" id="selSpeciesGeneSingle">
+                                                <option value="9606">Homo sapiens (Human)</option>
+                                                <option value="10090">Mus musculus (Mouse)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <br/>
+                                    <div align="center">
+                                        <button type="button" class="btn btn-primary" id="btnSingleGene"
+                                                style="width: 104px;" onclick="searchGene('single')">Search
+                                        </button>
+                                    </div>
+
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="doubleGeneSearch">
+                        <div class="panel panel-default" id="geneDouble"
+                             style="display: block;">
+                            <div class="panel-heading text-center">GENE SEARCH</div>
+                            <div class="panel-body">
+                                <div>
+										<span style="float: right; font-size: 11px;"> <a
+                                                href="#" style="text-decoration: underline; color: #62605E;"
+                                                onclick="setExampleGeneDouble2()">#ex2</a></span> <span
+                                        style="float: right; font-size: 11px;"> <a href="#"
+                                                                                   style="text-decoration: underline; color: #62605E;"
+                                                                                   onclick="setExampleGeneDouble1()">#ex1</a>&#160;&#160;
+										</span>
+                                </div>
+                                <form>
+                                    <div class="input-group input-group col-sm-9 col-sm-offset-1">
+                                        <input type="text" class="form-control"
+                                               placeholder="1st Gene Name or Entrez Gene Id" id="geneId1"/>
+                                    </div>
+                                    <br/>
+                                    <div class="input-group input-group col-sm-9 col-sm-offset-1">
+                                        <input type="text" class="form-control"
+                                               placeholder="2nd Gene Name or Entrez Gene Id" id="geneId2"/>
+                                    </div>
+                                    <br/>
+                                    <div class="input-group input-group col-sm-9 col-sm-offset-1">
+                                        <div class="form-group">
+                                            <label for="sel1">Select species:</label>
+                                            <select class="form-control" id="selSpeciesGeneDouble">
+                                                <option value="9606">Homo sapiens (Human)</option>
+                                                <option value="10090">Mus musculus (Mouse)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <br/>
+                                    <div align="center">
+                                        <button type="button" class="btn btn-primary" id="btnDoubleGene"
+                                                style="width: 104px;" onclick="searchGene('double')">Search
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="multipleGeneSearch">
+                        <div class="panel panel-default" id="geneMultiple"
+                             style="display: block;">
+                            <div class="panel-heading text-center">GENE SEARCH</div>
+                            <div class="panel-body">
+                                <br/>
+                                <div class="wrap" id="manyToManyRegionGene" style="display: none;">
+                                    <table class="head">
+                                        <tr>
+                                            <th>Uniprot Accessions</th>
+                                        </tr>
+                                    </table>
+                                    <div class="inner_table">
+                                        <table id="manyToManyTableGene" class="table table-hover table-striped"
+                                               style="font-size: 11px; max-height: 35px;">
+                                            <tr>
+                                                <td><input type="text" style="border:none;" placeholder="Gene Name"
+                                                           disabled="disabled"/></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <br/>
+                                    <div class="input-group col-sm-9 col-sm-offset-1">
+                                        <div class="form-group">
+                                            <label for="selSpeciesGeneManyToMany">Select species:</label>
+                                            <select class="form-control" id="selSpeciesGeneManyToMany">
+                                                <option value="9606">Homo sapiens (Human)</option>
+                                                <option value="10090">Mus musculus (Mouse)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <br/>
+
+                                </div>
+                                <p id="informationGeneManyToMany">Please upload a file that contains <a
+                                        style="font-weight: bold; color: black;">gene names</a> (if available) in the following file formats: xls, xlsx, csv.
+                                    The file should not include any title.</p>
+                                <br/>
+
+                                <p>Select file to upload:</p>
+                                <input id="readfileGene" type="file" onchange="loadFileGene(event)"/>
+                                <br/>
+                                <div align="center">
+                                    <button class="btn btn-primary" onclick="searchMultipleGene()"
+                                            style="width: 104px;">Search
+                                    </button>
+                                    <button class="btn btn-default"
+                                            onclick="$('#manyToManyRegionGene').hide(); $('#manyToManyTableGene tr').remove(); $('#informationGeneManyToMany').show();"
+                                            style="width: 104px;">Clean
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="pathwaySearch">
+                        <div class="panel panel-default" id="pathway"
+                             style="display: block;">
+                            <div class="panel-heading text-center">PATHWAY SEARCH</div>
+                            <div class="panel-body">
+                                <div>
+										 <span
+                                                 style="float: right; font-size: 11px;"> <a href="#"
+                                                                                            style="text-decoration: underline; color: #62605E;"
+                                                                                            onclick="setExamplePathway1()">NOD1/2 Signaling Pathway</a>
+										</span>
+                                    <span style="float: right; font-size: 11px; color: #62605E;"> Pathway name: &#160; </span>
+
+                                    <br/>
+                                    <span style="float: right; font-size: 11px;"> <a
+                                            href="#" style="text-decoration: underline; color: #62605E;"
+                                            onclick="setExamplePathway2()">R-HSA-114604</a></span>
+                                    <span style="float: right; font-size: 11px; color: #62605E;"> Reactome accession: &#160; </span>
+
+                                </div>
+                                <form>
+                                    <div class="input-group input-group col-sm-9 col-sm-offset-1">
+                                        <input type="text" class="form-control"
+                                               placeholder="Reactome accession or pathway name"
+                                               id="pathwayId"/>
+                                    </div>
+                                    <br/>
+                                    <div align="center">
+                                        <button type="button" class="btn btn-primary" id="btnPathwaySearch"
+                                                data-toggle="modal"
+                                                style="width: 104px;" onclick="searchPathway()">Search
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="diseaseSearch">
+                        <div class="panel panel-default" id="disease"
+                             style="display: block;">
+                            <div class="panel-heading text-center">DISEASE SEARCH</div>
+                            <div class="panel-body">
+                                <div>
+                                        <span
+                                                style="float: right; font-size: 11px;"> <a href="#"
+                                                                                           style="text-decoration: underline; color: #62605E;"
+                                                                                           onclick="setExampleDisease1()">Liver carcinoma</a>
+                                        </span>
+                                    <span style="float: right; font-size: 11px; color: #62605E;">Disease name: &#160; </span>
+                                    <br/>
+                                    <span style="float: right; font-size: 11px;"> <a
+                                            href="#" style="text-decoration: underline; color: #62605E;"
+                                            onclick="setExampleDisease2()">C2239176</a></span>
+                                    <span style="float: right; font-size: 11px; color: #62605E;">DisGeNET Id: &#160; </span>
+
+                                </div>
+                                <br/>
+                                <form>
+                                    <div class="input-group col-sm-9 col-sm-offset-1">
+                                        <input type="text" class="form-control"
+                                               placeholder="DisGeNET id or disease name" id="diseaseId"/>
+                                    </div>
+                                    <br/>
+
+                                    <div align="center">
+                                        <button type="button" class="btn btn-primary" data-toggle="modal"
+                                                id="btnDiseaseSearch"
+                                                style="width: 104px;" onclick="searchDisease()">Search
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="tissueSearch">
+                        <div class="panel panel-default" id="tissue"
+                             style="display: block;">
+                            <div class="panel-heading text-center">TISSUE SEARCH</div>
+                            <div class="panel-body">
+
+                                <form>
+                                    <div class="select_join input-group col-sm-9 col-sm-offset-1" align="center">
+                                        <select id="selectTissue" style="">
+                                            <option>Choose a tissue</option>
+                                        </select>
+                                    </div>
+                                    <br/>
+                                    <div class="input-group col-sm-9 col-sm-offset-1">
+                                        <label class="col-sm-9" style="float: left;">Jaccard Similarity Threshold
+                                            <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip"
+                                                  data-placement="top"
+                                                  title="Jaccard Similarity Threshold should be between 0 and 1. You will get associations which have this Jaccard Similarity Threshold and above."/>
+                                        </label> <input type="text" value="0.4" class="col-sm-3" id="jaccardTissue"/>
+                                    </div>
+
+
+                                    <div align="center">
+                                        <button type="button" class="btn btn-primary" data-toggle="modal"
+                                                id="btnTissueSearch"
+                                                style="width: 104px;" onclick="searchTissue()">Search
+                                        </button>
+                                    </div>
+
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="progressModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <button type="button" class="close btn btn-default" aria-label="Close" data-dismiss="modal">
+                            <span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>
+                        </button>
+                        <p class="modal-title">Searching...</p>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped active"
+                                 role="progressbar" aria-valuenow="45" aria-valuemin="0"
+                                 aria-valuemax="100" style="width: 100%"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h:form id="newform">
+            <p:remoteCommand name="passGeneToJSFManagedBean"
+                             action="#{controlBean.findProteinsByGene}" process="@this"
+                             oncomplete="clickButton1();" update=":modalForm:proteinPanel1"/>
+            <p:remoteCommand name="passGenesJSONToJSFManagedBean"
+                             action="#{controlBean.findProteinsByGenes}" process="@this"
+                             oncomplete="clickButton1();" update=":modalForm:proteinPanel1"/>
+            <p:remoteCommand name="passGeneDoubleToJSFManagedBean"
+                             action="#{controlBean.findProteinsByGene}" process="@this"
+                             oncomplete="clickButton2();" update=":modalForm:proteinPanel2"/>
+            <p:remoteCommand name="passSingleProteinNameToJSFManagedBean"
+                             action="#{controlBean.findProteinsByName}" process="@this"
+                             oncomplete="clickButton1();" update=":modalForm:proteinPanel1"/>
+            <p:remoteCommand name="passDoubleProteinNameToJSFManagedBean"
+                             action="#{controlBean.findProteinsByName}" process="@this"
+                             oncomplete="clickButton2();" update=":modalForm:proteinPanel2"/>
+            <p:remoteCommand name="passPathwayNameToJSFManagedBean"
+                             action="#{controlBean.findPathwayDTOs}" process="@this"
+                             oncomplete="clickButton3();"/>
+            <p:remoteCommand name="passDiseaseNameToJSFManagedBean"
+                             action="#{controlBean.findDiseaseDTOs}" process="@this"
+                             oncomplete="clickButton4();"/>
+            <p:remoteCommand name="passProteinsJSONToJSFManagedBean"
+                             action="#{graphDbManagedBean.searchListOfProteins}" process="@this"
+                             oncomplete="clickButton5();"/>
+            <p:remoteCommand name="passTissueNameToJSFManagedBean"
+                             action="#{controlBean.findProteinDTOsByTissue}" process="@this"
+                             oncomplete="clickButton6();"/>
+        </h:form>
+
+
+        <h:form id="modalForm">
+            <input type="button" id="btnprotein1" data-toggle="modal"
+                   data-target="#proteins1" style="display: none;"></input>
+            <h:panelGroup layout="block" id="proteinPanel1">
+                <div class="modal fade" tabindex="-1" role="dialog" id="proteins1"
+                     aria-hidden="true">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-body">
+                                <button type="button" class="btn btn-default" style="float: right;"
+                                        data-dismiss="modal">Close
+                                </button>
+                                <p style="font-weight: bold;">Total number of proteins found: #{controlBean.proteinDTOs.size()}</p>
+                                <p style="color:grey; font-style: italic;">Please search the protein/gene of interest. Select Jaccard Similarity Threshold to see associated protein pairs.</p>
+                                <table class="table table-hover" id="geneProteinSingle">
+                                    <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>Uniprot Accession</th>
+                                        <th>Gene Name</th>
+                                        <th>Ensembl Id</th>
+                                        <th>Protein Name</th>
+                                        <th>Jaccard Similarity Threshold<span
+                                                class="glyphicon glyphicon-question-sign"
+                                                data-toggle="tooltip" data-placement="top"
+                                                title="Jaccard Similarity Threshold should be between 0 and 1. You will get associations which have this Jaccard Similarity Threshold and above."/>
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <ui:repeat var="protein" value="#{controlBean.proteinDTOs}">
+                                        <tr>
+                                            <td style="text-align: center; width: 3%">
+                                                <a href=''
+                                                   onclick="this.href='/tabloidproteome/dataTable.xhtml?accession=#{protein.protein1.uniprotAccession}&amp;species=#{protein.protein1.species}&amp;jaccard='+document.getElementById('jaccardGeneSingle#{protein.protein1.uniprotAccession}').value">
+													<span class="glyphicon glyphicon-search"
+                                                          aria-hidden="true"></span>
+                                                </a></td>
+                                            <td>#{protein.protein1.uniprotAccession}</td>
+                                            <td>
+                                                <ui:repeat var="geneName" value="#{protein.protein1.geneNames}">
+                                                    <a target="_blank"
+                                                       href="http://www.genecards.org/cgi-bin/carddisp.pl?gene=#{geneName}">#{geneName}</a>
+                                                </ui:repeat>
+                                            </td>
+                                            <td>
+                                                <ui:repeat var="geneId" value="#{protein.protein1.geneIds}">
+                                                    #{geneId}
+                                                </ui:repeat>
+                                            </td>
+                                            <td>#{protein.protein1.proteinName}</td>
+                                            <td><input name="jaccValue" type="text"
+                                                       id="jaccardGeneSingle#{protein.protein1.uniprotAccession}"/></td>
+                                        </tr>
+                                    </ui:repeat>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default"
+                                        data-dismiss="modal">Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </h:panelGroup>
+            <input type="button" id="btnprotein2" data-toggle="modal"
+                   data-target="#proteins2" style="display: none;"></input>
+            <h:panelGroup layout="block" id="proteinPanel2">
+                <div class="modal fade" tabindex="-1" role="dialog" id="proteins2"
+                     aria-hidden="true">
+                    <div class="modal-dialog-lg" role="document" style="width : 80%;">
+                        <div class="modal-content">
+                            <div class="modal-body">
+                                <button type="button" class="btn btn-default" style="float: right;"
+                                        data-dismiss="modal">Close
+                                </button>
+                                <p style="font-weight: bold;">Total number of protein pairs found: #{controlBean.proteinDTOs.size()}</p>
+                                <p style="color:grey; font-style: italic;">Please select the protein/gene pair of interest</p>
+                                <table class="table table-hover" id="geneProteinDouble">
+                                    <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>1st Uniprot Accession</th>
+                                        <th>1st Gene Name</th>
+                                        <th>1st Ensembl Id</th>
+                                        <th>1st Protein Name</th>
+                                        <th>2nd Uniprot Accession</th>
+                                        <th>2nd Gene Name</th>
+                                        <th>2nd Ensembl Id</th>
+                                        <th>2nd Protein Name</th>
+                                        <th>Jaccard Similarity Threshold</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <ui:repeat var="protein" value="#{controlBean.proteinDTOs}">
+                                        <tr>
+                                            <td style="text-align: center; width: 3%">
+                                                <a href=''
+                                                   onclick="this.href='/tabloidproteome/dataTable.xhtml?accession1=#{protein.protein1.uniprotAccession}&amp;accession2=#{protein.protein2.uniprotAccession}&amp;species=#{protein.protein1.species}&amp;jaccard=#{protein.associate.jaccSimScore}'">
+													<span class="glyphicon glyphicon-search"
+                                                          aria-hidden="true"></span>
+                                                </a></td>
+                                            <td>#{protein.protein1.uniprotAccession}</td>
+                                            <td>
+                                                <ui:repeat var="geneName" value="#{protein.protein1.geneNames}">
+                                                    <a target="_blank"
+                                                       href="http://www.genecards.org/cgi-bin/carddisp.pl?gene=#{geneName}">#{geneName}</a>
+                                                </ui:repeat>
+                                            </td>
+                                            <td>
+                                                <ui:repeat var="geneId" value="#{protein.protein1.geneIds}">
+                                                    #{geneId}
+                                                </ui:repeat>
+                                            </td>
+                                            <td>#{protein.protein1.proteinName}</td>
+                                            <td>#{protein.protein2.uniprotAccession}</td>
+                                            <td>
+                                                <ui:repeat var="geneName" value="#{protein.protein2.geneNames}">
+                                                    <a target="_blank"
+                                                       href="http://www.genecards.org/cgi-bin/carddisp.pl?gene=#{geneName}">#{geneName}</a>
+                                                </ui:repeat>
+                                            </td>
+                                            <td>
+                                                <ui:repeat var="geneId" value="#{protein.protein2.geneIds}">
+                                                    #{geneId}
+                                                </ui:repeat>
+                                            </td>
+                                            <td>#{protein.protein2.proteinName}</td>
+                                            <td>#{protein.associate.jaccSimScore}</td>
+                                        </tr>
+                                    </ui:repeat>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default"
+                                        data-dismiss="modal">Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </h:panelGroup>
+        </h:form>
+    </div>
+    <div id="footer">
+        <div class="container">
+            <div class="row" style="margin-top: 0;">
+                <div class="col-sm-9">
+                    <p class="text-muted credit">SUPPORTED BY</p>
+                    <p class="text-muted credit">
+                        <a target="_blank" href="https://compomics.com">
+                            <img border="0" src="/tabloidproteome/resources/images/compOmics_logo.png" width="90px"
+                                 height="46px"/>
+                        </a>&#160;
+                        <a target="_blank" href="http://www.crl-mappit.be/" style="padding-left: 15px">
+                            <img border="0" src="/tabloidproteome/resources/images/cytokineLogo.png" width="100px"
+                                 height="38px"/>
+                        </a>&#160;&#160;
+                        <a target="_blank" href="http://www.vib.be" style="padding-left: 15px;">
+                            <img border="0" src="/tabloidproteome/resources/images/VIBLogo.png" width="84px"
+                                 height="50px"/>
+                        </a>&#160;
+                        <a target="_blank" href="http://www.ugent.be/en">
+                            <img border="0" src="/tabloidproteome/resources/images/ugent-logo.png" width="86px"
+                                 height="67px"/>
+                        </a>
+                        <a target="_blank" href="https://www.elixir-belgium.org/">
+                            <img border="0" src="/tabloidproteome/resources/images/elixir.png" width="79px"
+                                 height="57px"/>
+                        </a>
+                        <a target="_blank" href="https://erc.europa.eu/">
+                            <img border="0" src="/tabloidproteome/resources/images/erc.png" width="79px" height="79px"/>
+                        </a>
+                    </p>
+                </div>
+                <div class="col-sm-1">
+                    <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/information.xhtml"
+                                                                      class="text-muted">Information</a></p>
+                    <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/information.xhtml#about"
+                                                                      class="text-sub">About</a></p>
+                    <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/information.xhtml#version"
+                                                                      class="text-sub">Version</a></p>
+                    <p class="credit"><a href="/tabloidproteome/information.xhtml#reference"
+                                         class="text-sub">Reference</a></p>
+                </div>
+                <div class="col-sm-1">
+                    <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml"
+                                                                      class="text-muted">Data</a></p>
+                    <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml#statistics"
+                                                                      class="text-sub">Statistics</a></p>
+                    <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml#resources"
+                                                                      class="text-sub">Credits &#38; Resources</a></p>
+                    <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml#download"
+                                                                      class="text-sub">Download</a></p>
+                </div>
+                <div class="col-sm-1">
+                    <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml"
+                                                                      class="text-muted">Help</a></p>
+                    <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml#faq"
+                                                                      class="text-sub">FAQ</a></p>
+                    <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml#userGuide"
+                                                                      class="text-sub">User Guide</a></p>
+                    <p class="credit"><a href="/tabloidproteome/help.xhtml#contact" class="text-sub">Contact</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+
+</html>

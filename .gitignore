@@ -1,31 +1,49 @@
-target/
-!.mvn/wrapper/maven-wrapper.jar
+/target/
+pom.xml~
+.gitignore~
+desktop.ini
+*.log
+.attach*
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-
-### IntelliJ IDEA ###
-.idea
-*.iws
+### JetBrains template
+# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm
 *.iml
-*.ipr
 
-### NetBeans ###
-nbproject/private/
-build/
-nbbuild/
-dist/
-nbdist/
-.nb-gradle/
+## Directory-based project format:
+.idea/
+# if you remove the above rule, at least ignore the following:
 
-### project specific
-*/target/**
-out.sql
-.gitignore
-.mvn/*
+# User-specific stuff:
+# .idea/workspace.xml
+# .idea/tasks.xml
+# .idea/dictionaries
 
+# Sensitive or high-churn files:
+# .idea/dataSources.ids
+# .idea/dataSources.xml
+# .idea/sqlDataSources.xml
+# .idea/dynamic.xml
+# .idea/uiDesigner.xml
+
+# Gradle:
+# .idea/gradle.xml
+# .idea/libraries
+
+# Mongo Explorer plugin:
+# .idea/mongoSettings.xml
+
+## File-based project format:
+## Plugin-specific files:
+
+# IntelliJ
+# mpeltonen/sbt-idea plugin
+# JIRA plugin
+# Crashlytics plugin (for Android Studio and IntelliJ)
+com_crashlytics_export_strings.xml
+crashlytics.properties
+crashlytics-build.properties
+
+# netbeans
+nb-configuration.xml
+*nbactions.xml
+*nbactions.xml.rej

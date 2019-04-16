@@ -6,38 +6,38 @@ import java.util.List;
 import com.compomics.neo4j.model.nodes.PathWay;
 
 
-public class PathwayDTO implements Serializable{
+public class PathwayDTO implements Serializable {
 
-	private static final long serialVersionUID = 4683311680811942209L;
-	private PathWay pathWay;
-	private List<ProteinDTO> proteinDTOs;
-	private List<PathwayDTO> pathwayDTOs;
-	
-	public PathwayDTO() {
-	}
-	
-	public PathWay getPathWay() {
-		return pathWay;
-	}
-	
-	public void setPathWay(PathWay pathWay) {
-		this.pathWay = pathWay;
-	}
-	
-	public List<ProteinDTO> getProteinDTOs() {
-		return proteinDTOs;
-	}
-	
-	public void setProteinDTOs(List<ProteinDTO> proteinDTOs) {
-		this.proteinDTOs = proteinDTOs;
-	}
+    private static final long serialVersionUID = 4683311680811942209L;
+    private PathWay pathWay;
+    private List<ProteinDTO> proteinDTOs;
+    private List<PathwayDTO> pathwayDTOs;
 
-	public List<PathwayDTO> getPathwayDTOs() {
-		return pathwayDTOs;
-	}
+    public PathwayDTO() {
+    }
 
-	public void setPathwayDTOs(List<PathwayDTO> pathwayDTOs) {
-		this.pathwayDTOs = pathwayDTOs;
-	}
-	
+    public PathWay getPathWay() {
+        return pathWay;
+    }
+
+    public void setPathWay(PathWay pathWay) {
+        this.pathWay = pathWay;
+    }
+
+    public List<ProteinDTO> getProteinDTOs() {
+        return proteinDTOs;
+    }
+
+    public void setProteinDTOs(List<ProteinDTO> proteinDTOs) {
+        this.proteinDTOs = proteinDTOs;
+    }
+
+    public List<PathwayDTO> getPathwayDTOs() {
+        return pathwayDTOs;
+    }
+
+    public void setPathwayDTOs(List<PathwayDTO> pathwayDTOs) {
+        this.pathwayDTOs = pathwayDTOs;
+    }
+
 }

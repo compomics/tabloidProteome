@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * Created by demet on 12/19/2016.
  */
-public class Complex implements Serializable{
+public class Complex implements Serializable {
 
     private static final long serialVersionUID = 4133258179319091230L;
 

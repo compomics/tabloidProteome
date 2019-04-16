@@ -10,7 +10,7 @@ import com.compomics.neo4j.model.nodes.Intact;
 /**
  * Created by demet on 12/19/2016.
  */
-public class Associate implements Serializable{
+public class Associate implements Serializable {
 
 
     private static final long serialVersionUID = -6840672278650359662L;
@@ -20,15 +20,15 @@ public class Associate implements Serializable{
     private Double jaccSimScore;
 
     private String interact;
-    
+
     private List<Intact> intact;
-    
+
     private List<BioGrid> bioGrid;
 
     private String commonAssayCount;
 
     private String commonProject;
-    
+
     public Associate() {
     }
 
@@ -56,37 +56,24 @@ public class Associate implements Serializable{
         this.interact = interact;
     }
 
-    public String getCommonAssayCount() {
-        return commonAssayCount;
-    }
-
     public void setCommonAssayCount(String commonAssayCount) {
         this.commonAssayCount = commonAssayCount;
     }
 
-    public String getCommonProject() {
-        return commonProject;
+    public List<Intact> getIntact() {
+        return intact;
     }
 
-    public void setCommonProject(String commonProject) {
-        this.commonProject = commonProject;
+    public List<BioGrid> getBioGrid() {
+        return bioGrid;
     }
 
-	public List<Intact> getIntact() {
-		return intact;
-	}
+    public void setIntact(List<Intact> intact) {
+        this.intact = intact;
+    }
 
-	public List<BioGrid> getBioGrid() {
-		return bioGrid;
-	}
+    public void setBioGrid(List<BioGrid> bioGrid) {
+        this.bioGrid = bioGrid;
+    }
 
-	public void setIntact(List<Intact> intact) {
-		this.intact = intact;
-	}
-
-	public void setBioGrid(List<BioGrid> bioGrid) {
-		this.bioGrid = bioGrid;
-	}
-
-	
 }

@@ -13,7 +13,7 @@ import com.compomics.neo4j.model.relationshipTypes.Associate;
 /**
  * Created by demet on 12/19/2016.
  */
-public class LinkDTO implements Serializable{
+public class LinkDTO implements Serializable {
 
     private static final long serialVersionUID = -1191827964699580119L;
 
@@ -24,111 +24,75 @@ public class LinkDTO implements Serializable{
     private Associate associate;
 
     private List<Project> projects;
-    
+
     private List<PathWay> pathWays;
-    
+
     private List<Complex> complexes;
-    
+
     private List<Go> mf;
-    
+
     private List<Go> bp;
-    
+
     private List<Go> cc;
-    
+
     private List<Disease> diseases;
-    
+
     private String edgeAnnotation;
 
-	public LinkDTO() {
+    public LinkDTO() {
     }
 
-	public String getSource() {
-		return source;
-	}
+    public String getSource() {
+        return source;
+    }
 
-	public String getTarget() {
-		return target;
-	}
+    public String getTarget() {
+        return target;
+    }
 
-	public Associate getAssociate() {
-		return associate;
-	}
+    public void setSource(String source) {
+        this.source = source;
+    }
 
-	public List<Project> getProjects() {
-		return projects;
-	}
+    public void setTarget(String target) {
+        this.target = target;
+    }
 
-	public List<PathWay> getPathWays() {
-		return pathWays;
-	}
+    public void setAssociate(Associate associate) {
+        this.associate = associate;
+    }
 
-	public List<Complex> getComplexes() {
-		return complexes;
-	}
+    public void setProjects(List<Project> projects) {
+        this.projects = projects;
+    }
 
-	public List<Go> getMf() {
-		return mf;
-	}
+    public void setPathWays(List<PathWay> pathWays) {
+        this.pathWays = pathWays;
+    }
 
-	public List<Go> getBp() {
-		return bp;
-	}
+    public void setComplexes(List<Complex> complexes) {
+        this.complexes = complexes;
+    }
 
-	public List<Go> getCc() {
-		return cc;
-	}
+    public void setMf(List<Go> mf) {
+        this.mf = mf;
+    }
 
-	public List<Disease> getDiseases() {
-		return diseases;
-	}
+    public void setBp(List<Go> bp) {
+        this.bp = bp;
+    }
 
-	public void setSource(String source) {
-		this.source = source;
-	}
+    public void setCc(List<Go> cc) {
+        this.cc = cc;
+    }
 
-	public void setTarget(String target) {
-		this.target = target;
-	}
+    public void setDiseases(List<Disease> diseases) {
+        this.diseases = diseases;
+    }
 
-	public void setAssociate(Associate associate) {
-		this.associate = associate;
-	}
-
-	public void setProjects(List<Project> projects) {
-		this.projects = projects;
-	}
-
-	public void setPathWays(List<PathWay> pathWays) {
-		this.pathWays = pathWays;
-	}
-
-	public void setComplexes(List<Complex> complexes) {
-		this.complexes = complexes;
-	}
-
-	public void setMf(List<Go> mf) {
-		this.mf = mf;
-	}
-
-	public void setBp(List<Go> bp) {
-		this.bp = bp;
-	}
-
-	public void setCc(List<Go> cc) {
-		this.cc = cc;
-	}
-
-	public void setDiseases(List<Disease> diseases) {
-		this.diseases = diseases;
-	}
-
-	public String getEdgeAnnotation() {
-		return edgeAnnotation;
-	}
-
-	public void setEdgeAnnotation(String edgeAnnotation) {
-		this.edgeAnnotation = edgeAnnotation;
-	}
+    public void setEdgeAnnotation(String edgeAnnotation) {
+        this.edgeAnnotation = edgeAnnotation;
+    }
 
 
 }

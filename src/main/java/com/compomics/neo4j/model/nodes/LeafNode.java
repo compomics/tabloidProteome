@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * Created by demet on 12/19/2016.
  */
-public class LeafNode implements Serializable{
+public class LeafNode implements Serializable {
 
     private static final long serialVersionUID = -6683930582294346695L;
 
@@ -18,9 +18,6 @@ public class LeafNode implements Serializable{
     private String evidenceCode;
 
     private String reactomelink;
-
-    public LeafNode() {
-    }
 
     public String getPathwayName() {
         return pathwayName;

@@ -2,73 +2,70 @@ package com.compomics.neo4j.model.nodes;
 
 import java.io.Serializable;
 
-public class BioGrid implements Serializable{
+public class BioGrid implements Serializable {
 
-	private static final long serialVersionUID = 4312534717290370998L;
-	
-	private String biogridId;
-	
-	private String experimentName;
-	
-	private String experimentType;
-	
-	private String modification;
-	
-	private double score;
-	
-	private String throughput;
+    private static final long serialVersionUID = 4312534717290370998L;
 
-	public BioGrid() {
-	}
+    private String biogridId;
 
-	public String getBiogridId() {
-		return biogridId;
-	}
+    private String experimentName;
 
-	public String getExperimentName() {
-		return experimentName;
-	}
+    private String experimentType;
 
-	public String getExperimentType() {
-		return experimentType;
-	}
+    private String modification;
 
-	public String getModification() {
-		return modification;
-	}
+    private double score;
 
-	public double getScore() {
-		return score;
-	}
+    private String throughput;
 
-	public String getThroughput() {
-		return throughput;
-	}
+    public BioGrid() {
+    }
 
-	public void setBiogridId(String biogridId) {
-		this.biogridId = biogridId;
-	}
+    public String getBiogridId() {
+        return biogridId;
+    }
 
-	public void setExperimentName(String experimentName) {
-		this.experimentName = experimentName;
-	}
+    public void setBiogridId(String biogridId) {
+        this.biogridId = biogridId;
+    }
 
-	public void setExperimentType(String experimentType) {
-		this.experimentType = experimentType;
-	}
+    public String getExperimentName() {
+        return experimentName;
+    }
 
-	public void setModification(String modification) {
-		this.modification = modification;
-	}
+    public void setExperimentName(String experimentName) {
+        this.experimentName = experimentName;
+    }
 
-	public void setScore(double score) {
-		this.score = score;
-	}
+    public String getExperimentType() {
+        return experimentType;
+    }
 
-	public void setThroughput(String throughput) {
-		this.throughput = throughput;
-	}
-	
-	
+    public void setExperimentType(String experimentType) {
+        this.experimentType = experimentType;
+    }
 
+    public String getModification() {
+        return modification;
+    }
+
+    public void setModification(String modification) {
+        this.modification = modification;
+    }
+
+    public double getScore() {
+        return score;
+    }
+
+    public void setScore(double score) {
+        this.score = score;
+    }
+
+    public String getThroughput() {
+        return throughput;
+    }
+
+    public void setThroughput(String throughput) {
+        this.throughput = throughput;
+    }
 }

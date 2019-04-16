@@ -1,11 +1,12 @@
 package com.compomics.neo4j.model.nodes;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Created by demet on 12/19/2016.
  */
-public class PathWay implements Serializable{
+public class PathWay implements Serializable {
 
     private static final long serialVersionUID = -6651737932045165580L;
 
@@ -18,8 +19,8 @@ public class PathWay implements Serializable{
     private String evidenceCode;
 
     private String reactomelink;
-    
-    private String label;
+
+    private List<String> labels;
 
     public PathWay() {
     }
@@ -64,12 +65,11 @@ public class PathWay implements Serializable{
         this.reactomelink = reactomelink;
     }
 
-	public String getLabel() {
-		return label;
-	}
+    public List<String> getLabels() {
+        return labels;
+    }
 
-	public void setLabel(String label) {
-		this.label = label;
-	}
-
+    public void setLabels(List<String> labels) {
+        this.labels = labels;
+    }
 }

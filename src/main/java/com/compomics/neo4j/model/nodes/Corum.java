@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * Created by demet on 12/19/2016.
  */
-public class Corum implements Serializable{
+public class Corum implements Serializable {
 
     private static final long serialVersionUID = 7947668784255424910L;
 
@@ -26,9 +26,6 @@ public class Corum implements Serializable{
     private String purificationMethod;
 
     private String synonymName;
-
-    public Corum() {
-    }
 
     public String getComplexName() {
         return complexName;
@@ -101,5 +98,4 @@ public class Corum implements Serializable{
     public void setSynonymName(String synonymName) {
         this.synonymName = synonymName;
     }
-
 }

@@ -5,16 +5,13 @@ import java.io.Serializable;
 /**
  * Created by demet on 12/19/2016.
  */
-public class Assay implements Serializable{
+public class Assay implements Serializable {
 
     private static final long serialVersionUID = 5092894809184023398L;
 
     private String assayAccession;
 
     private String tissue;
-
-    public Assay() {
-    }
 
     public String getAssayAccession() {
         return assayAccession;

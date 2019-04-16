@@ -2,7 +2,6 @@ package com.compomics.neo4j.model.nodes;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by demet on 12/19/2016.
@@ -10,9 +9,9 @@ import java.util.Set;
 public class Protein implements Serializable {
 
     private static final long serialVersionUID = -1879461966536472891L;
-    
+
     private List<String> geneNames;
-    
+
     private List<String> geneIds;
 
     private String species;
@@ -26,11 +25,11 @@ public class Protein implements Serializable {
     private String uniprotAccession;
 
     private String uniprotStatus;
-    
+
     private String associationId;
-    
+
     private int group;
-    
+
 
     public Protein() {
     }
@@ -39,8 +38,16 @@ public class Protein implements Serializable {
         return geneNames;
     }
 
-    public void setGeneNames(List<String> geneName) {
-        this.geneNames = geneName;
+    public void setGeneNames(List<String> geneNames) {
+        this.geneNames = geneNames;
+    }
+
+    public List<String> getGeneIds() {
+        return geneIds;
+    }
+
+    public void setGeneIds(List<String> geneIds) {
+        this.geneIds = geneIds;
     }
 
     public String getSpecies() {
@@ -91,53 +98,42 @@ public class Protein implements Serializable {
         this.uniprotStatus = uniprotStatus;
     }
 
-	public List<String> getGeneIds() {
-		return geneIds;
-	}
+    public String getAssociationId() {
+        return associationId;
+    }
 
-	public void setGeneIds(List<String> geneIds) {
-		this.geneIds = geneIds;
-	}
+    public void setAssociationId(String associationId) {
+        this.associationId = associationId;
+    }
 
-	public String getAssociationId() {
-		return associationId;
-	}
+    public int getGroup() {
+        return group;
+    }
 
-	public void setAssociationId(String associationId) {
-		this.associationId = associationId;
-	}
+    public void setGroup(int group) {
+        this.group = group;
+    }
 
-	public int getGroup() {
-		return group;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((uniprotAccession == null) ? 0 : uniprotAccession.hashCode());
+        return result;
+    }
 
-	public void setGroup(int group) {
-		this.group = group;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((uniprotAccession == null) ? 0 : uniprotAccession.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Protein other = (Protein) obj;
-		if (uniprotAccession == null) {
-			if (other.uniprotAccession != null)
-				return false;
-		} else if (!uniprotAccession.equals(other.uniprotAccession))
-			return false;
-		return true;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Protein other = (Protein) obj;
+        if (uniprotAccession == null) {
+            return other.uniprotAccession == null;
+        } else return uniprotAccession.equals(other.uniprotAccession);
+    }
 
 }

@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:p="http://primefaces.org/ui">
+<h:head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' http://primefaces.org/ui http://xmlns.jcp.org http://java.sun.com http://www.w3.org;
+      script-src 'self' 'unsafe-inline' https://code.jquery.com/jquery-2.1.4.min.js https://www.google-analytics.com 
+      https://cdnjs.cloudflare.com https://maxcdn.bootstrapcdn.com;
+      style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; 
+      font-src 'self' https://cdnjs.cloudflare.com;
+      img-src 'self' https://www.google-analytics.com;
+      object-src 'self'"/>
+    <!-- Bootstrap Core CSS -->
+    <link href="/tabloidproteome/resources/css/bootstrap.css" rel="stylesheet"/>
+
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js" type="text/javascript"></script>
+
+
+    <link href="/tabloidproteome/resources/css/custom.css" rel="stylesheet"/>
+    <link href="/tabloidproteome/resources/css/sticky-footer.css" rel="stylesheet"/>
+    <link href="/tabloidproteome/resources/css/bootstrap-table-expandable.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.7/css/bootstrap-dialog.min.css"
+          rel="stylesheet"/>
+
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
+    <script src="/tabloidproteome/resources/js/bootstrap-table-expandable.js"></script>
+    <script async="async" src="/tabloidproteome/resources/js/urlValidate.js"></script>
+    <style>
+        body {
+            padding-top: 70px;
+            /* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of navigation changes. */
+        }
+
+        .hiddenRow {
+            padding: 0 !important;
+        }
+    </style>
+    <script>
+        (function (i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r;
+            i[r] = i[r] || function () {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date();
+            a = s.createElement(o), m = s.getElementsByTagName(o)[0];
+            a.async = 1;
+            a.src = g;
+            m.parentNode.insertBefore(a, m)
+        })(window, document, 'script',
+            'https://www.google-analytics.com/analytics.js', 'ga');
+
+        ga('create', 'UA-96922635-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+    <script>
+        $(function () {
+            if (window.location.search == "?pathway") {
+                document.getElementById("diseaseRegion").style.display = 'none';
+                document.getElementById("tissueRegion").style.display = 'none';
+                document.getElementById("pathwayRegion").style.display = 'block';
+            } else if (window.location.search == "?disease") {
+                document.getElementById("pathwayRegion").style.display = 'none';
+                document.getElementById("tissueRegion").style.display = 'none';
+                document.getElementById("diseaseRegion").style.display = 'block';
+            } else if (window.location.search == "?tissue") {
+                document.getElementById("pathwayRegion").style.display = 'none';
+                document.getElementById("diseaseRegion").style.display = 'none';
+                document.getElementById("tissueRegion").style.display = 'block';
+            }
+
+
+        });
+
+        $(document).ready(function () {
+            console.log("fdf");
+            $("[data-toggle=tooltip]").tooltip({placement: 'right'});
+        });
+    </script>
+
+</h:head>
+<body>
+<div id="wrapper">
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container" id="header">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse"
+                        data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span> <span
+                        class="icon-bar"></span> <span class="icon-bar"></span> <span
+                        class="icon-bar"></span>
+                </button>
+                <a href="/tabloidproteome/search.xhtml" class="navbar-left"><img
+                        src="/tabloidproteome/resources/images/logo.png"
+                        style="width: 70px; height: 54px;"/></a> <a class="navbar-brand"
+                                                                    href="/tabloidproteome/search.xhtml">Tabloid Proteome</a>
+            </div>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse"
+                 id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav pull-right">
+                    <li><a href="/tabloidproteome/search.xhtml">Search</a></li>
+                    <li><a href="/tabloidproteome/dataTable.xhtml?session">Data
+                        Table</a></li>
+                    <li><a href="/tabloidproteome/help.xhtml">Help</a></li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+    <!-- Page Content -->
+
+    <div class="container" id="content">
+        <div id="pathwayRegion">
+            <h1></h1>
+            <p style="font-weight: bold;">Total number of pathways found: #{controlBean.pathwayDTOs.size()}</p>
+            <p style="color:grey; font-style: italic;">Please click on the pathway of interest to find relevant protein pairs. If the pathway is not a leaf pathway, you will see the related leaf pathway Reactome accession before the protein pairs table.</p>
+            <table class="table table-hover table-expandable table-sticky-header table-custom">
+                <thead>
+                <tr>
+                    <th style="width: 60%;">Pathway Name</th>
+                    <th style="width: 35%;">Reactome Accession</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <ui:repeat var="pathway" value="#{controlBean.pathwayDTOs}">
+                    <tr data-target="'#' + #{pathway.pathWay.reactomeAccession}" style="color:purple;">
+
+                        <td style="width: 60%;">#{pathway.pathWay.pathwayName}</td>
+                        <td style="width: 35%;">#{pathway.pathWay.reactomeAccession}</td>
+                        <td><span class="pull-right clickable"><i class="glyphicon glyphicon-chevron-down"></i></span>
+                        </td>
+                    </tr>
+                    <tr id="#{pathway.pathWay.reactomeAccession}" class="collapse">
+                        <td colspan="3">
+                            <ui:repeat var="leafPathway" value="#{pathway.pathwayDTOs}">
+                                <div class="wrap">
+                                    <table class="table table-hover table-custom">
+                                        <tbody>
+                                        <tr>
+                                            <td style="width: 61%;">#{leafPathway.pathWay.pathwayName} <i
+                                                    class="glyphicon glyphicon-info-sign" data-toggle="tooltip"
+                                                    title="It is classified as sub pathway for the pathway (above). These classifications are derived from Reactome database"
+                                                    id="infoLeafPathway"></i></td>
+                                            <td style="width: 39%;">#{leafPathway.pathWay.reactomeAccession}</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <table class="head">
+                                        <tr>
+                                            <th style="width: 3%"></th>
+                                            <th style="width: 6%">1st Uniprot Accession</th>
+                                            <th style="width: 40%">1st Protein Name</th>
+                                            <th style="width: 6%">2nd Uniprot Accession</th>
+                                            <th style="width: 40%">2nd Protein Name</th>
+                                            <th style="width: 5%">Jaccard Similarity</th>
+                                        </tr>
+                                    </table>
+                                    <div class="inner_table_large">
+                                        <table>
+                                            <ui:repeat var="proteinDTO" value="#{leafPathway.proteinDTOs}">
+                                                <tr>
+                                                    <td style="text-align: center; width: 3%"><a
+                                                            href="/tabloidproteome/dataTable.xhtml?accession1=#{proteinDTO.protein1.uniprotAccession}&amp;accession2=#{proteinDTO.protein2.uniprotAccession}&amp;jaccard=#{proteinDTO.associate.jaccSimScore}&amp;species=9606">
+                                                        <span class="glyphicon glyphicon-search"
+                                                              aria-hidden="true"></span>
+                                                    </a></td>
+                                                    <td style="width: 6%;">#{proteinDTO.protein1.uniprotAccession}</td>
+                                                    <td style="width: 40%;">#{proteinDTO.protein1.proteinName}</td>
+                                                    <td style="width: 6%">#{proteinDTO.protein2.uniprotAccession}</td>
+                                                    <td style="width: 40%">#{proteinDTO.protein2.proteinName}</td>
+                                                    <td style="width: 5%">#{proteinDTO.associate.jaccSimScore}</td>
+                                                </tr>
+                                            </ui:repeat>
+                                        </table>
+                                    </div>
+                                </div>
+                            </ui:repeat>
+
+                        </td>
+                    </tr>
+                </ui:repeat>
+                </tbody>
+            </table>
+
+        </div>
+
+
+        <div id="diseaseRegion" style="display: none;">
+            <h1></h1>
+            <p>Jaccard similarity threshold is set as 0.4 for this search. If you want to see more results with lower threshold, please contact us.</p>
+            <p style="font-weight: bold;">Total number of diseases found: #{controlBean.diseaseDTOs.size()}</p>
+            <p style="color:grey; font-style: italic;">Please click on the disease of interest to find relevant protein pairs.</p>
+            <table class="table table-hover table-expandable table-sticky-header table-custom">
+                <thead>
+                <tr>
+                    <th>Disease Name</th>
+                    <th>DisGeNet Id</th>
+                    <th>Associated pair count</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <ui:repeat var="disease" value="#{controlBean.diseaseDTOs}">
+                    <tr data-target="'#' + #{disease.disease.disgenetId}" style="color:purple;">
+
+                        <td>#{disease.disease.diseaseName}</td>
+                        <td>#{disease.disease.disgenetId}</td>
+                        <td>#{disease.proteinDTOs.size()}</td>
+                        <td><span class="pull-right clickable"><i class="glyphicon glyphicon-chevron-down"></i></span>
+                        </td>
+                    </tr>
+                    <tr id="#{disease.disease.disgenetId}">
+                        <td colspan="4">
+
+                            <div class="wrap">
+                                <table class="head">
+                                    <tr>
+                                        <th style="width: 3%"></th>
+                                        <th style="width: 6%">1st Uniprot Accession</th>
+                                        <th style="width: 40%">1st Protein Name</th>
+                                        <th style="width: 6%">2nd Uniprot Accession</th>
+                                        <th style="width: 40%">2nd Protein Name</th>
+                                        <th style="width: 5%">Jaccard Similarity</th>
+                                    </tr>
+                                </table>
+                                <div class="inner_table_large">
+                                    <table>
+                                        <ui:repeat var="proteinDTO" value="#{disease.proteinDTOs}">
+                                            <tr>
+                                                <td style="text-align: center; width: 3%"><a
+                                                        href="/tabloidproteome/dataTable.xhtml?accession1=#{proteinDTO.protein1.uniprotAccession}&amp;accession2=#{proteinDTO.protein2.uniprotAccession}&amp;jaccard=#{proteinDTO.associate.jaccSimScore}&amp;species=9606">
+                                                    <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                                                </a></td>
+                                                <td style="width: 6%">#{proteinDTO.protein1.uniprotAccession}</td>
+                                                <td style="width: 40%">#{proteinDTO.protein1.proteinName}</td>
+                                                <td style="width: 6%">#{proteinDTO.protein2.uniprotAccession}</td>
+                                                <td style="width: 40%">#{proteinDTO.protein2.proteinName}</td>
+                                                <td style="width: 5%">#{proteinDTO.associate.jaccSimScore}</td>
+                                            </tr>
+                                        </ui:repeat>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </td>
+                    </tr>
+                </ui:repeat>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="tissueRegion" style="display: none;">
+            <h1></h1>
+            <p style="font-weight: bold;">Total number of protein pairs found: #{controlBean.proteinDTOs.size()}</p>
+
+            <table class="table table-hover table-sticky-header table-custom">
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>1st Uniprot Accession</th>
+                    <th>1st Protein Name</th>
+                    <th>2nd Uniprot Accession</th>
+                    <th>2nd Protein Name</th>
+                    <th>Jaccard Similarity</th>
+                    <th>Tissue Name</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <ui:repeat var="proteinDTO" value="#{controlBean.proteinDTOs}">
+                    <tr>
+                        <td>
+                            <a href="/tabloidproteome/dataTable.xhtml?accession1=#{proteinDTO.protein1.uniprotAccession}&amp;accession2=#{proteinDTO.protein2.uniprotAccession}&amp;jaccard=#{proteinDTO.associate.jaccSimScore}&amp;species=9606">
+                                <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                            </a></td>
+                        <td>#{proteinDTO.protein1.uniprotAccession}</td>
+                        <td>#{proteinDTO.protein1.proteinName}</td>
+                        <td>#{proteinDTO.protein2.uniprotAccession}</td>
+                        <td>#{proteinDTO.protein2.proteinName}</td>
+                        <td>#{proteinDTO.associate.jaccSimScore}</td>
+                        <td>#{proteinDTO.tissueName}</td>
+                    </tr>
+                </ui:repeat>
+                </tbody>
+            </table>
+        </div>
+
+
+    </div>
+
+
+    <div id="footer">
+        <div class="container">
+            <div class="row" style="margin-top: 0;">
+                <div class="col-sm-9">
+                    <p class="text-muted credit">SUPPORTED BY</p>
+                    <p class="text-muted credit">
+                        <a target="_blank" href="https://compomics.com">
+                            <img border="0" src="/tabloidproteome/resources/images/compOmics_logo.png" width="90px"
+                                 height="46px"/>
+                        </a>&#160;
+                        <a target="_blank" href="http://www.crl-mappit.be/" style="padding-left: 15px">
+                            <img border="0" src="/tabloidproteome/resources/images/cytokineLogo.png" width="100px"
+                                 height="38px"/>
+                        </a>&#160;&#160;
+                        <a target="_blank" href="http://www.vib.be" style="padding-left: 15px;">
+                            <img border="0" src="/tabloidproteome/resources/images/VIBLogo.png" width="84px"
+                                 height="50px"/>
+                        </a>&#160;
+                        <a target="_blank" href="http://www.ugent.be/en">
+                            <img border="0" src="/tabloidproteome/resources/images/ugent-logo.png" width="86px"
+                                 height="67px"/>
+                        </a>
+                        <a target="_blank" href="https://www.elixir-belgium.org/">
+                            <img border="0" src="/tabloidproteome/resources/images/elixir.png" width="79px"
+                                 height="57px"/>
+                        </a>
+                        <a target="_blank" href="https://erc.europa.eu/">
+                            <img border="0" src="/tabloidproteome/resources/images/erc.png" width="79px" height="79px"/>
+                        </a>
+                    </p>
+                </div>
+                <div class="col-sm-1">
+                    <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/information.xhtml"
+                                                                      class="text-muted">Information</a></p>
+                    <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/information.xhtml#about"
+                                                                      class="text-sub">About</a></p>
+                    <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/information.xhtml#version"
+                                                                      class="text-sub">Version</a></p>
+                    <p class="credit"><a href="/tabloidproteome/information.xhtml#reference"
+                                         class="text-sub">Reference</a></p>
+                </div>
+                <div class="col-sm-1">
+                    <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml"
+                                                                      class="text-muted">Data</a></p>
+                    <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml#statistics"
+                                                                      class="text-sub">Statistics</a></p>
+                    <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml#resources"
+                                                                      class="text-sub">Credits &#38; Resources</a></p>
+                    <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/data.xhtml#download"
+                                                                      class="text-sub">Download</a></p>
+                </div>
+                <div class="col-sm-1">
+                    <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml"
+                                                                      class="text-muted">Help</a></p>
+                    <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml#faq"
+                                                                      class="text-sub">FAQ</a></p>
+                    <p class="credit" style="margin-bottom: 15px;"><a href="/tabloidproteome/help.xhtml#userGuide"
+                                                                      class="text-sub">User Guide</a></p>
+                    <p class="credit"><a href="/tabloidproteome/help.xhtml#contact" class="text-sub">Contact</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>
