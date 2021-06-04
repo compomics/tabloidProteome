@@ -5,8 +5,8 @@ import com.compomics.neo4j.model.dataTransferObjects.PathwayDTO;
 import com.compomics.neo4j.model.dataTransferObjects.ProteinDTO;
 import com.compomics.neo4j.model.nodes.*;
 import com.compomics.neo4j.model.relationshipTypes.Associate;
+import org.neo4j.driver.*;
 import org.neo4j.driver.internal.value.NullValue;
-import org.neo4j.driver.v1.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,7 +114,7 @@ public class Service implements Serializable {
         parameters.put("jacc", jaccScore);
 
         try (Session session = Connection.getInstance().getDriver().session()) {
-            StatementResult result = session.run(queries.getProperty(queryName), parameters);
+            Result result = session.run(queries.getProperty(queryName), parameters);
             while (result.hasNext()) {
                 Record record = result.next();
                 if (!record.get("species1").asString().equals(species)) {
@@ -194,7 +194,7 @@ public class Service implements Serializable {
         parameters.put("species", species);
 
         try (Session session = Connection.getInstance().getDriver().session()) {
-            StatementResult result = session.run(queries.getProperty(GENE_QUERY_MULTIPLE), parameters);
+            Result result = session.run(queries.getProperty(GENE_QUERY_MULTIPLE), parameters);
             while (result.hasNext()) {
                 Record record = result.next();
                 ProteinDTO proteinDTO = new ProteinDTO();
@@ -236,7 +236,7 @@ public class Service implements Serializable {
 
         try (Session session = Connection.getInstance().getDriver().session()) {
             LOGGER.info("Start running query pathway " + pathway);
-            StatementResult result = session.run(queries.getProperty(PATHWAY_SEARCH_QUERY), parameters);
+            Result result = session.run(queries.getProperty(PATHWAY_SEARCH_QUERY), parameters);
             LOGGER.info("Finished running query pathway " + pathway);
             while (result.hasNext()) {
                 Record record = result.next();
@@ -270,7 +270,7 @@ public class Service implements Serializable {
             pathwayDTO.setProteinDTOs(findProteinDTOsByPathway(pathway.getReactomeAccession()));
             pathwayDTOs.add(pathwayDTO);
         } else {
-            StatementResult result = session.run(queries.getProperty(HIERARCHY_SEARCH), parameters);
+            Result result = session.run(queries.getProperty(HIERARCHY_SEARCH), parameters);
             while (result.hasNext()) {
                 Record record = result.next();
                 String leafPathwayReactomeAcc = (String) record.get("leaf_pathway_reactome_acc").asList().get(record.get("leaf_pathway_reactome_acc").asList().size() - 1);
@@ -298,7 +298,7 @@ public class Service implements Serializable {
         parameters.put("reactomeAccession", reactomeAccession);
 
         try (Session session = Connection.getInstance().getDriver().session()) {
-            StatementResult result = session.run(queries.getProperty(PATHWAY_FIND_PROTEIN), parameters);
+            Result result = session.run(queries.getProperty(PATHWAY_FIND_PROTEIN), parameters);
             while (result.hasNext()) {
                 Record record = result.next();
 
@@ -343,7 +343,7 @@ public class Service implements Serializable {
 
         try (Session session = getDriver().session()) {
             LOGGER.info("Start running query disease " + disease + " with jaccard coef " + jacc);
-            StatementResult result = session.run(queries.getProperty(DISEASE_SEARCH_QUERY), parameters);
+            Result result = session.run(queries.getProperty(DISEASE_SEARCH_QUERY), parameters);
             LOGGER.info("Finished running query disease " + disease + " with jaccard coef " + jacc);
             while (result.hasNext()) {
                 Record record = result.next();
@@ -417,7 +417,7 @@ public class Service implements Serializable {
 
         try (Session session = Connection.getInstance().getDriver().session()) {
             LOGGER.info("Start query tissue " + tissue + " with jaccard coef " + jacc);
-            StatementResult result = session.run(queries.getProperty(PROTEIN_FIND_BY_TISSUE), parameters);
+            Result result = session.run(queries.getProperty(PROTEIN_FIND_BY_TISSUE), parameters);
             LOGGER.info("Finished query tissue " + tissue + " with jaccard coef " + jacc);
             while (result.hasNext()) {
                 Record record = result.next();
@@ -470,7 +470,7 @@ public class Service implements Serializable {
                 query = ONE_TO_ONE_SEARCH_MOUSE;
             }
 
-            StatementResult result = session.run(queries.getProperty(query), parameters);
+            Result result = session.run(queries.getProperty(query), parameters);
             createProteinDTOList(session, result, proteinDTOS);
         }
 
@@ -494,7 +494,7 @@ public class Service implements Serializable {
             parameters.put("acc2", accession2);
             parameters.put("jacc", jaccScore);
 
-            StatementResult result = session.run(queries.getProperty(queryName), parameters);
+            Result result = session.run(queries.getProperty(queryName), parameters);
             createProteinDTOList(session, result, proteinDTOS);
         }
 
@@ -512,7 +512,7 @@ public class Service implements Serializable {
      * @param proteinDTOs
      * @return
      */
-    private void createProteinDTOList(Session session, StatementResult result, List<ProteinDTO> proteinDTOs) {
+    private void createProteinDTOList(Session session, Result result, List<ProteinDTO> proteinDTOs) {
 
         while (result.hasNext()) {
             Record record = result.next();
@@ -648,7 +648,7 @@ public class Service implements Serializable {
         parameters.put("acc2", accession2);
         parameters.put("jacc", jacc);
 
-        StatementResult result = session.run(queries.getProperty(Service.PROJECT_QUERY), parameters);
+        Result result = session.run(queries.getProperty(Service.PROJECT_QUERY), parameters);
         while (result.hasNext()) {
             Record record = result.next();
             // set Project
@@ -673,7 +673,7 @@ public class Service implements Serializable {
         parameters = new HashMap<>();
         parameters.put("associationId", associationId);
 
-        StatementResult result = session.run(queries.getProperty(INTACT_QUERY), parameters);
+        Result result = session.run(queries.getProperty(INTACT_QUERY), parameters);
         if (result.hasNext()) {
             Record record = result.next();
 
@@ -696,7 +696,7 @@ public class Service implements Serializable {
         parameters = new HashMap<>();
         parameters.put("associationId", associationId);
 
-        StatementResult result = session.run(queries.getProperty(BIOGRID_QUERY), parameters);
+        Result result = session.run(queries.getProperty(BIOGRID_QUERY), parameters);
         if (result.hasNext()) {
             Record record = result.next();
             if (!NullValue.NULL.equals(record.get("biogridId"))) {
@@ -734,7 +734,7 @@ public class Service implements Serializable {
         parameters.put("acc2", accession2);
         parameters.put("jacc", jacc);
 
-        StatementResult result = session.run(queries.getProperty(Service.PATHWAY_QUERY), parameters);
+        Result result = session.run(queries.getProperty(Service.PATHWAY_QUERY), parameters);
         while (result.hasNext()) {
             Record record = result.next();
             // set Project
@@ -767,7 +767,7 @@ public class Service implements Serializable {
         parameters.put("acc2", accession2);
         parameters.put("jacc", jacc);
 
-        StatementResult result = session.run(queries.getProperty(Service.COMPLEX_QUERY), parameters);
+        Result result = session.run(queries.getProperty(Service.COMPLEX_QUERY), parameters);
         while (result.hasNext()) {
             Record record = result.next();
             // set Project
@@ -804,7 +804,7 @@ public class Service implements Serializable {
         parameters.put("acc1", accession1);
         parameters.put("acc2", accession2);
 
-        StatementResult result = session.run(queries.getProperty(Service.COMMONGO_QUERY), parameters);
+        Result result = session.run(queries.getProperty(Service.COMMONGO_QUERY), parameters);
         while (result.hasNext()) {
             Record record = result.next();
             // set Project
@@ -836,7 +836,7 @@ public class Service implements Serializable {
         parameters.put("acc2", accession2);
         parameters.put("jacc", jacc);
 
-        StatementResult result = session.run(queries.getProperty(Service.DISEASE_QUERY), parameters);
+        Result result = session.run(queries.getProperty(Service.DISEASE_QUERY), parameters);
         while (result.hasNext()) {
             Record record = result.next();
             // set Project
@@ -867,7 +867,7 @@ public class Service implements Serializable {
 
         String resultString = "*";
         try (Session session = Connection.getInstance().getDriver().session()) {
-            StatementResult result = session.run(queries.getProperty(Service.CONTROL_QUERY), parameters);
+            Result result = session.run(queries.getProperty(Service.CONTROL_QUERY), parameters);
             if (result.hasNext()) {
                 Record record = result.next();
                 List<Object> paths = new ArrayList<>(record.get("path").asList());
@@ -893,7 +893,7 @@ public class Service implements Serializable {
         parameters.put("species", species);
 
         try (Session session = Connection.getInstance().getDriver().session()) {
-            StatementResult result = session.run(queries.getProperty(queryName), parameters);
+            Result result = session.run(queries.getProperty(queryName), parameters);
             while (result.hasNext()) {
                 Record record = result.next();
                 ProteinDTO proteinDTO = new ProteinDTO();
