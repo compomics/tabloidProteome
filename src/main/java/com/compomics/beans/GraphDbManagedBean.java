@@ -178,7 +178,7 @@ public class GraphDbManagedBean implements Serializable {
                 proteinDTOS.clear();
                 String[] path = requestParams.get("path").split("\\*");
                 for (int i = 0; i < path.length - 1; i++) {
-                    proteinDTOS.addAll(dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, path[i], path[i + 1], jaccScore));
+                    proteinDTOS.addAll(dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, path[i], path[i + 1], species, jaccScore));
                 }
                 visualisationBean.load(this);
             }
@@ -306,21 +306,11 @@ public class GraphDbManagedBean implements Serializable {
     }
 
     public void getSingleProteinDTOs(String species) {
-        if (species.equals("9606")) {
-            proteinDTOS = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY, accession1, accession2, jaccScore);
-        } else if (species.equals("10090")) {
-            proteinDTOS = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY_MOUSE, accession1, accession2, jaccScore);
-        }
-
+        proteinDTOS = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY, accession1, accession2, species, jaccScore);
     }
 
     public void getDoubleProteinDTOs(String species) {
-        if (species.equals("9606")) {
-            proteinDTOS = dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, accession1, accession2, jaccScore);
-        } else if (species.equals("10090")) {
-            proteinDTOS = dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY_MOUSE, accession1, accession2, jaccScore);
-        }
-
+        proteinDTOS = dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, accession1, accession2, species, jaccScore);
     }
 
     public void tsvExport() {

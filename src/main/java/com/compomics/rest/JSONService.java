@@ -56,9 +56,9 @@ public class JSONService implements Serializable {
         Service dbService = new Service();
         try {
             if (species.equals("9606")) {
-                proteinDTOs = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY, accession, null, Double.valueOf(jaccard));
+                proteinDTOs = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY, accession, null, species, Double.valueOf(jaccard));
             } else if (species.equals("10090")) {
-                proteinDTOs = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY_MOUSE, accession, null, Double.valueOf(jaccard));
+                proteinDTOs = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY_MOUSE, accession, null, species, Double.valueOf(jaccard));
             }
             if (proteinDTOs.isEmpty()) {
                 return Response.status(Response.Status.NOT_FOUND).entity("Resource not found for accession: " + accession).build();
@@ -87,9 +87,9 @@ public class JSONService implements Serializable {
         Service dbService = new Service();
         try {
             if (species.equals("9606")) {
-                proteinDTOs = dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, accession1, accession2, Double.valueOf(jaccard));
+                proteinDTOs = dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, accession1, accession2, species, Double.valueOf(jaccard));
             } else if (species.equals("10090")) {
-                proteinDTOs = dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY_MOUSE, accession1, accession2, Double.valueOf(jaccard));
+                proteinDTOs = dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY_MOUSE, accession1, accession2, species, Double.valueOf(jaccard));
             }
 
             if (proteinDTOs.isEmpty()) {
@@ -120,7 +120,7 @@ public class JSONService implements Serializable {
             gene = gene.toUpperCase();
             proteinDTOs = new ArrayList<>();
             dbService.findProteinsByGene(gene, "", species).forEach(proteinDTO -> {
-                proteinDTOs.addAll(dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY, proteinDTO.getProtein1().getUniprotAccession(), null, Double.valueOf(jaccard)));
+                proteinDTOs.addAll(dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY, proteinDTO.getProtein1().getUniprotAccession(), null, species, Double.valueOf(jaccard)));
             });
 
             if (proteinDTOs.isEmpty()) {
@@ -153,7 +153,7 @@ public class JSONService implements Serializable {
             gene2 = gene2.toUpperCase();
             proteinDTOs = new ArrayList<>();
             dbService.findProteinsByGene(gene1, gene2, species).forEach(proteinDTO -> {
-                proteinDTOs.addAll(dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, proteinDTO.getProtein1().getUniprotAccession(), proteinDTO.getProtein2().getUniprotAccession(), Double.valueOf(jaccard)));
+                proteinDTOs.addAll(dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, proteinDTO.getProtein1().getUniprotAccession(), proteinDTO.getProtein2().getUniprotAccession(), species, Double.valueOf(jaccard)));
             });
 
             if (proteinDTOs.isEmpty()) {
@@ -196,7 +196,7 @@ public class JSONService implements Serializable {
                 pathwayDTO.getPathwayDTOs().forEach(pathwayDTO1 -> {
                     List<ProteinDTO> proteinDTOList = new ArrayList<>();
                     pathwayDTO1.getProteinDTOs().forEach(proteinDTO -> {
-                        proteinDTOList.addAll(dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, proteinDTO.getProtein1().getUniprotAccession(), proteinDTO.getProtein2().getUniprotAccession(), Double.valueOf(jaccard)));
+                        proteinDTOList.addAll(dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, proteinDTO.getProtein1().getUniprotAccession(), proteinDTO.getProtein2().getUniprotAccession(), "9606",Double.valueOf(jaccard)));
                     });
                     pathWays.put(pathwayDTO1.getPathWay().getReactomeAccession(), proteinDTOList);
                 });
@@ -245,7 +245,7 @@ public class JSONService implements Serializable {
             proteinDTOs = new ArrayList<>();
             dbService.findDiseaseDTOs(disease, Double.valueOf(jaccard)).forEach(diseaseDTO -> {
                 diseaseDTO.getProteinDTOs().forEach(proteinDTO -> {
-                    proteinDTOs.addAll(dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, proteinDTO.getProtein1().getUniprotAccession(), proteinDTO.getProtein2().getUniprotAccession(), Double.valueOf(jaccard)));
+                    proteinDTOs.addAll(dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, proteinDTO.getProtein1().getUniprotAccession(), proteinDTO.getProtein2().getUniprotAccession(), "9606",Double.valueOf(jaccard)));
                 });
 
             });

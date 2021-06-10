@@ -171,16 +171,16 @@ public class VisualisationBean implements Serializable {
                 switch (graphDbManagedBean.getSelectionType()) {
                     case "single":
                         if (graphDbManagedBean.getSpecies().equals("9606")) {
-                            proteinDTOs = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY, proteinDTOS.get(0).getProtein1().getUniprotAccession(), null, jacc);
+                            proteinDTOs = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY, proteinDTOS.get(0).getProtein1().getUniprotAccession(), null, graphDbManagedBean.getSpecies(), jacc);
                         } else if (graphDbManagedBean.getSpecies().equals("10090")) {
-                            proteinDTOs = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY_MOUSE, proteinDTOS.get(0).getProtein1().getUniprotAccession(), null, jacc);
+                            proteinDTOs = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY_MOUSE, proteinDTOS.get(0).getProtein1().getUniprotAccession(), null, graphDbManagedBean.getSpecies(), jacc);
                         }
                         break;
                     case "double":
                         if (graphDbManagedBean.getSpecies().equals("9606")) {
-                            proteinDTOs = dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, proteinDTOS.get(0).getProtein1().getUniprotAccession(), proteinDTOS.get(0).getProtein2().getUniprotAccession(), jacc);
+                            proteinDTOs = dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, proteinDTOS.get(0).getProtein1().getUniprotAccession(), proteinDTOS.get(0).getProtein2().getUniprotAccession(), graphDbManagedBean.getSpecies(), jacc);
                         } else if (graphDbManagedBean.getSpecies().equals("10090")) {
-                            proteinDTOs = dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY_MOUSE, proteinDTOS.get(0).getProtein1().getUniprotAccession(), proteinDTOS.get(0).getProtein2().getUniprotAccession(), jacc);
+                            proteinDTOs = dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY_MOUSE, proteinDTOS.get(0).getProtein1().getUniprotAccession(), proteinDTOS.get(0).getProtein2().getUniprotAccession(), graphDbManagedBean.getSpecies(), jacc);
                         }
 
                         break;
@@ -274,9 +274,9 @@ public class VisualisationBean implements Serializable {
         try {
             List<ProteinDTO> proteinDTOs = new ArrayList<>();
             if (graphDbManagedBean.getSpecies().equals("9606")) {
-                proteinDTOs = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY, accession, null, jacc);
+                proteinDTOs = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY, accession, null, graphDbManagedBean.getSpecies(), jacc);
             } else if (graphDbManagedBean.getSpecies().equals("10090")) {
-                proteinDTOs = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY_MOUSE, accession, null, jacc);
+                proteinDTOs = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY_MOUSE, accession, null, graphDbManagedBean.getSpecies(), jacc);
             }
             if (!proteinDTOs.isEmpty()) {
                 List<Protein> proteins = new ArrayList<>();

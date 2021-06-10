@@ -474,7 +474,7 @@ function clickButton6() {
 }
 
 function setExampleSingle1() {
-    document.getElementById('singleAccession').value = 'Q13330';
+    document.getElementById('singleAccession').value = 'Q9UJX3';
     return false;
 }
 
@@ -491,7 +491,7 @@ function setExampleDouble1() {
 
 function setExampleDouble2() {
     document.getElementById('doubleAccession1').value = 'Q12873';
-    document.getElementById('doubleAccession2').value = 'Q13330';
+    document.getElementById('doubleAccession2').value = 'Q9UJX3';
     return false;
 }
 

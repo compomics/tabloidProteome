@@ -117,7 +117,7 @@ public class GraphJSON implements Serializable {
     public Response getNodesLinksInJSONDouble(@PathParam("accession1") String accession1, @PathParam("accession2") String accession2) {
         Service dbService = new Service();
         try {
-            List<ProteinDTO> proteinDTOs = dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, accession1, accession2, 0.0);
+            List<ProteinDTO> proteinDTOs = dbService.getProteinDTOList(DOUBLE_PROTEIN_QUERY, accession1, accession2, "9606", 0.0);
             if (proteinDTOs.isEmpty()) {
                 return Response.status(Response.Status.NOT_FOUND).entity("Resource not found for accession: " + accession1 + " and " + accession2).build();
             } else {
@@ -167,7 +167,7 @@ public class GraphJSON implements Serializable {
     public Response addNodesLinksInJSON(@PathParam("accession") String accession) {
         Service dbService = new Service();
         try {
-            List<ProteinDTO> proteinDTOs = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY, accession, null, 0.0);
+            List<ProteinDTO> proteinDTOs = dbService.getProteinDTOList(SINGLE_PROTEIN_QUERY, accession, null, "9606",0.0);
             if (proteinDTOs.isEmpty()) {
                 return Response.status(Response.Status.NOT_FOUND).entity("Resource not found for accession: " + accession).build();
             } else {
