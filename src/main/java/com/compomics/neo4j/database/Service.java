@@ -110,15 +110,15 @@ public class Service implements Serializable {
 
         List<ProteinDTO> proteins = new ArrayList<>();
         parameters = new HashMap<>();
-        parameters.put("proteinName1", proteinName1);
-        parameters.put("proteinName2", proteinName2);
+        parameters.put("protein_name_1_regex", "(?i).*" + proteinName1 + ".*");
+        parameters.put("protein_name_2_regex", "(?i).*" + proteinName2 + ".*");
         parameters.put("jacc", jaccScore);
 
         try (Session session = Connection.getInstance().getDriver().session()) {
             Result result = session.run(queries.getProperty(queryName), parameters);
             while (result.hasNext()) {
                 Record record = result.next();
-                if (!record.get("species1").asString().equals(species)) {
+                if (!String.valueOf(record.get("species1").asInt()).equals(species)) {
                     continue;
                 }
                 ProteinDTO proteinDTO = new ProteinDTO();
@@ -131,10 +131,10 @@ public class Service implements Serializable {
                         protein1.getGeneNames().add(gene.toString().replace("[", "").replace("]", ""));
                     });
                 }
-                protein1.setSpecies(record.get("species1").asString());
+                protein1.setSpecies(String.valueOf(record.get("species1").asInt()));
                 proteinDTO.setProtein1(protein1);
                 if (queryName.equals(PROTEIN_FIND_BY_NAME_DOUBLE)) {
-                    if (!record.get("species2").asString().equals(species)) {
+                    if (!String.valueOf(record.get("species2").asInt()).equals(species)) {
                         continue;
                     }
                     Protein protein2 = new Protein();
@@ -146,7 +146,7 @@ public class Service implements Serializable {
                             protein2.getGeneNames().add(gene.toString().replace("[", "").replace("]", ""));
                         });
                     }
-                    protein2.setSpecies(record.get("species2").asString());
+                    protein2.setSpecies(String.valueOf(record.get("species2").asInt()));
                     proteinDTO.setProtein2(protein2);
                     Associate associate = new Associate();
                     associate.setJaccSimScore(record.get("jacc_sim_score").asDouble());
