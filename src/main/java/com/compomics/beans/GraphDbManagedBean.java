@@ -46,8 +46,6 @@ public class GraphDbManagedBean implements Serializable {
     // queries
     private static final String SINGLE_PROTEIN_QUERY = "singleProteinSearch";
     private static final String DOUBLE_PROTEIN_QUERY = "doubleProteinSearch";
-    private static final String SINGLE_PROTEIN_QUERY_MOUSE = "singleProteinSearchMouse";
-    private static final String DOUBLE_PROTEIN_QUERY_MOUSE = "doubleProteinSearchMouse";
 
 
     @ManagedProperty(value = "#{visualisationBean}")
@@ -243,6 +241,17 @@ public class GraphDbManagedBean implements Serializable {
 
         visualisationBean.load(this);
         edgeAnnotations = Arrays.asList(array3.split(","));
+    }
+
+    public void searchManyToManyProteins() {
+        clearFields();
+        dbService.getDriver();
+        array1 = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("array1");
+        species = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("species");
+        jaccScore = Double.valueOf(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("jacc"));
+        setMultipleSearch(true);
+        proteinDTOS = dbService.getProteinDTOListForManyToManyProteins(Arrays.asList(array1.split("\\s*,\\s*")), jaccScore, species);
+        visualisationBean.load(this);
     }
 
     public void updateListofProteinSearch() {

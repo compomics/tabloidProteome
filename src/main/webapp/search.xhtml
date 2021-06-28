@@ -12,7 +12,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' http://primefaces.org/ui http://xmlns.jcp.org http://java.sun.com http://www.w3.org; 
       script-src 'self' 'unsafe-inline' https://code.jquery.com/jquery-2.1.4.min.js https://www.google-analytics.com 
-      https://cdnjs.cloudflare.com https://maxcdn.bootstrapcdn.com https://rawgit.com/agershun/alasql/ 'unsafe-eval';
+      https://cdnjs.cloudflare.com https://maxcdn.bootstrapcdn.com https://unpkg.com/papaparse@latest/papaparse.min.js 'unsafe-eval';
       style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; 
       font-src 'self' https://cdnjs.cloudflare.com;
       img-src 'self' https://www.google-analytics.com;
@@ -47,7 +47,9 @@
     <script
             src="/tabloidproteome/resources/js/bootstrap-dialog.js"
             type="text/javascript"></script>
-    <script src="https://rawgit.com/agershun/alasql/develop/dist/alasql.js"></script>
+    <!--    <script src="https://rawgit.com/agershun/alasql/develop/dist/alasql.js"></script>-->
+    <!--    <script src="https://cdn.jsdelivr.net/npm/alasql@1.7"></script>-->
+    <script src="https://unpkg.com/papaparse@latest/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/xlsx.full.min.js"></script>
 
     <script async="async" src="/tabloidproteome/resources/js/tissue.js"></script>
@@ -91,7 +93,6 @@
             });
 
         });
-
     </script>
 </h:head>
 
@@ -187,7 +188,7 @@
                                 <div>
 										<span style="float: right; font-size: 11px;"> <a
                                                 href="#" style="text-decoration: underline; color: #62605E;"
-                                                onclick="setExampleSingle2()">P08134</a></span> <span
+                                                onclick="setExampleSingle2()">Q14684</a></span> <span
                                         style="float: right; font-size: 11px;"> <a href="#"
                                                                                    style="text-decoration: underline; color: #62605E;"
                                                                                    onclick="setExampleSingle1()">Q9UJX3</a>,&#160;
@@ -350,12 +351,12 @@
                                             </div>
                                         </div>
                                         <p id="informationOneToOne">Please upload a file that contains <a
-                                                style="font-weight: bold; color: black;">protein pairs</a> and edge annotaion (if available) in the following file formats: xls, xlsx, csv.
+                                                style="font-weight: bold; color: black;">protein pairs</a> and edge annotation (if available) in CSV file format.
                                             The first two columns should be Uniprot accessions of the proteins. If you have edge annotation, you can add it to the 3rd column.
                                             The file should not include any title.</p>
                                         <br/>
                                         <p>Select file to upload:</p>
-                                        <input id="readfile" type="file" onchange="loadFile(event)"/>
+                                        <input id="readfile" type="file" onchange="loadFile()"/>
                                         <div class="checkbox">
                                             <label>
                                                 <input type="checkbox"
@@ -416,13 +417,13 @@
                                             </div>
                                         </div>
                                         <p id="informationManyToMany">Please upload a file that contains <a
-                                                style="font-weight: bold; color: black;">protein UniProt accessions</a> (if available) in the following file formats: xls, xlsx, csv.
+                                                style="font-weight: bold; color: black;">protein UniProt accessions</a> (if available) in CSV file format.
                                             When you click on the search button, you will have all possible 2 protein combinations from the list you provide by considering Jaccard Similarity Threshold.
                                             The file should not include any title.</p>
                                         <br/>
 
                                         <p>Select file to upload:</p>
-                                        <input id="readfile2" type="file" onchange="loadFile2(event)"/>
+                                        <input id="readfile2" type="file" onchange="loadFile2()"/>
                                         <br/>
                                         <div align="center">
                                             <button class="btn btn-primary" onclick="searchMultipleProtein2()"
@@ -449,13 +450,13 @@
                                     <span
                                             style="float: right; font-size: 11px;"> <a href="#"
                                                                                        style="text-decoration: underline; color: #62605E;"
-                                                                                       onclick="setExampleGeneSingle1()">MTA1</a>
+                                                                                       onclick="setExampleGeneSingle1()">EXOSC10</a>
                                     </span>
                                     <span style="float: right; font-size: 11px; color: #62605E;"> Gene Name: &#160; </span>
                                     <br/>
                                     <span style="float: right; font-size: 11px;"> <a
                                             href="#" style="text-decoration: underline; color: #62605E;"
-                                            onclick="setExampleGeneSingle2()">1107</a></span>
+                                            onclick="setExampleGeneSingle2()">57470</a></span>
                                     <span style="float: right; font-size: 11px; color: #62605E;">Entrez Gene Id: &#160; </span>
                                 </div>
                                 <form>
@@ -566,12 +567,12 @@
 
                                 </div>
                                 <p id="informationGeneManyToMany">Please upload a file that contains <a
-                                        style="font-weight: bold; color: black;">gene names</a> (if available) in the following file formats: xls, xlsx, csv.
+                                        style="font-weight: bold; color: black;">gene names</a> (if available) in CSV file format.
                                     The file should not include any title.</p>
                                 <br/>
 
                                 <p>Select file to upload:</p>
-                                <input id="readfileGene" type="file" onchange="loadFileGene(event)"/>
+                                <input id="readfileGene" type="file" onchange="loadFileGene()"/>
                                 <br/>
                                 <div align="center">
                                     <button class="btn btn-primary" onclick="searchMultipleGene()"
@@ -675,6 +676,16 @@
                                         </select>
                                     </div>
                                     <br/>
+                                    <div class="input-group input-group col-sm-9 col-sm-offset-1">
+                                        <div class="form-group">
+                                            <label for="sel1">Select species:</label>
+                                            <select class="form-control" id="selSpeciesTissue">
+                                                <option value="9606">Homo sapiens (Human)</option>
+                                                <option value="10090">Mus musculus (Mouse)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <br/>
                                     <div class="input-group col-sm-9 col-sm-offset-1">
                                         <label class="col-sm-9" style="float: left;">Jaccard Similarity Threshold
                                             <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip"
@@ -682,8 +693,6 @@
                                                   title="Jaccard Similarity Threshold should be between 0 and 1. You will get associations which have this Jaccard Similarity Threshold and above."/>
                                         </label> <input type="text" value="0.4" class="col-sm-3" id="jaccardTissue"/>
                                     </div>
-
-
                                     <div align="center">
                                         <button type="button" class="btn btn-primary" data-toggle="modal"
                                                 id="btnTissueSearch"
@@ -747,6 +756,9 @@
             <p:remoteCommand name="passTissueNameToJSFManagedBean"
                              action="#{controlBean.findProteinDTOsByTissue}" process="@this"
                              oncomplete="clickButton6();"/>
+            <p:remoteCommand name="passManyToManyProteinsJSONToJSFManagedBean"
+                             action="#{graphDbManagedBean.searchManyToManyProteins}" process="@this"
+                             oncomplete="clickButton7();"/>
         </h:form>
 
 

@@ -154,7 +154,9 @@ function searchMultipleProtein() {
         for (var j = 0; j < cellLength; j += 3) {
             array1.push(oCells.item(j).innerHTML);
             array2.push(oCells.item(j + 1).innerHTML);
-            array3.push(oCells.item(j + 2).innerHTML);
+            if (cellLength > 2) {
+                array3.push(oCells.item(j + 2).innerHTML);
+            }
         }
 
     }
@@ -184,7 +186,7 @@ function searchMultipleProtein() {
     } else {
         var dialogInstance = new BootstrapDialog();
         dialogInstance.setTitle('INPUT ERROR');
-        dialogInstance.setMessage('Please upload CSV file that contains protein pairs!');
+        dialogInstance.setMessage('Please upload a CSV file that contains protein pairs!');
         dialogInstance.setType(BootstrapDialog.TYPE_DANGER);
         dialogInstance.open();
     }
@@ -216,18 +218,10 @@ function searchMultipleProtein2() {
     }
 
     if (array1.length != 0) {
-        passProteinsJSONToJSFManagedBean([{
+        passManyToManyProteinsJSONToJSFManagedBean([{
             name: 'array1',
             value: isSafe(array1)
         },
-            {
-                name: 'array2',
-                value: ""
-            },
-            {
-                name: 'array3',
-                value: ""
-            },
             {
                 name: 'jacc',
                 value: isSafe(document.getElementById("jaccardManyToMany").value)
@@ -240,7 +234,7 @@ function searchMultipleProtein2() {
     } else {
         var dialogInstance = new BootstrapDialog();
         dialogInstance.setTitle('INPUT ERROR');
-        dialogInstance.setMessage('Please upload CSV file that contains protein accessions!');
+        dialogInstance.setMessage('Please upload a CSV file that contains protein accessions!');
         dialogInstance.setType(BootstrapDialog.TYPE_DANGER);
         dialogInstance.open();
     }
@@ -283,7 +277,7 @@ function searchMultipleGene() {
     } else {
         var dialogInstance = new BootstrapDialog();
         dialogInstance.setTitle('INPUT ERROR');
-        dialogInstance.setMessage('Please upload CSV file that contains gene names!');
+        dialogInstance.setMessage('Please upload a file that contains gene names!');
         dialogInstance.setType(BootstrapDialog.TYPE_DANGER);
         dialogInstance.open();
     }
@@ -380,6 +374,10 @@ function searchTissue() {
             {
                 name: "jacc",
                 value: isSafe(document.getElementById("jaccardTissue").value)
+            },
+            {
+                name: "species",
+                value: isSafe(document.getElementById("selSpeciesTissue").value)
             }
         ]);
     } else {
@@ -473,46 +471,62 @@ function clickButton6() {
     return false;
 }
 
+function clickButton7() {
+    try {
+        var surl = '/tabloidproteome/dataTable.xhtml?multipleSearch';
+        if (validateURL(surl))
+            window.location = surl;
+        else {
+            throw new InvalidURLException();
+        }
+    } catch (e) {
+        if (e instanceof InvalidURLException)
+            alert(e.message);
+    }
+
+    return false;
+}
+
 function setExampleSingle1() {
     document.getElementById('singleAccession').value = 'Q9UJX3';
     return false;
 }
 
 function setExampleSingle2() {
-    document.getElementById('singleAccession').value = 'P08134';
+    document.getElementById('singleAccession').value = 'Q14684';
     return false;
 }
 
 function setExampleDouble1() {
-    document.getElementById('doubleAccession1').value = 'Q8WXI9';
-    document.getElementById('doubleAccession2').value = 'Q12873';
+    document.getElementById('doubleAccession1').value = 'Q9UJX3';
+    document.getElementById('doubleAccession2').value = 'Q01780';
     return false;
 }
 
 function setExampleDouble2() {
-    document.getElementById('doubleAccession1').value = 'Q12873';
-    document.getElementById('doubleAccession2').value = 'Q9UJX3';
+    document.getElementById('doubleAccession1').value = 'Q9UNX4';
+    document.getElementById('doubleAccession2').value = 'Q15397';
     return false;
 }
 
 function setExampleGeneSingle1() {
-    document.getElementById('geneId').value = 'MTA1';
+    document.getElementById('geneId').value = 'EXOSC10';
     return false;
 }
 
 function setExampleGeneSingle2() {
-    document.getElementById('geneId').value = '1107';
+    document.getElementById('geneId').value = '57470';
     return false;
 }
 
 function setExampleGeneDouble1() {
-    document.getElementById('geneId1').value = 'MTA1';
-    document.getElementById('geneId2').value = 'CHD3';
+    document.getElementById('geneId1').value = 'EXOSC10';
+    document.getElementById('geneId2').value = 'ANAPC7';
     return false;
 }
 
 function setExampleGeneDouble2() {
-    document.getElementById('geneId1').value = 'MTA1';
+    document.getElementById('geneId1').value = 'EXOSC10';
     document.getElementById('geneId2').value = 'SIN3A';
     return false;
 }
@@ -537,7 +551,7 @@ function setExampleDisease2() {
     return false;
 }
 
-function loadFile(event) {
+function loadFile() {
     var table = document.getElementById("oneToOneTable");
     $("#oneToOneTable tr").remove();
     var maxColumn = 2;
@@ -545,82 +559,83 @@ function loadFile(event) {
         maxColumn = 3;
     }
 
-    alasql('SELECT * FROM FILE(?,{headers:false})', [event], function (data) {
-        for (var obj in data) {
-            if (data.hasOwnProperty(obj)) {
-                var headerIndex = 0;
-                var row = table.insertRow(table.rows.length);
-                for (var prop in data[obj]) {
-                    if (data[obj].hasOwnProperty(prop) && headerIndex < maxColumn) {
-                        var cell = row.insertCell(headerIndex);
-                        cell.innerHTML = data[obj][prop];
-                        headerIndex++;
-                    }
-                }
-                if (headerIndex != 3) {
-                    row.insertCell(headerIndex);
+    var selectedFile = document.getElementById('readfile').files[0];
+    Papa.parse(selectedFile, {
+        header: false,
+        skipEmptyLines: true,
+        complete: function (results) {
+            for (var i = 0; i < results.data.length; i++) {
+                var row = table.insertRow(i);
+                for (var j = 0; j < maxColumn; j++) {
+                    var cell = row.insertCell(j);
+                    cell.innerHTML = results.data[i][j];
                 }
             }
+            $("#oneToOneRegion").show();
+            $("#informationOneToOne").hide();
         }
-        $("#oneToOneRegion").show();
-        $("#informationOneToOne").hide();
     });
-
     $("#readfile").val("");
 }
 
 
-function loadFile2(event) {
+function loadFile2() {
     var table = document.getElementById("manyToManyTable");
     $("#manyToManyTable tr").remove();
-    var maxColumn = 1;
 
-    alasql('SELECT * FROM FILE(?,{headers:false})', [event], function (data) {
-        for (var obj in data) {
-            if (data.hasOwnProperty(obj)) {
+    var selectedFile = document.getElementById('readfile2').files[0];
+    Papa.parse(selectedFile, {
+        header: false,
+        skipEmptyLines: true,
+        complete: function (results) {
+            for (var i = 0; i < results.data.length; i++) {
                 var headerIndex = 0;
                 var row = table.insertRow(table.rows.length);
-                for (var prop in data[obj]) {
-                    if (data[obj].hasOwnProperty(prop) && headerIndex < maxColumn) {
-                        var cell = row.insertCell(headerIndex);
-                        cell.innerHTML = data[obj][prop];
-                        headerIndex++;
-                    }
+                if (results.data[i] instanceof Array) {
+                    var cell = row.insertCell(headerIndex);
+                    cell.innerHTML = results.data[i][0];
+                    headerIndex++;
+                } else {
+                    var cell = row.insertCell(headerIndex);
+                    cell.innerHTML = results.data[i];
+                    headerIndex++;
                 }
             }
+            $("#manyToManyRegion").show();
+            $("#informationManyToMany").hide();
         }
-        $("#manyToManyRegion").show();
-        $("#informationManyToMany").hide();
     });
 
     $("#readfile2").val("");
 }
 
 
-function loadFileGene(event) {
+function loadFileGene() {
+
     var table = document.getElementById("manyToManyTableGene");
     $("#manyToManyTableGene tr").remove();
-    var maxColumn = 1;
 
-    alasql('SELECT * FROM FILE(?,{headers:false})', [event], function (data) {
-        for (var obj in data) {
-            if (data.hasOwnProperty(obj)) {
+    var selectedFile = document.getElementById('readfileGene').files[0];
+    Papa.parse(selectedFile, {
+        header: false,
+        skipEmptyLines: true,
+        complete: function (results) {
+            for (var i = 0; i < results.data.length; i++) {
                 var headerIndex = 0;
                 var row = table.insertRow(table.rows.length);
-                for (var prop in data[obj]) {
-                    if (data[obj].hasOwnProperty(prop) && headerIndex < maxColumn) {
-                        var cell = row.insertCell(headerIndex);
-                        cell.innerHTML = data[obj][prop];
-                        headerIndex++;
-                    }
-                }
-                if (headerIndex != 3) {
-                    row.insertCell(headerIndex);
+                if (results.data[i] instanceof Array) {
+                    var cell = row.insertCell(headerIndex);
+                    cell.innerHTML = results.data[i][0];
+                    headerIndex++;
+                } else {
+                    var cell = row.insertCell(headerIndex);
+                    cell.innerHTML = results.data[i];
+                    headerIndex++;
                 }
             }
+            $("#manyToManyRegionGene").show();
+            $("#informationGeneManyToMany").hide();
         }
-        $("#manyToManyRegionGene").show();
-        $("#informationGeneManyToMany").hide();
     });
 
     $("#readfile").val("");

@@ -159,6 +159,7 @@ public class ControlBean implements Serializable {
         if (!FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("jacc").equals("")) {
             jaccScore = Double.valueOf(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("jacc"));
         }
-        proteinDTOs = dbService.getProteinDTOsByTissue(tissue, jaccScore);
+        species = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("species");
+        proteinDTOs = dbService.getProteinDTOsByTissue(tissue, jaccScore, species);
     }
 }

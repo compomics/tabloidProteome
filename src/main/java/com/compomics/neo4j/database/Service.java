@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Service implements Serializable {
 
@@ -47,7 +48,7 @@ public class Service implements Serializable {
     private static final String PROTEIN_FIND_BY_NAME_DOUBLE = "searchByProteinNameDouble";
     private static final String PROTEIN_FIND_BY_TISSUE = "findProteinsByTissue";
     private static final String ONE_TO_ONE_SEARCH = "oneToOneSearch";
-    private static final String ONE_TO_ONE_SEARCH_MOUSE = "oneToOneSearchMouse";
+    private static final String MANY_TO_MANY_SEARCH = "manyToManySearch";
 
     public Service() {
         // load the queries from the properties file
@@ -183,15 +184,16 @@ public class Service implements Serializable {
      * find protein accession by gene name list
      *
      * @param genes
-     * @param species
+     * @param taxonomyId
      * @return
      */
-    public List<ProteinDTO> findProteinsByGenes(List<String> genes, String species) {
+    public List<ProteinDTO> findProteinsByGenes(List<String> genes, String taxonomyId) {
         List<ProteinDTO> proteins = new ArrayList<>();
 
+        //String testgenes = genes.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(","));
         parameters = new HashMap<>();
         parameters.put("genes", genes);
-        parameters.put("species", species);
+        parameters.put("taxonomyId", Integer.valueOf(taxonomyId));
 
         try (Session session = Connection.getInstance().getDriver().session()) {
             Result result = session.run(queries.getProperty(GENE_QUERY_MULTIPLE), parameters);
@@ -199,24 +201,22 @@ public class Service implements Serializable {
                 Record record = result.next();
                 ProteinDTO proteinDTO = new ProteinDTO();
                 Protein protein1 = new Protein();
-                protein1.setUniprotAccession(record.get("uniprot_accession1").asString());
+                protein1.setUniprotAccession(record.get("uniprot_id1").asString());
                 protein1.setProteinName(record.get("protein_name1").asString());
 
                 protein1.setGeneNames(new ArrayList<>());
                 if (!NullValue.NULL.equals(record.get("gene_name1"))) {
-                    record.get("gene_name1").asList().forEach(gene -> {
-                        protein1.getGeneNames().add(gene.toString().replace("[", "").replace("]", ""));
-                    });
+                    protein1.getGeneNames().add(record.get("gene_name1").asString());
                 }
 
                 protein1.setGeneIds(new ArrayList<>());
-                if (!NullValue.NULL.equals(record.get("gene_id1"))) {
-                    record.get("gene_id1").asList().forEach(gene -> {
+                if (!NullValue.NULL.equals(record.get("ensembleId1"))) {
+                    record.get("ensembleId1").asList().forEach(gene -> {
                         protein1.getGeneIds().add(gene.toString().replace("[", "").replace("]", ""));
                     });
                 }
 
-                protein1.setSpecies(record.get("species1").asString());
+                protein1.setSpecies(String.valueOf(record.get("species1").asInt()));
                 proteinDTO.setProtein1(protein1);
 
                 proteins.add(proteinDTO);
@@ -339,6 +339,7 @@ public class Service implements Serializable {
 
         parameters = new HashMap<>();
         parameters.put("disease", disease);
+        parameters.put("disease_regex", "(?i).*" + disease + ".*");
         parameters.put("jacc", jacc);
 
         try (Session session = getDriver().session()) {
@@ -407,13 +408,14 @@ public class Service implements Serializable {
      * @param tissue : tissue name
      * @return List of proteinDTO
      */
-    public List<ProteinDTO> getProteinDTOsByTissue(String tissue, Double jacc) {
+    public List<ProteinDTO> getProteinDTOsByTissue(String tissue, Double jacc, String taxonomyId) {
         LOGGER.info("Start finding tissue " + tissue + " with jaccard coef " + jacc);
         List<ProteinDTO> proteinDTOS = new ArrayList<>();
 
         parameters = new HashMap<>();
-        parameters.put("tissueName", tissue);
+        parameters.put("tissue", tissue);
         parameters.put("jacc", jacc);
+        parameters.put("taxonomyId", Integer.valueOf(taxonomyId));
 
         try (Session session = Connection.getInstance().getDriver().session()) {
             LOGGER.info("Start query tissue " + tissue + " with jaccard coef " + jacc);
@@ -451,26 +453,44 @@ public class Service implements Serializable {
      * @param accessions1
      * @param accessions2
      * @param jaccScore
-     * @param species
+     * @param taxonomyId
      * @return
      */
-    public List<ProteinDTO> getProteinDTOListForMultipleProteins(List<String> accessions1, List<String> accessions2, double jaccScore, String species) {
+    public List<ProteinDTO> getProteinDTOListForMultipleProteins(List<String> accessions1, List<String> accessions2, double jaccScore, String taxonomyId) {
         List<ProteinDTO> proteinDTOS = new ArrayList<>();
 
         parameters = new HashMap<>();
-        parameters.put("array1", accessions1);
-        parameters.put("array2", accessions2);
+        parameters.put("proteins1", accessions1);
+        parameters.put("proteins2", accessions2);
         parameters.put("jacc", jaccScore);
+        parameters.put("taxonomyId", Integer.valueOf(taxonomyId));
 
         try (Session session = Connection.getInstance().getDriver().session()) {
-            String query = "";
-            if (species.equals("9606")) {
-                query = ONE_TO_ONE_SEARCH;
-            } else if (species.equals("10090")) {
-                query = ONE_TO_ONE_SEARCH_MOUSE;
-            }
+            Result result = session.run(queries.getProperty(ONE_TO_ONE_SEARCH), parameters);
+            createProteinDTOList(session, result, proteinDTOS);
+        }
 
-            Result result = session.run(queries.getProperty(query), parameters);
+        return proteinDTOS;
+    }
+
+    /**
+     * Get Protein DTO list for multiple proteins, for one to one search
+     *
+     * @param accessions
+     * @param jaccScore
+     * @param taxonomyId
+     * @return
+     */
+    public List<ProteinDTO> getProteinDTOListForManyToManyProteins(List<String> accessions, double jaccScore, String taxonomyId) {
+        List<ProteinDTO> proteinDTOS = new ArrayList<>();
+
+        parameters = new HashMap<>();
+        parameters.put("proteins", accessions);
+        parameters.put("jacc", jaccScore);
+        parameters.put("taxonomyId", Integer.valueOf(taxonomyId));
+
+        try (Session session = Connection.getInstance().getDriver().session()) {
+            Result result = session.run(queries.getProperty(MANY_TO_MANY_SEARCH), parameters);
             createProteinDTOList(session, result, proteinDTOS);
         }
 
@@ -658,7 +678,9 @@ public class Service implements Serializable {
             if (!record.get("project_accession").asString().equals("null")) {
                 Project project = new Project();
                 project.setProjectAccession(record.get("project_accession").asString());
-                project.setKeywords(record.get("keywords").asList().toString().replace("[", "").replace("]", ""));
+                if (!record.get("keywords").equals(NullValue.NULL)) {
+                    project.setKeywords(record.get("keywords").asList().toString().replace("[", "").replace("]", ""));
+                }
                 // TODO check if this can be null
                 if (!record.get("tissue").equals(NullValue.NULL)) {
                     project.setTissue(record.get("tissue").asList().toString().replace("[", "").replace("]", ""));
@@ -667,8 +689,12 @@ public class Service implements Serializable {
                 if (!record.get("tags").equals(NullValue.NULL)) {
                     project.setTags(record.get("tags").asList().toString().replace("[", "").replace("]", ""));
                 }
-                project.setInstruments(record.get("instruments").asList().toString().replace("[", "").replace("]", ""));
-                project.setExperimentType(record.get("experiment_type").asList().toString());
+                if (!record.get("instruments").equals(NullValue.NULL)) {
+                    project.setInstruments(record.get("instruments").asList().toString().replace("[", "").replace("]", ""));
+                }
+                if (!record.get("experiment_type").equals(NullValue.NULL)) {
+                    project.setExperimentType(record.get("experiment_type").asList().toString());
+                }
                 projects.add(project);
             }
         }
@@ -731,9 +757,8 @@ public class Service implements Serializable {
     /**
      * Get pathways between two given proteins.
      *
-     * @param session    the db session
-     * @param accession1 the first protein accession.
-     * @param accession2 the second protein accession.
+     * @param session       the db session
+     * @param associationId the association ID
      * @return list of pathways
      */
     private List<PathWay> getPathwayList(Session session, String associationId) {
@@ -795,9 +820,9 @@ public class Service implements Serializable {
     /**
      * Get complexes between two given proteins.
      *
-     * @param session    the db session
-     * @param accession1 the first protein accession.
-     * @param accession2 the second protein accession.
+     * @param session       the db session
+     * @param associationId the association ID.
+     * @param jacc          the jaccard score threshold.
      * @return list of complexes
      */
     private List<Complex> getComplexList(Session session, String associationId, Double jacc) {
@@ -863,7 +888,7 @@ public class Service implements Serializable {
     /**
      * Get common diseases between two proteins
      *
-     * @param session    the db session
+     * @param session       the db session
      * @param associationId the association ID.
      * @return list of common diseases
      */
