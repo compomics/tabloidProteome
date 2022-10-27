@@ -187,10 +187,17 @@ public class GraphDbManagedBean implements Serializable {
      * Find combinations of given array
      *
      * @param arr
+     *  Name of array
      * @param len
+     *  Length
      * @param startPosition
+     *  Start position
      * @param result
-     * @return array
+     *  Result
+     * @param firstProtein
+     *  First protein
+     * @param secondProtein
+     *  Second protein
      */
     public void combinations(String[] arr, int len, int startPosition, String[] result, List<String> firstProtein, List<String> secondProtein) {
         if (len == 0) {
