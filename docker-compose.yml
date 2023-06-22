@@ -1,0 +1,34 @@
+services:
+  tomcat:
+    image: tomcat:8.0
+    ports:
+      - "8085:8080"
+    networks:
+      - tabloid_network
+  neo4j:
+    image: neo4j:4.4.3
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - /Users/natalia/Downloads/neo4j-community-4.4.3/data:/data
+      - /Users/natalia/Downloads/neo4j-community-4.4.3/logs:/logs
+    environment:
+      NEO4J_AUTH: "none"
+    networks:
+      - tabloid_network
+  tabloid-proteome:
+    build:
+      dockerfile: ./Dockerfile
+    #image: tabloid_docker_image
+    ports:
+      - "8086:8080"
+    networks:
+      - tabloid_network
+    depends_on:
+      - tomcat
+      - neo4j
+networks:
+    tabloid_network:
+      driver: bridge
+  

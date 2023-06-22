@@ -4,6 +4,8 @@ package com.compomics.neo4j.database;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Properties;
 
 import org.neo4j.driver.AuthTokens;
@@ -51,7 +53,7 @@ public class Connection implements Serializable, AutoCloseable {
             driver = GraphDatabase.driver(prop.getProperty("url"), AuthTokens.basic(prop.getProperty("user"), prop.getProperty("password")));
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
+        }finally {
             if (input != null) {
                 try {
                     input.close();
